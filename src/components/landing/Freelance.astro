@@ -44,6 +44,7 @@ const timelines = freelance.timelines.map((t) => ({ value: t, label: t }));
           class="form"
           data-form="freelance"
           data-email={site.email}
+          data-turnstile-key={site.turnstileSiteKey}
           data-confirmation={freelance.confirmation}
           novalidate
         >
@@ -63,7 +64,7 @@ const timelines = freelance.timelines.map((t) => ({ value: t, label: t }));
               autocomplete="off"
             />
           </div>
-          {/* Turnstile widget mounts here in task 1.6 */}
+          <div data-turnstile></div>
           <button class="button" type="submit" data-submit>
             Start a project
           </button>

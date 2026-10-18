@@ -590,6 +590,10 @@ body::after {
 .form .button {
   justify-self: start;
 }
+/* The Turnstile widget is interaction-only: idle it must take no row (and no grid gap), a challenge appears in the flow. */
+.form [data-turnstile] {
+  display: contents;
+}
 /* The forms post through JavaScript, so without it they hide and the email line stays (Base.astro sets data-js) */
 :root:not([data-js]) .form {
   display: none;

@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { forms } from './forms';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -6,6 +7,8 @@ app.get('/api/health', (c) => {
   c.header('Cache-Control', 'no-store');
   return c.json({ ok: true, service: 'arnav-portfolio', time: new Date().toISOString() });
 });
+
+app.route('/api/forms', forms);
 
 app.all('/api/*', (c) => c.json({ ok: false, error: 'not_found' }, 404));
 

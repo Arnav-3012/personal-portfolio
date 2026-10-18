@@ -29,7 +29,11 @@
   // Must be a verified Email Routing destination (task 1.10).
   "send_email": [{ "name": "EMAIL", "destination_address": "arnavworkmail3012@gmail.com" }],
 
+  // MAIL_TO must equal the send_email destination above (a restricted binding only delivers there).
+  // MAIL_FROM must be an address on the domain whose Email Routing is enabled (task 1.10).
+  "vars": { "MAIL_FROM": "portfolio@arnavc.in", "MAIL_TO": "arnavworkmail3012@gmail.com" },
+
   "observability": { "enabled": true },
 
-  // Cron triggers arrive in task 1.7. Turnstile is a secret only (TURNSTILE_SECRET), added in task 1.6.
+  // Secrets (wrangler secret put, or .dev.vars locally): TURNSTILE_SECRET, GITHUB_TOKEN. Typed in worker/secrets.d.ts.
 }

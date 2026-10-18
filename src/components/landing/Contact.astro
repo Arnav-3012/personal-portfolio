@@ -1,6 +1,6 @@
 ---
 // Contact (SPEC row 11): the email, the socials and a short message form. The form posts to
-// /api/forms/contact (task 1.6 builds it, with Turnstile). Everything else comes from site.json.
+// /api/forms/contact (Turnstile, D1 and email on the Worker side). Everything else comes from site.json.
 import Icon from '../Icon.astro';
 import FormField from '../FormField.astro';
 import { site } from '../../lib/content';
@@ -41,6 +41,7 @@ const socials = [
       class="form"
       data-form="contact"
       data-email={site.email}
+      data-turnstile-key={site.turnstileSiteKey}
       data-confirmation="Sent. Arnav replies within a few days."
       novalidate
     >
@@ -51,7 +52,7 @@ const socials = [
         <label for="contact-website">Website</label>
         <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
       </div>
-      {/* Turnstile widget mounts here in task 1.6 */}
+      <div data-turnstile></div>
       <button class="button" type="submit" data-submit>
         Send message
       </button>

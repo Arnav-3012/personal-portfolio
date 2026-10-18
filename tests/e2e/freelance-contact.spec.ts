@@ -3,7 +3,11 @@ import { expect, test, type Page, type Route } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 const read = (file: string) => JSON.parse(readFileSync(`content/${file}`, 'utf8'));
-const site = read('site.json') as { email: string; socials: Record<string, string> };
+const site = read('site.json') as {
+  email: string;
+  turnstileSiteKey: string;
+  socials: Record<string, string>;
+};
 const freelance = read('freelance.json') as {
   headline: string;
   confirmation: string;
@@ -12,13 +16,56 @@ const freelance = read('freelance.json') as {
   services: { id: string; title: string; description: string }[];
 };
 
-const open = async (page: Page, theme: 'day' | 'night' = 'night') => {
+// Stands in for Cloudflare's script: renders nothing and hands out Cloudflare's documented dummy token, which the
+// always-pass test secret the e2e Worker runs with accepts (the Worker really calls siteverify).
+const DUMMY_TOKEN = 'XXXX.DUMMY.TOKEN.XXXX';
+const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js*';
+const fakeTurnstile = `
+  window.__ts = { renders: 0, resets: 0, siteKey: null, appearance: null };
+  window.turnstile = {
+    render(el, o) {
+      window.__ts.renders++;
+      window.__ts.siteKey = o.sitekey;
+      window.__ts.appearance = o.appearance;
+      window.__ts.cb = o.callback;
+      setTimeout(() => o.callback('${DUMMY_TOKEN}'), 0);
+      return 'widget-1';
+    },
+    reset() {
+      window.__ts.resets++;
+      setTimeout(() => window.__ts.cb('${DUMMY_TOKEN}'), 0);
+    },
+  };
+`;
+
+const open = async (
+  page: Page,
+  theme: 'day' | 'night' = 'night',
+  turnstile: 'fake' | 'blocked' = 'fake',
+) => {
   await page.addInitScript((t) => {
     sessionStorage.setItem('arnav:boot:v1', 'seen');
     localStorage.setItem('arnav:settings:v1', JSON.stringify({ theme: t }));
   }, theme);
+  await page.route(TURNSTILE_SCRIPT, (route) =>
+    turnstile === 'blocked'
+      ? route.abort('blockedbyclient')
+      : route.fulfill({ contentType: 'text/javascript', body: fakeTurnstile }),
+  );
   await page.goto('/');
 };
+
+declare global {
+  interface Window {
+    __ts?: {
+      renders: number;
+      resets: number;
+      siteKey: string | null;
+      appearance: string | null;
+      cb: (token: string) => void;
+    };
+  }
+}
 
 const toasts = (page: Page) => page.locator('.toast__message');
 const json = (status: number) => (route: Route) =>
@@ -151,18 +198,83 @@ test.describe('open to freelance', () => {
     expect(requests).toBe(1);
   });
 
-  test('before the backend exists the failure is honest and the text is kept', async ({ page }) => {
-    // No route: the real Worker answers /api/forms/freelance with its JSON 404 (task 1.6 builds it).
+  test('a real send reaches the Worker: it is verified, stored, confirmed and the form clears', async ({
+    page,
+  }) => {
+    // No route: this goes through the real Worker, D1 and Cloudflare's siteverify.
     await open(page);
     const form = await fillFreelance(page);
     await form.locator('[data-submit]').click();
-    await expect(toasts(page).first()).toContainText(`Email me at ${site.email}`);
+    await expect(toasts(page)).toHaveText(freelance.confirmation);
+    await expect(form.locator('[data-done]')).toHaveText(freelance.confirmation);
+    await expect(form.locator('[name=message]')).toHaveValue('');
+  });
+
+  test('the Turnstile script loads only when the visitor touches a form, as an interaction-only widget', async ({
+    page,
+  }) => {
+    const asked: string[] = [];
+    page.on('request', (req) => {
+      if (req.url().includes('challenges.cloudflare.com')) asked.push(req.url());
+    });
+    await open(page);
+    await page.locator('#freelance').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    expect(asked).toEqual([]);
+    await page.locator('form[data-form="freelance"] [name=name]').focus();
+    await expect.poll(() => asked.length).toBe(1);
+    await expect.poll(() => page.evaluate(() => window.__ts?.renders)).toBe(1);
+    expect(await page.evaluate(() => window.__ts?.appearance)).toBe('interaction-only');
+    // Idle, the slot takes no row: the gap above the button matches the gap between fields.
+    await expect(page.locator('form[data-form="freelance"] [data-turnstile]')).toHaveCSS(
+      'display',
+      'contents',
+    );
+    expect(await page.evaluate(() => window.__ts?.siteKey)).toBe(site.turnstileSiteKey);
+  });
+
+  test('the token travels in the request and the widget is reset after each send', async ({
+    page,
+  }) => {
+    const bodies: Record<string, string>[] = [];
+    await page.route('**/api/forms/freelance', async (route) => {
+      bodies.push(route.request().postDataJSON() as Record<string, string>);
+      await json(200)(route);
+    });
+    await open(page);
+    const form = await fillFreelance(page);
+    await form.locator('[data-submit]').click();
+    await expect(form.locator('[data-done]')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.__ts?.resets)).toBe(1);
+    await fillFreelance(page);
+    await form.locator('[data-submit]').click();
+    await expect.poll(() => bodies.length).toBe(2);
+    expect(bodies.map((b) => b['turnstile'])).toEqual([DUMMY_TOKEN, DUMMY_TOKEN]);
+    await expect.poll(() => page.evaluate(() => window.__ts?.resets)).toBe(2);
+  });
+
+  test('when the bot check cannot load, the failure is honest and the text is kept', async ({
+    page,
+  }) => {
+    let sent = 0;
+    await page.route('**/api/forms/**', (route) => {
+      sent++;
+      return json(200)(route);
+    });
+    await open(page, 'night', 'blocked');
+    const form = await fillFreelance(page);
+    await form.locator('[data-submit]').click();
+    await expect(toasts(page).first()).toContainText("bot check didn't pass");
+    await expect(toasts(page).first()).toContainText(site.email);
     await expect(form.locator('[data-done]')).toBeHidden();
     await expect(form.locator('[name=message]')).toHaveValue(/chatbot/);
     await expect(form.locator('[data-submit]')).toBeEnabled();
+    expect(sent).toBe(0);
   });
 
-  test('rate limit, rejection and offline each get their own message', async ({ page }) => {
+  test('rate limit, rejection, bot check, outage and offline each get their own message', async ({
+    page,
+  }) => {
     await open(page);
     const form = await fillFreelance(page);
     const send = async () => {
@@ -176,6 +288,14 @@ test.describe('open to freelance', () => {
     await page.route('**/api/forms/freelance', json(400));
     await send();
     await expect(toasts(page).last()).toContainText("didn't go through");
+    await page.unroute('**/api/forms/freelance');
+    await page.route('**/api/forms/freelance', json(403));
+    await send();
+    await expect(toasts(page).last()).toContainText("bot check didn't pass");
+    await page.unroute('**/api/forms/freelance');
+    await page.route('**/api/forms/freelance', json(503));
+    await send();
+    await expect(toasts(page).last()).toContainText("Couldn't send that");
     await page.unroute('**/api/forms/freelance');
     await page.route('**/api/forms/freelance', (route) => route.abort('internetdisconnected'));
     await send();
@@ -242,6 +362,14 @@ test.describe('contact', () => {
       message: 'Loved the site, let us talk.',
       website: '',
     });
+  });
+
+  test('a real contact send reaches the Worker and confirms', async ({ page }) => {
+    await open(page);
+    const form = await fillContact(page);
+    await form.locator('[data-submit]').click();
+    await expect(toasts(page)).toHaveText(freelance.confirmation);
+    await expect(form.locator('[name=message]')).toHaveValue('');
   });
 
   test('the nav Contact link lands here', async ({ page }) => {

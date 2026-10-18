@@ -37,6 +37,8 @@ export const siteSchema = z.strictObject({
     timezone: text,
   }),
   email: z.email(),
+  // Public Turnstile site key (the secret lives in the Worker). Cloudflare's always-pass test key until 1.10.
+  turnstileSiteKey: text.max(60),
   socials: z.strictObject({ linkedin: url, github: url, instagram: url }),
   resume: z.strictObject({ source: media, file: z.string().regex(/^[a-z0-9-]+\.pdf$/) }),
   portrait: z.strictObject({ alt: text.max(120) }),

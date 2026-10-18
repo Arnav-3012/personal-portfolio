@@ -1,60 +1,18 @@
-// Contact and freelance forms (SPEC "Open to freelance", row 11). Client side only: validate, POST JSON to
-// `/api/forms/<kind>` (task 1.6 builds that endpoint, with Turnstile, D1 and email), and report honestly when it
-// can't be reached. Limits here mirror what the Worker will enforce.
+// Contact and freelance forms (SPEC "Open to freelance", row 11). Client side: validate with the same rules the
+// Worker enforces (form-rules.ts), get a Turnstile token, POST JSON to `/api/forms/<kind>`, and report honestly
+// when it can't be reached.
+import { FORM_KINDS, validate, type FormKind } from './form-rules';
+import { createTurnstile } from './turnstile';
 import { toast } from './toast';
 
-export type FormKind = 'contact' | 'freelance';
-
-interface Rule {
-  label: string;
-  required: boolean;
-  min?: number;
-  max: number;
-  email?: boolean;
-}
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const name: Rule = { label: 'Name', required: true, max: 80 };
-const email: Rule = { label: 'Email', required: true, max: 120, email: true };
-
-export const RULES: Record<FormKind, Record<string, Rule>> = {
-  contact: {
-    name,
-    email,
-    message: { label: 'Message', required: true, min: 10, max: 2000 },
-  },
-  freelance: {
-    name,
-    email,
-    company: { label: 'Company', required: false, max: 80 },
-    service: { label: 'Service', required: true, max: 40 },
-    timeline: { label: 'Timeline', required: true, max: 40 },
-    message: { label: 'Project description', required: true, min: 20, max: 2000 },
-  },
-};
-
-/** Field name → message for each broken rule; empty when the form is fine. */
-export function validate(kind: FormKind, values: Readonly<Record<string, string>>) {
-  const errors: Record<string, string> = {};
-  for (const [field, rule] of Object.entries(RULES[kind])) {
-    const value = (values[field] ?? '').trim();
-    if (!value) {
-      if (rule.required) errors[field] = `${rule.label} is required.`;
-    } else if (value.length > rule.max) {
-      errors[field] = `${rule.label} must be ${rule.max} characters or fewer.`;
-    } else if (rule.min && value.length < rule.min) {
-      errors[field] = `${rule.label} needs at least ${rule.min} characters.`;
-    } else if (rule.email && !EMAIL.test(value)) {
-      errors[field] = 'Enter a valid email address.';
-    }
-  }
-  return errors;
-}
-
 export type SubmitResult =
-  { ok: true } | { ok: false; reason: 'unavailable' | 'limited' | 'rejected' | 'network' };
+  | { ok: true }
+  | { ok: false; reason: 'unavailable' | 'limited' | 'rejected' | 'verification' | 'network' };
 
-/** Posts the form. A 404 or 5xx is "unavailable" (the endpoint isn't there yet or is down); a throw is "network". */
+/**
+ * Posts the form (the Turnstile token travels in `values.turnstile`). 403 is the bot check refusing,
+ * 429 the rate limit, a 404 or 5xx "unavailable"; a throw is "network".
+ */
 export async function submitForm(
   kind: FormKind,
   values: Readonly<Record<string, string>>,
@@ -71,6 +29,7 @@ export async function submitForm(
     return { ok: false, reason: 'network' };
   }
   if (res.ok) return { ok: true };
+  if (res.status === 403) return { ok: false, reason: 'verification' };
   if (res.status === 429) return { ok: false, reason: 'limited' };
   if (res.status === 404 || res.status >= 500) return { ok: false, reason: 'unavailable' };
   return { ok: false, reason: 'rejected' };
@@ -87,6 +46,8 @@ export function failureMessage(
       return `Too many messages from this connection. Try again later, or email ${address}.`;
     case 'rejected':
       return `That didn't go through. Check the fields, or email ${address}.`;
+    case 'verification':
+      return `The bot check didn't pass. Reload the page and try again, or email ${address}.`;
     case 'network':
       return `You look offline. ${fallback}`;
     case 'unavailable':
@@ -94,7 +55,7 @@ export function failureMessage(
   }
 }
 
-const KINDS = new Set<string>(Object.keys(RULES));
+const KINDS = new Set<string>(FORM_KINDS);
 
 function showErrors(form: HTMLFormElement, errors: Readonly<Record<string, string>>): void {
   for (const control of form.querySelectorAll<HTMLElement>('[name]')) {
@@ -115,7 +76,36 @@ export function initForms(doc: Document = document, fetchImpl: typeof fetch = fe
     if (!KINDS.has(kind)) continue;
     const button = form.querySelector<HTMLButtonElement>('[data-submit]');
     const done = form.querySelector<HTMLElement>('[data-done]');
+    const slot = form.querySelector<HTMLElement>('[data-turnstile]');
+    const siteKey = form.dataset['turnstileKey'];
     const idle = button?.textContent ?? 'Send';
+    // The Cloudflare script is fetched when the visitor first touches the form, never with the page.
+    const challenge = slot && siteKey ? createTurnstile(slot, siteKey) : null;
+    if (challenge) form.addEventListener('focusin', challenge.start, { once: true });
+
+    const finish = (result: SubmitResult): void => {
+      if (button) {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.textContent = idle;
+      }
+      challenge?.reset();
+      if (result.ok) {
+        form.reset();
+        const confirmation = form.dataset['confirmation'] ?? 'Sent.';
+        if (done) {
+          done.textContent = confirmation;
+          done.hidden = false;
+        }
+        toast({ kind: 'ok', message: confirmation });
+      } else {
+        if (done) done.hidden = true;
+        toast({
+          kind: 'error',
+          message: failureMessage(result.reason, form.dataset['email'] ?? ''),
+        });
+      }
+    };
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -137,28 +127,17 @@ export function initForms(doc: Document = document, fetchImpl: typeof fetch = fe
         button.setAttribute('aria-busy', 'true');
         button.textContent = 'Sending…';
       }
-      void submitForm(kind as FormKind, values, fetchImpl).then((result) => {
-        if (button) {
-          button.disabled = false;
-          button.removeAttribute('aria-busy');
-          button.textContent = idle;
-        }
-        if (result.ok) {
-          form.reset();
-          const confirmation = form.dataset['confirmation'] ?? 'Sent.';
-          if (done) {
-            done.textContent = confirmation;
-            done.hidden = false;
-          }
-          toast({ kind: 'ok', message: confirmation });
-        } else {
-          if (done) done.hidden = true;
-          toast({
-            kind: 'error',
-            message: failureMessage(result.reason, form.dataset['email'] ?? ''),
-          });
-        }
-      });
+      void (async () => {
+        const token = challenge ? await challenge.token() : null;
+        if (challenge && !token) return finish({ ok: false, reason: 'verification' });
+        finish(
+          await submitForm(
+            kind as FormKind,
+            token ? { ...values, turnstile: token } : values,
+            fetchImpl,
+          ),
+        );
+      })();
     });
   }
 }
