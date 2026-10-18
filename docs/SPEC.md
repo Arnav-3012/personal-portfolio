@@ -602,7 +602,7 @@ Everything below is supplied at build time; the build starts with placeholders s
 - [x] One photo per timeline era: `assets/incoming/timeline/01`–`07`
 
 * [x] 5 selected 75 Hard reels (MP4, under 25 MiB each) with a one-line caption for each: `assets/incoming/75hard/` (day numbers 01–05 are placeholders, not real days)
-* [ ] Rules you followed and a "what it taught me" note for the calendar
+* [ ] Rules you followed and a "what it taught me" note for the calendar: rules done in `discipline.json`; still need the lesson note and the sub-line
 
 **Text and data**
 
@@ -612,13 +612,13 @@ Everything below is supplied at build time; the build starts with placeholders s
 - [x] One line each for the RBAC-based RAG automation (generic description if it's company work) and the women-safety AI app
   - RBAC-based RAG automation: "RAG with role-based access control, so every answer only draws on documents the asker's role is allowed to see"
   - Women-safety AI app: "Smart, AI-powered women's safety app, built end to end"
-- [ ] "Why cricket" paragraph
+- [x] "Why cricket" paragraph: `cricket.json`
 - [x] Resume PDF: `assets/incoming/resume/arnav-resume-2026-10.pdf`
 
 **Accounts and keys**
 
 - [ ] Custom domain name + registrar login (to point nameservers to Cloudflare)
-- [ ] Cloudflare account (free)
+- [x] Cloudflare account (free): done in 1.1 (wrangler login + workers.dev subdomain)
 - [ ] GitHub fine-grained token, read-only on public repos
 - [ ] Spotify developer app + refresh token (optional; widget hides without it)
 - [ ] Meshy or Tripo account for the avatar and hero props; Mixamo (free Adobe account) for animations

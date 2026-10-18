@@ -37,3 +37,4 @@ Newest first. Files changed per task.
 - `content/timeline.json` (added); `docs/SPEC.md`: timeline.json ticked
 - `content/profile.md` (added); `docs/SPEC.md`: profile.md ticked
 - `CLAUDE.md`, `docs/SPEC.md`: Marvel rule narrowed to visuals, scenes and UI copy
+- `content/cricket.json`, `content/discipline.json` (added); `content/experience.json`, `CLAUDE.md`, `docs/SPEC.md` (updated)

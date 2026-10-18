@@ -1,0 +1,30 @@
+{
+  "whyCricket": "Cricket has always felt personal. The first time I truly connected with it was 2 April 2011, the night India won the World Cup, and that's when the love story began. The main character of that story is Virat Kohli. He still inspires me, because he shows that a human mind and body can achieve anything they set out to. I played club cricket until 2022, and I still play whenever I can.",
+  "clips": [
+    {
+      "file": "assets/incoming/cricket/clip-01-cover-drive.mp4",
+      "caption": "Playing shots under the trees at dusk"
+    },
+    {
+      "file": "assets/incoming/cricket/clip-02-fast-bowling.mp4",
+      "caption": "Night game, facing up"
+    },
+    {
+      "file": "assets/incoming/cricket/clip-03-india-vs-nz-from-stands.mp4",
+      "caption": "India vs New Zealand, from the stands"
+    }
+  ],
+  "photos": [
+    {
+      "file": "assets/incoming/cricket/photo-01-batting.png",
+      "caption": "Mid-swing",
+      "alt": "Arnav batting in a green tee in front of yellow stumps and a brick wall"
+    },
+    {
+      "file": "assets/incoming/cricket/photo-03-watching-match.jpg",
+      "caption": "Arms wide in the stands",
+      "alt": "Arnav from behind in an India bib, arms spread, looking over a packed stadium"
+    }
+  ],
+  "posters": ["assets/incoming/posters/poster-03-cover-drive.png"]
+}

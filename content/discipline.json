@@ -1,0 +1,52 @@
+{
+  "headline": "75 DAYS. ZERO DAYS OFF.",
+  "subLine": "TODO: one line in Arnav's words",
+  "rules": [
+    "Wake up by 6 am",
+    "Drink 3 litres of water",
+    "Two physical activities",
+    "Satsang",
+    "Learn something new",
+    "Read a book",
+    "No junk food",
+    "No sugar"
+  ],
+  "lesson": "TODO: what 75 Hard taught Arnav",
+  "reels": [
+    {
+      "file": "assets/incoming/75hard/day-01-midterm-season-meditation.mp4",
+      "poster": "assets/incoming/75hard/day-01-midterm-season-meditation-poster.jpg",
+      "day": 1,
+      "caption": "Midterm season, still meditating",
+      "featured": false
+    },
+    {
+      "file": "assets/incoming/75hard/day-02-5am-wakeup-and-college.mp4",
+      "poster": "assets/incoming/75hard/day-02-5am-wakeup-and-college-poster.jpg",
+      "day": 2,
+      "caption": "5:48 am alarm, 8 am college",
+      "featured": false
+    },
+    {
+      "file": "assets/incoming/75hard/day-03-mcdonalds-gym-and-reading.mp4",
+      "poster": "assets/incoming/75hard/day-03-mcdonalds-gym-and-reading-poster.jpg",
+      "day": 3,
+      "caption": "Friends, gym, then a book",
+      "featured": false
+    },
+    {
+      "file": "assets/incoming/75hard/day-04-resisting-tempting-fries.mp4",
+      "poster": "assets/incoming/75hard/day-04-resisting-tempting-fries-poster.jpg",
+      "day": 4,
+      "caption": "Said no to the fries",
+      "featured": true
+    },
+    {
+      "file": "assets/incoming/75hard/day-05-college-cricket-meditation.mp4",
+      "poster": "assets/incoming/75hard/day-05-college-cricket-meditation-poster.jpg",
+      "day": 5,
+      "caption": "College, cricket, meditation",
+      "featured": false
+    }
+  ]
+}
