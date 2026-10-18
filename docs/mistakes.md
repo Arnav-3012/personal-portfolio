@@ -4,6 +4,72 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.5cd (footer redesign) · An oversized child stretched the whole grid
+- **What happened:** the first footer screenshot had the "Based in" column, the "Back to top" link and the end of the bottom line cut off at the right edge, at every width; the giant ARNAV wordmark itself was also clipped.
+- **Root cause:** `.foot__inner` was a one-column grid with an implicit `auto` track, and the wordmark's own width (24vw × 5 letters, wider than the screen) stretched that track past the container, so every sibling was laid out on a wider canvas and clipped by `overflow: hidden`.
+- **Fix:** `grid-template-columns: minmax(0, 1fr)` on the footer grid, wordmark sized to fit (`min(19vw, 300px)`), `white-space: nowrap; overflow: hidden` on the wordmark.
+- **Prevention rule:** In a CSS grid or flex column, give the track `minmax(0, 1fr)` whenever any child can be wider than the container (huge type, long strings, images), and screenshot the footer at 375, 768 and 1440 px before reading any other detail.
+- **Files:** `src/components/landing/Footer.astro`
+
+## 2026-10-18 · 1.5cd · The landing HTML crossed Lighthouse's first-flight cliff (LCP 1956 → 2107 ms)
+- **What happened:** after the batch, e2e (240/240), axe and the link check all passed, but `pnpm lhci` failed: LCP 2107 ms against the 2000 ms budget, and accessibility 97 (evidence links 14 px tall). The LCP element (the hero portrait) was untouched.
+- **Root cause:** three separate things.
+  1. I set the About quote in Fraunces (the era font). Browsers fetch a font as soon as any text uses it, even offscreen, so a 23 KB download competed with the hero image. Fixed by using the loaded body font; the era font is now opt-in per page (`era` prop on `Base.astro`), which also removes its `@font-face` block from the landing HTML.
+  2. The compressed HTML went from 13.9 KB to 15.4 KB. Lighthouse's mobile model sends about 14.6 KB in the first round trip, and any more costs another ~150 ms (one RTT): bisecting showed every variant at or under 14.4 KB gave 1956–1959 ms, the full page 2107 ms. Only a section-by-section bisect found it, because the e2e and axe suites don't measure bytes.
+  3. Evidence links were 14 px tall (WCAG 2.2 target size); they now have a 24 px hit area, and only core skills show evidence.
+- **What did not work (reverted, no measured benefit):** deferring the new `init*` calls to idle time, and `content-visibility: auto` on the new sections, both left LCP at 2107 ms. `scopedStyleStrategy: 'class'` saved 138 B, not worth the churn. I added speculative performance changes before measuring what drove the number.
+- **Fix:** the reel player dialog (1.5b) is now built by `playerMarkup()` in `src/lib/reels.ts` at load, not server-rendered (−580 B; Arnav approved this deviation); new sections use global BEM-prefixed styles so their elements carry no scope attribute; the `<noscript>` style tags became a `data-js` flag; `scripts/check-html-budget.ts` runs after every build and fails above 14,200 B gzipped. Result: HTML 13.9 KB, LCP 1958 ms, Lighthouse 99/100/100/100.
+- **Prevention rule:** Keep the landing HTML under 14.2 KB gzipped (the build checks it); build interaction-only markup in JavaScript instead of server-rendering it; bisect a performance regression by removing sections before trying fixes; never ship text in a font the page did not already load.
+- **Files:** `scripts/check-html-budget.ts`, `package.json`, `src/lib/reels.ts`, `src/lib/icons.ts`, `src/components/landing/ReelPlayer.astro`, `src/components/Icon.astro`, `src/layouts/Base.astro`, `src/pages/design.astro`, `src/components/landing/{Skills,Freelance,GithubLive,BeyondCode,Contact,Footer}.astro`, `src/styles/global.css`
+
+## 2026-10-18 · 1.5cd · Background wait loops that waited on themselves
+- **What happened:** I wrote `until ! pgrep -f bisect.py` as a wait loop; the loop's own command line contains "bisect.py", so `pgrep` always found it and five waiters hung until I killed them (the "failed, exit 144" notices).
+- **Root cause:** `pgrep -f` matches the full command line of the waiting shell too.
+- **Fix:** wait on the output file's contents or a known final line instead.
+- **Prevention rule:** Wait for a background job on its output (a line or a file), never with `pgrep -f` on a string that appears in the waiting command.
+- **Files:** none
+
+## 2026-10-18 · 1.5cd · Visual problems only the screenshots showed (six in one batch)
+- **What happened:** the first full set of screenshots showed: the cricket photo cropped to trees and brick with the batter cut off; the two Beyond code titles at different heights (the grid stretched the image row); the contact email breaking mid-word ("gmai / l.com") at 768 px and ("gmail.co / m") at 375 px; the philosophy quote 7 lines tall in a squeezed column at 768 px; the GitHub heatmap filling only 60% of the width at fixed 12 px cells; and a month label dropped (Nov) while a partial first month (Oct) was kept.
+- **Root cause:** I set `object-position`, column splits and font sizes from imagination instead of from the source image and the real text widths. Every e2e assertion passed (92/92), because none of them measure how something looks.
+- **Fix:** a `position` focal point in `cricket.json` (content, not CSS); `grid-template-rows: auto 1fr` with a bottom-pinned link; a smaller email size at each breakpoint; the intro splits into two columns only from 1024 px; a fluid heatmap grid (`minmax(0,1fr)` columns, square cells, 15 px minimum so a phone scrolls); crowded month labels keep the later month.
+- **Prevention rule:** Open the source photo before choosing a crop and store the focal point in content; test every long unbreakable string (email, URL) at 375 and 768 px; never call a visual task done before reading the screenshots.
+- **Files:** `content/cricket.json`, `src/lib/content.ts`, `src/lib/landing.ts`, `src/lib/github.ts`, `src/components/landing/{BeyondCode,Contact,Skills,GithubLive}.astro`
+
+## 2026-10-18 · 1.5cd · REPEAT: expected values written from my head (four times)
+- **What happened:** four tests failed on values I had guessed: `(-0).toFixed(2)` is `"0.00"` so the expected `-0` was wrong; `Intl` `en-GB` prints September as "Sept", not "Sep"; a dock neighbour at 110 px scaled to 1.097, not "above 1.1"; my month-label fixture put Oct one column after Sep, which the crowding rule drops by design.
+- **Root cause:** I wrote the expectation from the intended behaviour and never evaluated it first (same cause as the 1.5b entry "Several of my own assertions checked the wrong thing"). The `Intl` one is also environment-dependent: ICU versions disagree on short month names.
+- **Fix:** corrected each expectation after printing the real value; month names come from a fixed table (`src/lib/dates.ts`), not `Intl`.
+- **Prevention rule:** Evaluate an expected number or string once (node REPL or a throwaway test) before committing it to a test; use fixed tables, not `Intl`, for any text a test compares.
+- **Files:** `tests/unit/lib/{dock,github}.test.ts`, `src/lib/{dates,github,landing}.ts`
+
+## 2026-10-18 · 1.5cd · Dock designed without measuring its tiles
+- **What happened:** the first dock had a 120 px magnify radius. The e2e check "the neighbouring tile also grows" failed: neighbouring pills sit about 110 px apart, so the second tile barely moved and only one tile ever swelled, which is not a dock.
+- **Root cause:** I picked the radius and the gap as round numbers before measuring the real tile widths.
+- **Fix:** radius 170 px, peak 1.35, gap 24 px so a grown tile and its neighbour don't collide; the unit test pins that a neighbour at 110 px grows.
+- **Prevention rule:** Derive a distance-based effect's radius from the measured spacing of the real elements, and test the neighbour, not only the target.
+- **Files:** `src/lib/dock.ts`, `src/components/landing/Skills.astro`, `tests/unit/lib/dock.test.ts`
+
+## 2026-10-18 · 1.5cd · Locators that matched the wrong thing
+- **What happened:** `page.locator('#75-hard')` threw "not a valid selector" (a CSS id cannot start with a digit); and `locator('.skill', { hasText: 'Speech enhancement' })` matched PyTorch's row, because `hasText` is a case-insensitive substring and PyTorch's evidence link is "SIH… speech enhancement".
+- **Root cause:** I treated a hash like a CSS selector and a text filter like an exact match.
+- **Fix:** `[id="75-hard"]` for any hash target; the layer test now asserts every row by index against the expected stable-sorted order, which is also stricter.
+- **Prevention rule:** Select by `[id="…"]` when the id may start with a digit; assert lists by position, not by `hasText`.
+- **Files:** `tests/e2e/{skills,beyond,landing}.spec.ts`
+
+## 2026-10-18 · 1.5cd · Plan assumed the dock list did not exist
+- **What happened:** the approved plan said the dock would be derived from `skills.json` (core + working, capped at 12). While reading the code, `site.json` already had a curated `dock` list of 8 stack names, with a schema and tests.
+- **Root cause:** I read `site.json` only up to the `proof` key while planning, and never saw the rest.
+- **Fix:** the dock renders `site.dock`; told Arnav in the report.
+- **Prevention rule:** Read the whole of every content file and its schema in `content.ts` before proposing a derived list in a plan.
+- **Files:** `src/components/landing/Skills.astro`
+
+## 2026-10-18 · 1.5cd · Smaller wrong turns (caught before review)
+- `FormField` took `label`, `required` and `maxlength` from its callers while `RULES` in `forms.ts` already held them; typecheck failed under `exactOptionalPropertyTypes`. It now reads `RULES`, so the form and validator cannot drift apart.
+- Duplicated the `SKILL_LEVELS` constant that `content.ts` already exports; removed.
+- Ran Prettier over `src/` before editing and then edited from stale text; re-read before each edit after a format.
+- A `cd` into a subfolder moved the shell's working directory; use absolute paths from the project root.
+
 ## 2026-10-18 · 1.5b revision (orbit) · An aborted `play()` was treated as "autoplay blocked"
 - **What happened:** after the orbit change one e2e run failed (tap to pause left the button on "Pause"; the earlier run had passed). Pausing, or skipping to the next reel, while `play()` was still pending rejects that promise with `AbortError`. My catch handler took every rejection as "autoplay with sound refused", muted the clip and restarted it, so a user's pause was undone and a fast skip played muted.
 - **Root cause:** I wrote one catch-all for a promise that rejects for several reasons and only imagined the autoplay case.

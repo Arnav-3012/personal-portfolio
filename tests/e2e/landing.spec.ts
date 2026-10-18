@@ -340,3 +340,145 @@ test.describe('accessibility', () => {
     });
   }
 });
+
+test.describe('closing sections and footer', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('no placeholder sections remain and every nav target exists', async ({ page }) => {
+    await skipBoot(page);
+    await page.goto('/');
+    await expect(page.locator('.stub')).toHaveCount(0);
+    await expect(page.locator('main')).not.toContainText('Arrives in task');
+    for (const href of await page
+      .locator('[data-nav-link]')
+      .evaluateAll((links) => links.map((a) => a.getAttribute('href') ?? '')))
+      await expect(page.locator(`[id="${href.slice(1)}"]`), href).toHaveCount(1);
+  });
+
+  test('sections run in the SPEC order', async ({ page }) => {
+    await skipBoot(page);
+    await page.goto('/');
+    const ids = await page
+      .locator('main > section[id], main > div > section[id]')
+      .evaluateAll((els) => els.map((el) => el.id));
+    const wanted = [
+      'work',
+      'projects',
+      'experience',
+      '75-hard',
+      'about',
+      'freelance',
+      'github',
+      'beyond',
+      'contact',
+    ];
+    expect(ids.filter((id) => wanted.includes(id))).toEqual(wanted);
+  });
+
+  test('the footer is the page landmark with a call to action, link columns and socials', async ({
+    page,
+  }) => {
+    await skipBoot(page);
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    await expect(footer).toHaveCount(1);
+    await expect(footer).toContainText(site.name);
+    await expect(footer).not.toContainText('Built on Cloudflare');
+    await expect(footer).not.toContainText('Last deployed');
+    await expect(footer.locator('time')).toHaveCount(0);
+    // The open status leads into the freelance section; the address is a mailto link.
+    await expect(footer.locator('.foot__status')).toContainText(freelance.headline);
+    await expect(footer.locator('.foot__big')).toHaveAttribute('href', '#freelance');
+    await expect(footer.getByRole('link', { name: site.email })).toHaveAttribute(
+      'href',
+      `mailto:${site.email}`,
+    );
+    for (const [label, key] of [
+      ['LinkedIn', 'linkedin'],
+      ['GitHub', 'github'],
+      ['Instagram', 'instagram'],
+    ] as const)
+      await expect(
+        footer.locator('nav[aria-labelledby="foot-elsewhere"]').getByRole('link', { name: label }),
+      ).toHaveAttribute('href', site.socials[key]);
+    await expect(footer).toContainText(`${site.location.city}, ${site.location.country}`);
+  });
+
+  test('every footer section link lands on a real section, and Back to top goes home', async ({
+    page,
+  }) => {
+    await skipBoot(page);
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    for (const href of await footer
+      .locator('nav[aria-labelledby="foot-sections"] a')
+      .evaluateAll((links) => links.map((a) => a.getAttribute('href') ?? '')))
+      await expect(page.locator(`[id="${href.slice(1)}"]`), href).toHaveCount(1);
+    await footer.scrollIntoViewIfNeeded();
+    await footer.getByRole('link', { name: 'Back to top' }).click();
+    await expect(page).toHaveURL(/#main$/);
+    expect(await page.evaluate(() => scrollY)).toBeLessThan(400);
+  });
+
+  test('the outlined wordmark is decoration and never steals a click', async ({ page }) => {
+    await skipBoot(page);
+    await page.goto('/');
+    const word = page.locator('.foot__word');
+    await expect(word).toHaveAttribute('aria-hidden', 'true');
+    await expect(word).toHaveText(site.shortName);
+    await expect(word).toHaveCSS('pointer-events', 'none');
+  });
+
+  test('the footer fits at 375 px with touch-sized links', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await skipBoot(page);
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    await footer.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    for (const link of await footer.getByRole('link').all()) {
+      const box = await link.boundingBox();
+      expect(box?.height ?? 0, await link.innerText()).toBeGreaterThanOrEqual(24);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(375);
+    }
+  });
+
+  for (const theme of ['night', 'day'] as const)
+    test(`axe: the footer has no violations (${theme})`, async ({ page }) => {
+      await skipBoot(page);
+      await setTheme(page, theme);
+      await page.goto('/');
+      await page.getByRole('contentinfo').scrollIntoViewIfNeeded();
+      const results = await new AxeBuilder({ page }).include('footer').analyze();
+      expect(results.violations).toEqual([]);
+    });
+});
+
+test.describe('screenshots', () => {
+  for (const width of [375, 768, 1440]) {
+    for (const theme of ['night', 'day'] as const) {
+      for (const motion of ['full', 'reduced'] as const) {
+        test(`footer ${width}px ${theme} ${motion}`, async ({ browser }, info) => {
+          const ctx = await browser.newContext({
+            viewport: { width, height: 900 },
+            reducedMotion: motion === 'reduced' ? 'reduce' : 'no-preference',
+          });
+          const page = await ctx.newPage();
+          await page.addInitScript((t) => {
+            sessionStorage.setItem('arnav:boot:v1', 'seen');
+            localStorage.setItem('arnav:settings:v1', JSON.stringify({ theme: t }));
+          }, theme);
+          await page.goto('/');
+          await page.getByRole('contentinfo').scrollIntoViewIfNeeded();
+          await page.waitForTimeout(300);
+          await page.getByRole('contentinfo').screenshot({
+            path: info.outputPath(`footer-${width}-${theme}-${motion}.png`),
+          });
+          await ctx.close();
+        });
+      }
+    }
+  }
+});

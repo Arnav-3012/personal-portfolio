@@ -4,6 +4,27 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.5cd Skills, freelance, GitHub, beyond code, contact, footer
+
+**Added**
+- `src/components/landing/Skills.astro`, `Freelance.astro`, `GithubLive.astro`, `BeyondCode.astro`, `Contact.astro`, `Footer.astro`; `src/components/FormField.astro`
+- `src/lib/skills.ts`, `dock.ts`, `tilt.ts`, `forms.ts`, `github.ts`, `icons.ts`, `dates.ts`
+- `scripts/check-html-budget.ts` (runs after `astro build`)
+- `public/media/cricket/batting.jpg`
+- `tests/unit/lib/skills.test.ts`, `dock.test.ts`, `forms.test.ts`, `github.test.ts`, `icons.test.ts`; `tests/e2e/skills.spec.ts`, `beyond.spec.ts`, `freelance-contact.spec.ts`, `github-live.spec.ts`
+
+**Changed**
+- `src/pages/index.astro`: the three stubs are replaced by the six sections; `initDock`, `initForms`, `initGithub`, `initTilt`
+- `src/lib/landing.ts`: `anchorFor`, `teaser`, `beyondTiles`, `footerSections`
+- `content/cricket.json`, `src/lib/content.ts`: `teaser` photo with a `position` focal point
+- `src/lib/reels.ts`, `src/components/landing/ReelPlayer.astro`: the player dialog is built in JS (`playerMarkup`); the component keeps only global styles
+- `src/components/Icon.astro`: paths moved to `src/lib/icons.ts`
+- `src/layouts/Base.astro`: `era` prop (Fraunces opt-in), `data-js` flag; `src/pages/design.astro` opts in
+- `src/styles/global.css`: section frame, form and field styles
+- `package.json`: `build` runs the HTML budget check
+- `tests/e2e/landing.spec.ts`: no stubs, section order, footer tests and screenshots; `tests/unit/lib/reels.test.ts`: `playerMarkup`
+- `CLAUDE.md`: HTML budget rule; `docs/SPEC.md`: footer row 12; `docs/plan.md` (1.5c, 1.5d and 1.5 ticked; 1.6+1.7 and 1.9+1.10 batched), `docs/mistakes.md`, `docs/logs.md`
+
 ## 2026-10-18 · 1.5b Experience and 75 Hard
 
 **Added**

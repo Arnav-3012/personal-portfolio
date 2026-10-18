@@ -1,0 +1,171 @@
+---
+// Open to freelance (SPEC row 8): the status, the four services and the "Start a project" form. One switch in
+// freelance.json drives it (booked turns grey, shows the note, and replaces the form with the email line). The
+// form is a client for POST /api/forms/freelance (src/lib/forms.ts); the endpoint arrives in task 1.6.
+import FormField from '../FormField.astro';
+import { freelance, site } from '../../lib/content';
+import { freelanceStatus } from '../../lib/landing';
+
+const status = freelanceStatus(freelance);
+const services = freelance.services.map((s) => ({ value: s.id, label: s.title }));
+const timelines = freelance.timelines.map((t) => ({ value: t, label: t }));
+---
+
+<section
+  id="freelance"
+  class="l-section free"
+  aria-labelledby="freelance-title"
+  data-open={String(status.open)}
+>
+  <header class="l-section__head">
+    <p class="hud free__status">
+      <span class="free__dot" aria-hidden="true"></span>
+      {status.label}
+      {status.note && <span class="free__note"> · {status.note}</span>}
+    </p>
+    <h2 id="freelance-title" class="display">
+      {status.open ? 'Start a project' : status.label}
+    </h2>
+  </header>
+
+  <div class="free__grid">
+    <ul class="free__services">
+      {freelance.services.map((s) => (
+        <li class="service" data-service={s.id}>
+          <h3 class="service__title">{s.title}</h3>
+          <p class="small">{s.description}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="free__side">
+      {status.open && (
+        <form
+          class="form"
+          data-form="freelance"
+          data-email={site.email}
+          data-confirmation={freelance.confirmation}
+          novalidate
+        >
+          <FormField form="freelance" name="name" autocomplete="name" />
+          <FormField form="freelance" name="email" type="email" autocomplete="email" />
+          <FormField form="freelance" name="company" autocomplete="organization" />
+          <FormField form="freelance" name="service" as="select" options={services} />
+          <FormField form="freelance" name="timeline" as="select" options={timelines} />
+          <FormField form="freelance" name="message" as="textarea" />
+          <div class="field field--trap" aria-hidden="true">
+            <label for="freelance-website">Website</label>
+            <input
+              id="freelance-website"
+              name="website"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+          {/* Turnstile widget mounts here in task 1.6 */}
+          <button class="button" type="submit" data-submit>
+            Start a project
+          </button>
+          <p class="small free__done" data-done role="status" hidden></p>
+        </form>
+      )}
+      <p class="small free__email">
+        {freelance.emailLine} <a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .free__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--time);
+  }
+  .free[data-open='false'] .free__status {
+    color: var(--text-2);
+  }
+  .free__note {
+    color: var(--text-2);
+  }
+  /* Status dot with a slow glow pulse; grey and still when booked */
+  .free__dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--time);
+  }
+  .free[data-open='false'] .free__dot {
+    background: var(--text-2);
+  }
+  .free[data-open='true'] .free__dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: var(--time);
+    opacity: 0;
+    animation: free-pulse 2.4s var(--ease-out) infinite;
+  }
+  @keyframes free-pulse {
+    from {
+      opacity: 0.55;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.4);
+    }
+  }
+  :root[data-motion='reduced'] .free__dot::after {
+    animation: none;
+  }
+
+  .free__grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .free__services {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: 0;
+    list-style: none;
+  }
+  .service {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5);
+    border: var(--border);
+    border-left: 2px solid var(--time);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .free[data-open='false'] .service {
+    border-left-color: var(--line);
+  }
+  .service__title {
+    font-size: var(--type-body);
+  }
+  .free__side {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+  .free__done {
+    color: var(--ok);
+  }
+  .free__email a {
+    color: var(--text);
+  }
+
+  @media (min-width: 768px) {
+    .free__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: var(--space-8);
+    }
+  }
+</style>

@@ -1,0 +1,254 @@
+---
+// Footer (SPEC row 12), styled after Warp's restraint (awesome-design-md): a closing call to action, link columns
+// with wide-tracked mono labels, a giant outlined wordmark and a quiet bottom bar. Everything comes from content
+// (site.json, freelance.json). The workshop link joins in Phase 2. It is the page-level
+// contentinfo landmark, so it sits outside <main>.
+import Icon from '../Icon.astro';
+import { freelance, site } from '../../lib/content';
+import { footerSections, freelanceStatus, resumeHref } from '../../lib/landing';
+
+const resume = resumeHref(site.resume.file);
+const status = freelanceStatus(freelance);
+const year = new Date().getUTCFullYear();
+const elsewhere = [
+  ['LinkedIn', site.socials.linkedin],
+  ['GitHub', site.socials.github],
+  ['Instagram', site.socials.instagram],
+  ...(resume ? [['Resume', resume] as const] : []),
+] as const;
+---
+
+<footer class="foot">
+  <div class="foot__inner">
+    <div class="foot__cta">
+      <p class="hud foot__status" data-open={String(status.open)}>
+        <span class="foot__dot" aria-hidden="true"></span>
+        {status.label}
+        {status.note && <span> · {status.note}</span>}
+      </p>
+      <a class="foot__big" href={status.open ? '#freelance' : `mailto:${site.email}`}>
+        {status.open ? 'Start a project' : 'Say hello'}
+        <Icon name="arrow-up-right" size={32} />
+      </a>
+      <a class="foot__mail" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+    </div>
+
+    <div class="foot__cols">
+      <nav aria-labelledby="foot-sections">
+        <p id="foot-sections" class="hud foot__label">
+          Sections
+        </p>
+        <ul class="foot__list">
+          {footerSections.map(([id, label]) => (
+            <li>
+              <a href={`#${id}`}>{label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <nav aria-labelledby="foot-elsewhere">
+        <p id="foot-elsewhere" class="hud foot__label">
+          Elsewhere
+        </p>
+        <ul class="foot__list">
+          {elsewhere.map(([label, href]) => (
+            <li>
+              <a href={href} rel={href.startsWith('http') ? 'noopener' : undefined}>
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="foot__where">
+        <p class="hud foot__label">Based in</p>
+        <p>
+          {site.location.city}, {site.location.country}
+        </p>
+        <p class="small">{site.education.school}</p>
+      </div>
+    </div>
+
+    <p class="foot__word" aria-hidden="true">
+      {site.shortName}
+    </p>
+
+    <div class="foot__bar hud">
+      <p>
+        © {year} {site.name}
+      </p>
+      <a href="#main">Back to top</a>
+    </div>
+  </div>
+</footer>
+
+<style is:global>
+  .foot {
+    margin-top: var(--section-gap);
+    border-top: var(--border);
+    overflow: hidden;
+  }
+  .foot__inner {
+    display: grid;
+    /* minmax(0, 1fr): without it the wordmark's own width stretches the track past the container */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-4) var(--space-5);
+  }
+
+  /* Closing call to action */
+  .foot__cta {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+  .foot__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--time);
+  }
+  .foot__status[data-open='false'] {
+    color: var(--text-2);
+  }
+  .foot__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: currentColor;
+  }
+  .foot__big {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 7vw, 88px);
+    line-height: var(--lh-display-xl);
+    letter-spacing: var(--track-display-xl);
+    text-decoration: none;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .foot__big .icon {
+    width: 0.7em;
+    height: 0.7em;
+    color: var(--time);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+  .foot__big:hover {
+    color: var(--time);
+  }
+  .foot__big:hover .icon {
+    transform: translate(4px, -4px);
+  }
+  .foot__mail {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-2);
+    font-size: var(--type-body);
+    text-underline-offset: 6px;
+    overflow-wrap: anywhere;
+  }
+  .foot__mail:hover {
+    color: var(--text);
+  }
+
+  /* Link columns */
+  .foot__cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+    padding-top: var(--space-6);
+    border-top: var(--border);
+  }
+  .foot__label {
+    margin-bottom: var(--space-3);
+    color: var(--text-2);
+    letter-spacing: 0.2em;
+  }
+  .foot__list {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .foot__list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    color: var(--text);
+    text-decoration: none;
+    transition: opacity var(--dur-hover) var(--ease-out);
+  }
+  .foot__list a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    opacity: 0.75;
+  }
+  .foot__where {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    grid-column: 1 / -1;
+  }
+  .foot__where .foot__label {
+    margin-bottom: var(--space-2);
+  }
+
+  /* Giant outlined wordmark, faded out toward the bottom */
+  .foot__word {
+    margin-block: calc(var(--space-4) * -1) calc(var(--space-6) * -1);
+    color: transparent;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: min(19vw, 300px);
+    line-height: 0.82;
+    letter-spacing: var(--track-display-xl);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--text-2) 40%, transparent);
+    mask-image: linear-gradient(to bottom, var(--text) 35%, transparent 95%);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Bottom bar */
+  .foot__bar {
+    display: grid;
+    gap: var(--space-2) var(--space-5);
+    padding-top: var(--space-4);
+    border-top: var(--border);
+    color: var(--text-2);
+  }
+  .foot__bar a {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 32px;
+    color: var(--text);
+    text-underline-offset: 4px;
+  }
+
+  @media (min-width: 768px) {
+    .foot__inner {
+      padding-inline: var(--space-6);
+    }
+    .foot__cols {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .foot__where {
+      grid-column: auto;
+    }
+    .foot__bar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+</style>

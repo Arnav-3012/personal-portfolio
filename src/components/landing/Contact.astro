@@ -1,0 +1,110 @@
+---
+// Contact (SPEC row 11): the email, the socials and a short message form. The form posts to
+// /api/forms/contact (task 1.6 builds it, with Turnstile). Everything else comes from site.json.
+import Icon from '../Icon.astro';
+import FormField from '../FormField.astro';
+import { site } from '../../lib/content';
+
+const socials = [
+  ['LinkedIn', site.socials.linkedin],
+  ['GitHub', site.socials.github],
+  ['Instagram', site.socials.instagram],
+] as const;
+---
+
+<section id="contact" class="l-section contact" aria-labelledby="contact-title">
+  <header class="l-section__head">
+    <p class="hud l-section__eyebrow">04 · Contact</p>
+    <h2 id="contact-title" class="display">
+      Say hello
+    </h2>
+  </header>
+
+  <div class="contact__grid">
+    <div class="contact__info">
+      <a class="contact__email" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+      <ul class="contact__socials">
+        {socials.map(([label, href]) => (
+          <li>
+            <a class="hud" href={href} rel="noopener">
+              {label}
+              <Icon name="arrow-up-right" size={16} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <form
+      class="form"
+      data-form="contact"
+      data-email={site.email}
+      data-confirmation="Sent. Arnav replies within a few days."
+      novalidate
+    >
+      <FormField form="contact" name="name" autocomplete="name" />
+      <FormField form="contact" name="email" type="email" autocomplete="email" />
+      <FormField form="contact" name="message" as="textarea" />
+      <div class="field field--trap" aria-hidden="true">
+        <label for="contact-website">Website</label>
+        <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      {/* Turnstile widget mounts here in task 1.6 */}
+      <button class="button" type="submit" data-submit>
+        Send message
+      </button>
+      <p class="small contact__done" data-done role="status" hidden></p>
+    </form>
+  </div>
+</section>
+
+<style is:global>
+  .contact__grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .contact__info {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .contact__email {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(15px, 4.6vw, var(--type-heading));
+    overflow-wrap: anywhere;
+    text-underline-offset: 6px;
+  }
+  .contact__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+  .contact__socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    color: var(--time);
+    text-decoration: none;
+  }
+  .contact__done {
+    color: var(--ok);
+  }
+
+  @media (min-width: 768px) {
+    .contact__email {
+      font-size: clamp(14px, 1.9vw, var(--type-heading));
+      overflow-wrap: normal;
+    }
+    .contact__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: var(--space-8);
+    }
+  }
+</style>

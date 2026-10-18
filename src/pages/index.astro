@@ -9,15 +9,13 @@ import AllProjects from '../components/landing/AllProjects.astro';
 import Experience from '../components/landing/Experience.astro';
 import Hard75 from '../components/landing/Hard75.astro';
 import Skills from '../components/landing/Skills.astro';
+import Freelance from '../components/landing/Freelance.astro';
+import GithubLive from '../components/landing/GithubLive.astro';
 import BeyondCode from '../components/landing/BeyondCode.astro';
+import Contact from '../components/landing/Contact.astro';
+import Footer from '../components/landing/Footer.astro';
 import ReelPlayer from '../components/landing/ReelPlayer.astro';
 import { site } from '../lib/content';
-
-// Nav targets that task 1.5d fills in; stubs keep every anchor resolving until then.
-const upcoming = [
-  ['freelance', 'Open to freelance'],
-  ['contact', 'Contact'],
-] as const;
 ---
 
 <Base title={`${site.name} · ${site.roleLine}`} boot>
@@ -31,16 +29,12 @@ const upcoming = [
     <Experience />
     <Hard75 />
     <Skills />
-    {upcoming.map(([id, title]) => (
-      <section id={id} class="stub" aria-labelledby={`${id}-title`}>
-        <h2 id={`${id}-title`} class="display">
-          {title}
-        </h2>
-        <p class="small">Arrives in task 1.5c–1.5d.</p>
-      </section>
-    ))}
+    <Freelance />
+    <GithubLive />
     <BeyondCode />
+    <Contact />
   </main>
+  <Footer />
   <ReelPlayer />
 </Base>
 
@@ -52,6 +46,8 @@ const upcoming = [
   import { initExperience } from '../lib/experience';
   import { initReels } from '../lib/reels';
   import { initDock } from '../lib/dock';
+  import { initForms } from '../lib/forms';
+  import { initGithub } from '../lib/github';
   import { initTilt } from '../lib/tilt';
 
   initBoot();
@@ -61,24 +57,7 @@ const upcoming = [
   initExperience();
   initReels();
   initDock();
+  initForms();
+  initGithub();
   initTilt();
 </script>
-
-<style>
-  .stub {
-    display: grid;
-    gap: var(--space-3);
-    width: min(100%, 1280px);
-    margin-inline: auto;
-    padding: var(--section-gap) var(--space-4) 0;
-    scroll-margin-top: 60px;
-  }
-  .stub:last-child {
-    padding-bottom: var(--section-gap);
-  }
-  @media (min-width: 768px) {
-    .stub {
-      padding-inline: var(--space-6);
-    }
-  }
-</style>

@@ -4,6 +4,46 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.5cd Skills, freelance, GitHub, beyond code, contact, footer (third and fourth of the 1.5 sub-tasks, run as one batch)
+
+**Done** (plus three review rounds with Arnav: GitHub "not available", form error toast, footer redesign)
+- **Batching:** 1.5c and 1.5d ran as one gated batch (one plan, one QA pass, one "done", two commits); plan.md also groups 1.6+1.7 and 1.9+1.10. 1.5 is ticked.
+- **About and skills** (`Skills.astro`, `src/lib/skills.ts`, `dock.ts`): section id `about` (the nav's "03 About"): intro and philosophy from `profile.md`, skills by layer from `skills.json` (core, then working, then learning; core skills link their evidence to the project or role), and a stack dock from `site.dock` whose tiles grow toward the pointer (fine pointers with motion only).
+- **Open to freelance** (`Freelance.astro`, `FormField.astro`, `src/lib/forms.ts`): status, four services and the "Start a project" form, all from `freelance.json`; booked turns grey and swaps the form for the email line. Validation, one in-flight request, honeypot, and an honest failure toast with the email address. Posts JSON to `/api/forms/<kind>`; **that endpoint does not exist until 1.6**, so every send currently ends in the "Couldn't send that" toast.
+- **GitHub live** (`GithubLive.astro`, `src/lib/github.ts`): the `GET /api/github` response shape is defined (the contract for 1.7), the heatmap and four repos fill in when the section nears the viewport, skeleton while loading, fallback line with a profile link on 404, error or a bad body. **Shows the fallback until 1.7.**
+- **Beyond code** (`BeyondCode.astro`): cricket and 75 Hard tiles from `cricket.json` (new `teaser` photo with a `position` focal point) and `discipline.json`; whole tile is the link; pointer tilt on fine pointers.
+- **Contact and footer** (`Contact.astro`, `Footer.astro`): email, socials and a three-field form; footer after Warp (awesome-design-md): "Start a project" call to action, Sections / Elsewhere / Based in columns, giant outlined wordmark, © line and Back to top. "Built on Cloudflare" and the deploy date were removed on Arnav's request (SPEC row 12 updated).
+- **Performance work (see mistakes.md):** Lighthouse first failed at LCP 2107 ms because the compressed HTML crossed ~14.6 KB (one extra round trip in its model). Fixes: the reel player dialog is built in JS (`playerMarkup()`; approved by Arnav), the era font is opt-in per page, new sections use global BEM-prefixed styles, the `noscript` tags became a `data-js` flag, and `scripts/check-html-budget.ts` fails the build above 14,200 B gzipped.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| format, typecheck, lint | pass | 0 errors; check-no-hex 50 files clean |
+| `pnpm build` | pass | includes the HTML budget: 14,073 B gzipped (limit 14,200) |
+| `pnpm test` | 188/188 | new: skills order and evidence links, `markdownSection`, `teaser`, `beyondTiles`, dock scale, tilt, GitHub contract and heatmap helpers, form validation and status mapping, `playerMarkup` hooks, icons |
+| `pnpm e2e` | 257/257 | skills, dock (grows and stays still with reduced motion), freelance and contact (validation, success, busy and double click, 404 honest failure, 429, 400, offline, honeypot, no-JS), GitHub (no fetch before near, skeleton, cell rows and delays, fallbacks, mobile scroll to newest week), Beyond code (images, whole-tile click, tilt), footer, axe 0 in both themes (also with form errors showing) |
+| `pnpm links` | pass | 45 links, 0 broken |
+| Lighthouse (mobile) | pass | 99/100/100/100, LCP 1956 ms (budget 2000), CLS 0, script 21.3 KB gz; baseline before this batch 1956 ms |
+| Screenshots | reviewed | all 60 (About, Freelance, Contact, Beyond, GitHub) and the footer at 375/768/1440 × Day/Night × full/reduced, plus the JS-built reel player |
+| Mutation | pass | `freelance.open=false` (8 e2e failures), a renamed player hook (1), an unknown evidence id (2); each restored |
+| Arnav | confirmed "done" 2026-10-18 | reviewed in the browser; reported GitHub, form and footer |
+
+**Deviations from the approved plan**
+- Dock uses the existing `site.dock` list, not tiles derived from `skills.json`.
+- Evidence links show on core skills only (bytes and tab stops).
+- The reel player (1.5b) is now built in JS, `Icon.astro` paths moved to `src/lib/icons.ts`, `Base.astro` gained `era` and a `data-js` flag, and a build-time HTML budget was added (Arnav chose this over cutting content).
+- About quote uses the body font (the era font cost 23 KB at load).
+- Footer redesigned on request; SPEC row 12 changed.
+
+**Open items**
+- **1.6:** `/api/forms/<kind>` (Turnstile, D1, email). Until then both forms always show the failure toast. Needs from Arnav at the end of that task: Turnstile site key and secret, and the inbox verified in Email Routing. Turnstile slots are marked in `Freelance.astro` and `Contact.astro`.
+- **1.7:** `/api/github` in the shape of `src/lib/github.ts` (cron + KV). Needs a read-only fine-grained GitHub token for the contribution heatmap.
+- **HTML headroom is about 130 B.** The next task that adds markup must first move interaction-only markup (settings dialog, toast templates) into JS.
+- The cricket tile's "Enter the stadium" and the workshop footer link wait for Phase 2.
+- The 75 Hard poster has Instagram's logo baked into it.
+- 1.10: verify production serves Range for MP4s (from 1.5b); `/design` ships to production (from 1.2).
+- 1.8 next, or 1.6+1.7 if Arnav wants the forms and GitHub working first.
+
 ## 2026-10-18 · 1.5b Experience and 75 Hard (second of four 1.5 sub-tasks)
 
 **Done** (plus one revision round with Arnav)

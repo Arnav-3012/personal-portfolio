@@ -1,0 +1,67 @@
+---
+// One labelled form control with its error slot (src/lib/forms.ts fills `[data-error-for]`). The label is always
+// visible (no placeholder-only fields) and the error is linked with aria-describedby.
+import { RULES, type FormKind } from '../lib/forms';
+
+interface Props {
+  form: FormKind;
+  name: string;
+  as?: 'input' | 'textarea' | 'select';
+  type?: 'text' | 'email';
+  autocomplete?: string;
+  options?: readonly { value: string; label: string }[];
+}
+const { form, name, as = 'input', type = 'text', autocomplete, options = [] } = Astro.props;
+// Label, required and maxlength come from the same rules the validator uses, so they can't drift apart.
+const rule = RULES[form][name];
+if (!rule) throw new Error(`FormField: no rule for ${form}.${name}`);
+const { label, required, max: maxlength } = rule;
+const id = `${form}-${name}`;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+    {!required && <span class="field__optional"> (optional)</span>}
+  </label>
+  {as === 'textarea' && (
+    <textarea
+      class="field__control"
+      id={id}
+      name={name}
+      rows="5"
+      maxlength={maxlength}
+      required={required}
+      aria-describedby={`${id}-error`}
+    />
+  )}
+  {as === 'select' && (
+    <select
+      class="field__control"
+      id={id}
+      name={name}
+      required={required}
+      aria-describedby={`${id}-error`}
+    >
+      <option value="" selected disabled>
+        Choose one
+      </option>
+      {options.map((o) => (
+        <option value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  )}
+  {as === 'input' && (
+    <input
+      class="field__control"
+      id={id}
+      name={name}
+      type={type}
+      autocomplete={autocomplete}
+      maxlength={maxlength}
+      required={required}
+      aria-describedby={`${id}-error`}
+    />
+  )}
+  <p class="field__error" id={`${id}-error`} data-error-for={name} hidden></p>
+</div>

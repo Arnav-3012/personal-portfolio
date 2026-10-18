@@ -121,7 +121,7 @@ One long page that holds everything a recruiter or client needs: resume, LinkedI
 | 9 | GitHub live | Contribution heatmap + 4 latest repos, from the cached API | Squares fill in order |
 | 10 | Beyond code | Cricket teaser tile and a link to the 75 Hard section, both leading into the 3D room | Tile tilt on hover |
 | 11 | Contact | Form (Turnstile) + email + socials | Magnetic send button |
-| 12 | Footer | Socials, resume, "Built on Cloudflare", last-deployed date, workshop link | — |
+| 12 | Footer | Closing call to action ("Start a project", or "Say hello" when booked) with the email, link columns (sections, socials, resume), city and school, a giant outlined wordmark, © line and "Back to top"; workshop link joins in Phase 2. No "Built on Cloudflare" or last-deployed line (Arnav, 2026-10-18) | — |
 
 **EDITH-lite assistant (2D page)**
 

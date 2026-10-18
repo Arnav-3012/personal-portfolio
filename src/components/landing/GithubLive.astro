@@ -1,0 +1,196 @@
+---
+// GitHub live (SPEC row 9): a contribution heatmap and the four latest repos. The data comes from GET /api/github
+// (task 1.7's cron + KV); src/lib/github.ts defines the shape and fills this markup once the section nears the
+// viewport, so nothing is fetched before first paint. Until the endpoint exists the fallback line shows.
+import { site } from '../../lib/content';
+---
+
+<section id="github" class="l-section gh" aria-labelledby="github-title" data-github>
+  <header class="l-section__head">
+    <p class="hud l-section__eyebrow">GitHub</p>
+    <h2 id="github-title" class="display">
+      GitHub, live
+    </h2>
+    <p class="small gh__total" data-gh-total></p>
+  </header>
+
+  <div class="gh__body">
+    <div class="skeleton skeleton--card gh__skeleton" aria-hidden="true"></div>
+
+    <p class="gh__fallback">
+      Live activity isn't available right now.
+      <a href={site.socials.github} rel="noopener">
+        See Arnav's GitHub
+      </a>
+    </p>
+
+    <div class="gh__ready">
+      <div
+        class="gh__scroll"
+        data-gh-scroll
+        tabindex="0"
+        role="group"
+        aria-label="Contribution heatmap, scrolls sideways"
+      >
+        <div class="gh__chart">
+          <div class="gh__months" data-gh-months aria-hidden="true"></div>
+          <div class="gh__grid" data-gh-grid role="img" aria-label="Contribution heatmap"></div>
+        </div>
+      </div>
+      <p class="hud gh__legend" aria-hidden="true">
+        Less
+        {[0, 1, 2, 3, 4].map((level) => (
+          <span class="gh__key" data-level={level}></span>
+        ))}
+        More
+      </p>
+      <ul class="gh__repos" data-gh-repos aria-label="Latest repositories"></ul>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .gh__total {
+    min-height: 1.5em;
+  }
+  .gh__body {
+    min-height: 320px;
+  }
+  .gh__skeleton {
+    display: none;
+    height: 320px;
+  }
+  .gh__fallback,
+  .gh__ready {
+    display: none;
+  }
+  /* No state yet (no JS) and error both read as the fallback; idle and loading show the skeleton */
+  .gh:not([data-state]) .gh__fallback,
+  .gh[data-state='error'] .gh__fallback {
+    display: block;
+    color: var(--text-2);
+  }
+  .gh[data-state='idle'] .gh__skeleton,
+  .gh[data-state='loading'] .gh__skeleton {
+    display: block;
+  }
+  .gh[data-state='ready'] .gh__ready {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .gh__fallback a {
+    color: var(--text);
+  }
+
+  .gh__scroll {
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+  }
+  .gh__chart {
+    display: grid;
+    gap: var(--space-2);
+    /* Fills the row on desktop; on a phone it keeps 15 px a week and the strip scrolls */
+    width: 100%;
+    min-width: calc(var(--weeks, 53) * 15px);
+  }
+  .gh__months,
+  .gh__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
+    column-gap: 3px;
+  }
+  .gh__months {
+    min-height: 1em;
+    color: var(--text-2);
+  }
+  .gh__months .gh__month {
+    white-space: nowrap;
+  }
+  .gh__grid {
+    row-gap: 3px;
+  }
+  .gh__grid .gh__cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .gh__key {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .gh__grid .gh__cell[data-level='1'],
+  .gh__key[data-level='1'] {
+    background: color-mix(in srgb, var(--time) 30%, var(--line));
+  }
+  .gh__grid .gh__cell[data-level='2'],
+  .gh__key[data-level='2'] {
+    background: color-mix(in srgb, var(--time) 55%, var(--line));
+  }
+  .gh__grid .gh__cell[data-level='3'],
+  .gh__key[data-level='3'] {
+    background: color-mix(in srgb, var(--time) 80%, var(--line));
+  }
+  .gh__grid .gh__cell[data-level='4'],
+  .gh__key[data-level='4'] {
+    background: var(--time);
+  }
+  /* Squares fill in order: each waits its own --d (set from its index), so the year takes about 1.2 s */
+  :root[data-motion='full'] .gh[data-state='ready'] .gh__grid .gh__cell {
+    animation: gh-fill 260ms var(--ease-out) var(--d, 0ms) backwards;
+  }
+  @keyframes gh-fill {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+  .gh__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-2);
+  }
+  .gh__legend .gh__key:first-of-type {
+    margin-left: var(--space-2);
+  }
+  .gh__legend .gh__key:last-of-type {
+    margin-right: var(--space-2);
+  }
+
+  .gh__repos {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+  .gh__repos .gh__repo {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    padding: var(--space-4) var(--space-5);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .gh__repos .gh__repo-name {
+    color: var(--text);
+    font-weight: 600;
+    text-underline-offset: 4px;
+  }
+  .gh__repos .gh__repo-meta {
+    color: var(--time);
+  }
+
+  @media (min-width: 768px) {
+    .gh__repos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .gh__repos {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>
