@@ -17,6 +17,8 @@ export const TODO_PREFIX = 'TODO:';
 const text = z.string().trim().min(1);
 const id = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'kebab-case id');
 const media = z.string().startsWith('assets/');
+// Files that ship with the site live in public/ and are referenced without the "public/" prefix.
+const publicMedia = z.string().regex(/^media\/[a-z0-9/-]+\.(mp4|jpg)$/, 'path under public/media/');
 const url = z.url({ protocol: /^https$/ });
 const year = z.number().int().min(2000).max(2100);
 const yearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'YYYY-MM');
@@ -127,8 +129,8 @@ export const disciplineSchema = z.strictObject({
   lesson: text,
   reels: z.array(
     z.strictObject({
-      file: media,
-      poster: media,
+      file: publicMedia,
+      poster: publicMedia,
       day: z.number().int().min(1).max(75),
       caption: text.max(40),
       featured: z.boolean(),

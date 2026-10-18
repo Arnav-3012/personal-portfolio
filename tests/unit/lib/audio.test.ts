@@ -12,7 +12,17 @@ class FakeContext {
   suspend = vi.fn(async () => {
     this.state = 'suspended';
   });
-  createGain = () => ({ gain: { value: 1 }, connect: vi.fn() });
+  gains: { gain: { value: number }; connect: Mock }[] = [];
+  sources = 0;
+  createGain = () => {
+    const node = { gain: { value: 1 }, connect: vi.fn() };
+    this.gains.push(node);
+    return node;
+  };
+  createMediaElementSource = () => {
+    this.sources++;
+    return { connect: vi.fn() };
+  };
   createBufferSource = () => ({ buffer: null, connect: vi.fn(), start: () => this.started++ });
   decodeAudioData = vi.fn(async () => ({}));
 }
@@ -101,5 +111,44 @@ describe('AudioManager', () => {
 
   it('clamps volumes to 0–1', () => {
     expect(() => manager.setVolume('master', 3)).not.toThrow();
+  });
+
+  describe('attachElement', () => {
+    const el = {} as HTMLMediaElement;
+
+    it('routes nothing while muted, or before a gesture', () => {
+      expect(manager.attachElement(el)).toBeUndefined();
+      store.set({ sound: true });
+      expect(manager.attachElement(el)).toBeUndefined();
+      expect(createContext).not.toHaveBeenCalled();
+      expect(ctx.sources).toBe(0);
+    });
+
+    it('routes the element through its own level, starting silent, and clamps it', () => {
+      store.set({ sound: true });
+      doc.dispatchEvent(new Event('pointerdown'));
+      const handle = manager.attachElement(el, 'music');
+      expect(ctx.sources).toBe(1);
+      // The last gain created is the element's own level node.
+      const level = ctx.gains.at(-1);
+      expect(level?.gain.value).toBe(0);
+      handle?.setLevel(0.3);
+      expect(level?.gain.value).toBe(0.3);
+      handle?.setLevel(4);
+      expect(level?.gain.value).toBe(1);
+      handle?.setLevel(-1);
+      expect(level?.gain.value).toBe(0);
+    });
+
+    it('is silenced by the Settings toggle like any other sound', async () => {
+      store.set({ sound: true });
+      doc.dispatchEvent(new Event('pointerdown'));
+      manager.attachElement(el);
+      await flush();
+      store.set({ sound: false });
+      await flush();
+      expect(ctx.suspend).toHaveBeenCalled();
+      expect(manager.attachElement(el)).toBeUndefined();
+    });
   });
 });

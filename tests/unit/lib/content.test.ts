@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   cricket,
@@ -131,6 +131,19 @@ describe('skills, experience, timeline, discipline', () => {
   it('reel days are unique', () => {
     expect(new Set(discipline.reels.map((r) => r.day)).size).toBe(discipline.reels.length);
   });
+
+  it('every reel and poster ships from public/ and stays under 25 MiB', () => {
+    for (const r of discipline.reels)
+      for (const p of [r.file, r.poster]) {
+        const url = new URL(`public/${p}`, root);
+        expect(existsSync(url), p).toBe(true);
+        expect(statSync(url).size, p).toBeLessThan(25 * 1024 * 1024);
+      }
+  });
+
+  it('exactly one reel is featured (it drives the proximity audio)', () => {
+    expect(discipline.reels.filter((r) => r.featured)).toHaveLength(1);
+  });
 });
 
 // assets/incoming/ is gitignored, so this only runs on a machine that has the media.
@@ -140,7 +153,6 @@ describe.runIf(existsSync(new URL('assets/incoming/', root)))('media paths', () 
       site.resume.source,
       ...timeline.map((e) => e.photo),
       ...strings(cricket).filter((s) => s.startsWith('assets/')),
-      ...strings(discipline).filter((s) => s.startsWith('assets/')),
     ];
     for (const p of paths) expect(existsSync(new URL(p, root)), p).toBe(true);
   });

@@ -1,0 +1,282 @@
+---
+// Experience (SPEC row 6): a vertical tungsten rail with one card per role, newest first, then the hackathons.
+// The rail draws as you scroll and each node lights when the line reaches it (src/lib/experience.ts). Without
+// JS or with reduced motion the rail is fully drawn. Everything comes from experience.json and site.json.
+import { experience, projects, site } from '../../lib/content';
+import { honorsNewestFirst } from '../../lib/experience';
+import { selectedWork } from '../../lib/work';
+
+const honors = honorsNewestFirst(site.honors);
+const pinned = new Set(selectedWork(projects).map((p) => p.id));
+// Top-five projects have their own row in Selected work; the rest live in the index.
+const projectHref = (id: string): string => (pinned.has(id) ? `#work-${id}` : '#projects');
+const projectName = (id: string): string => projects.find((p) => p.id === id)?.name ?? id;
+---
+
+<section id="experience" class="exp" aria-labelledby="experience-title">
+  <div class="exp__inner">
+    <header class="exp__head">
+      <p class="hud exp__eyebrow">02 · Experience</p>
+      <h2 id="experience-title" class="display">
+        Experience
+      </h2>
+    </header>
+
+    <ol class="exp__rail" data-rail>
+      {experience.map((role) => (
+        <li class="exp__role" id={`role-${role.id}`} data-rail-node>
+          <p class="hud exp__dates">
+            {role.dates}
+            {role.end === null && <span class="exp__now">Now</span>}
+          </p>
+          <article class="exp__card">
+            <h3 class="exp__title">{role.title}</h3>
+            <p class="exp__company">
+              {role.company}
+              {role.companyNote && <span class="exp__note"> · {role.companyNote}</span>}
+              <span class="exp__note"> · {role.location}</span>
+            </p>
+            <ul class="exp__impact">
+              {role.impact.map((line) => (
+                <li>{line}</li>
+              ))}
+            </ul>
+            <ul class="exp__stack" aria-label={`${role.company} stack`}>
+              {role.stack.map((s) => (
+                <li class="hud">{s}</li>
+              ))}
+            </ul>
+          </article>
+        </li>
+      ))}
+    </ol>
+
+    <div class="exp__honors">
+      <h3 class="hud exp__honors-title">Hackathons and challenges</h3>
+      <ul class="exp__honor-list">
+        {honors.map((h) => (
+          <li class="exp__honor">
+            <span class="hud exp__honor-year">{h.year}</span>
+            <span class="exp__honor-event">{h.event}</span>
+            <span class="small exp__honor-result">{h.result}</span>
+            {h.projectId && (
+              <a class="hud exp__honor-link" href={projectHref(h.projectId)}>
+                {projectName(h.projectId)}
+                <span class="visually-hidden">
+                  {' '}
+                  ({h.event} {h.year} project)
+                </span>
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .exp {
+    scroll-margin-top: 60px;
+  }
+  .exp__inner {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding: var(--section-gap) var(--space-4) 0;
+  }
+  .exp__head {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+  }
+  .exp__eyebrow {
+    color: var(--time);
+  }
+
+  /* The rail: a faint track with the amber line drawn over it (scaleY from the top) */
+  .exp__rail {
+    --rail-x: 11px;
+    position: relative;
+    display: grid;
+    gap: var(--space-6);
+    padding: 0 0 0 var(--space-7);
+    list-style: none;
+  }
+  .exp__rail::before,
+  .exp__rail::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--rail-x);
+    width: 2px;
+    border-radius: var(--radius-pill);
+  }
+  .exp__rail::before {
+    background: var(--line);
+  }
+  .exp__rail::after {
+    background: linear-gradient(to bottom, var(--time), var(--time));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--time) 55%, transparent);
+    transform: scaleY(var(--p, 1));
+    transform-origin: top;
+  }
+
+  .exp__role {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    scroll-margin-top: 80px;
+  }
+  /* Node on the rail; lit by default so no-JS and reduced motion read as complete */
+  .exp__role::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: calc(var(--rail-x) - var(--space-7) - 5px);
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--time);
+    border-radius: var(--radius-pill);
+    background: var(--time);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--time) 20%, transparent);
+    transition:
+      background var(--dur-reveal) var(--ease-out),
+      border-color var(--dur-reveal) var(--ease-out),
+      box-shadow var(--dur-reveal) var(--ease-out);
+  }
+  .exp__rail[data-rail='draw'] .exp__role:not([data-lit])::before {
+    border-color: var(--line);
+    background: var(--bg);
+    box-shadow: none;
+  }
+
+  .exp__dates {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--time);
+  }
+  .exp__now {
+    padding: 2px var(--space-2);
+    border: 1px solid var(--ok);
+    border-radius: var(--radius-chip);
+    color: var(--ok);
+  }
+  .exp__card {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 760px;
+    padding: var(--space-5);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .exp__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-heading);
+    line-height: var(--lh-heading);
+  }
+  .exp__company {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .exp__note {
+    color: var(--text-2);
+    font-weight: 400;
+  }
+  .exp__impact {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+    color: var(--text-2);
+  }
+  .exp__impact li {
+    position: relative;
+    padding-left: var(--space-5);
+    max-width: var(--measure);
+  }
+  .exp__impact li::before {
+    content: '';
+    position: absolute;
+    top: 0.7em;
+    left: 0;
+    width: 12px;
+    height: 1px;
+    background: var(--time);
+  }
+  .exp__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .exp__stack li {
+    padding: var(--space-1) var(--space-2);
+    border: var(--border);
+    border-radius: var(--radius-chip);
+    color: var(--text-2);
+  }
+
+  .exp__honors {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: var(--border);
+  }
+  .exp__honors-title {
+    color: var(--text-2);
+  }
+  .exp__honor-list {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+  .exp__honor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+  }
+  .exp__honor-year {
+    color: var(--time);
+  }
+  .exp__honor-event {
+    font-weight: 600;
+  }
+  .exp__honor-link {
+    color: var(--text);
+    text-underline-offset: 4px;
+  }
+
+  @media (min-width: 768px) {
+    .exp__inner {
+      padding-inline: var(--space-6);
+    }
+    .exp__rail {
+      --rail-x: 195px;
+      padding-left: 0;
+    }
+    .exp__role {
+      grid-template-columns: 180px minmax(0, 1fr);
+      column-gap: var(--space-8);
+      align-items: start;
+    }
+    .exp__role::before {
+      left: calc(var(--rail-x) - 5px);
+    }
+    .exp__dates {
+      justify-content: flex-end;
+      padding-top: 2px;
+      text-align: right;
+    }
+    .exp__honors {
+      padding-left: calc(180px + var(--space-8));
+    }
+  }
+</style>

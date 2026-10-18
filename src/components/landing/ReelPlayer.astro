@@ -1,0 +1,175 @@
+---
+// Full-screen reel player (SPEC "75 Hard": click a card → full-screen player with sound, swipe or arrows for
+// next). One native <dialog> (focus trap, Esc, inert page for free) and one <video> whose src is set only when
+// a reel opens, so the five clips never preload together. Wiring: src/lib/reels.ts. The loader is the
+// SPEC's "day N / 75" counter driven by the real buffered amount.
+import Icon from '../Icon.astro';
+---
+
+<dialog class="player" aria-label="Reel player" data-player>
+  <div class="player__frame" data-player-frame>
+    <div class="player__stage" data-player-stage>
+      <video
+        class="player__video"
+        data-player-video
+        playsinline
+        preload="auto"
+        aria-label="Reel video"
+      />
+      <div class="player__load" data-player-load hidden>
+        <p class="hud" data-player-load-label>
+          loading reel · day 1 / 75
+        </p>
+        <span class="player__bar" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <p class="hud player__status" data-player-status aria-live="polite"></p>
+
+    <div class="player__controls">
+      <button class="icon-button" type="button" data-player-prev aria-label="Previous reel">
+        <Icon name="chevron-left" />
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        data-player-play
+        aria-label="Pause"
+        data-state="playing"
+      >
+        <span class="player__ico player__ico--pause">
+          <Icon name="pause" />
+        </span>
+        <span class="player__ico player__ico--play">
+          <Icon name="play" />
+        </span>
+      </button>
+      <button class="icon-button" type="button" data-player-next aria-label="Next reel">
+        <Icon name="chevron-right" />
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        data-player-mute
+        aria-label="Mute"
+        aria-pressed="false"
+        data-state="sound"
+      >
+        <span class="player__ico player__ico--sound">
+          <Icon name="volume-2" />
+        </span>
+        <span class="player__ico player__ico--muted">
+          <Icon name="volume-x" />
+        </span>
+      </button>
+      <button
+        class="icon-button player__close"
+        type="button"
+        data-player-close
+        aria-label="Close player"
+      >
+        <Icon name="x" />
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .player {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    color: var(--text);
+    backdrop-filter: blur(10px);
+  }
+  .player:not([open]) {
+    display: none;
+  }
+  .player::backdrop {
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+  }
+  .player__frame {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    justify-items: center;
+    gap: var(--space-3);
+    height: 100%;
+    padding: var(--space-4);
+  }
+  .player__stage {
+    position: relative;
+    /* A 9:16 box sized from the viewport height minus the status line and controls, so it hugs the clip */
+    width: min(100%, calc((100dvh - 140px) * 9 / 16));
+    max-height: 100%;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    /* Horizontal swipes belong to the player; vertical gestures stay with the browser */
+    touch-action: pan-y;
+  }
+  .player__video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .player__load {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--bg) 90%, transparent),
+      transparent
+    );
+  }
+  .player__load[hidden] {
+    display: none;
+  }
+  .player__bar {
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--line);
+    overflow: hidden;
+  }
+  .player__bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    background: var(--time);
+    transform: scaleX(var(--load, 0));
+    transform-origin: left;
+    transition: transform var(--dur-hover) linear;
+  }
+  .player__status {
+    color: var(--text-2);
+    text-align: center;
+  }
+  .player__controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  .player__ico {
+    display: none;
+    line-height: 0;
+  }
+  [data-state='playing'] .player__ico--pause,
+  [data-state='paused'] .player__ico--play,
+  [data-state='sound'] .player__ico--sound,
+  [data-state='muted'] .player__ico--muted {
+    display: inline-flex;
+  }
+  :global(html:has(.player[open])) {
+    overflow: hidden;
+  }
+</style>

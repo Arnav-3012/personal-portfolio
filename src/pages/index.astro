@@ -6,11 +6,13 @@ import Hero from '../components/landing/Hero.astro';
 import ProofStrip from '../components/landing/ProofStrip.astro';
 import SelectedWork from '../components/landing/SelectedWork.astro';
 import AllProjects from '../components/landing/AllProjects.astro';
+import Experience from '../components/landing/Experience.astro';
+import Hard75 from '../components/landing/Hard75.astro';
+import ReelPlayer from '../components/landing/ReelPlayer.astro';
 import { site } from '../lib/content';
 
-// Nav targets that tasks 1.5b–1.5d fill in; stubs keep every anchor resolving until then.
+// Nav targets that tasks 1.5c–1.5d fill in; stubs keep every anchor resolving until then.
 const upcoming = [
-  ['experience', 'Experience'],
   ['about', 'About'],
   ['freelance', 'Open to freelance'],
   ['contact', 'Contact'],
@@ -25,15 +27,18 @@ const upcoming = [
     <ProofStrip />
     <SelectedWork />
     <AllProjects />
+    <Experience />
+    <Hard75 />
     {upcoming.map(([id, title]) => (
       <section id={id} class="stub" aria-labelledby={`${id}-title`}>
         <h2 id={`${id}-title`} class="display">
           {title}
         </h2>
-        <p class="small">Arrives in task 1.5b–1.5d.</p>
+        <p class="small">Arrives in task 1.5c–1.5d.</p>
       </section>
     ))}
   </main>
+  <ReelPlayer />
 </Base>
 
 <script>
@@ -41,11 +46,15 @@ const upcoming = [
   import { initNav } from '../lib/nav';
   import { initHero } from '../lib/hero';
   import { initWork } from '../lib/work';
+  import { initExperience } from '../lib/experience';
+  import { initReels } from '../lib/reels';
 
   initBoot();
   initNav();
   initHero();
   initWork();
+  initExperience();
+  initReels();
 </script>
 
 <style>

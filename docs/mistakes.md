@@ -4,6 +4,53 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.5b revision (orbit) · An aborted `play()` was treated as "autoplay blocked"
+- **What happened:** after the orbit change one e2e run failed (tap to pause left the button on "Pause"; the earlier run had passed). Pausing, or skipping to the next reel, while `play()` was still pending rejects that promise with `AbortError`. My catch handler took every rejection as "autoplay with sound refused", muted the clip and restarted it, so a user's pause was undone and a fast skip played muted.
+- **Root cause:** I wrote one catch-all for a promise that rejects for several reasons and only imagined the autoplay case.
+- **Fix:** fall back to muted playback only for `NotAllowedError`; a regression test pauses immediately and skips three reels quickly (it ran 4× repeat with no failures).
+- **Prevention rule:** Check `error.name` before reacting to a rejected `play()`; treat a one-off e2e failure as a possible real race and find the cause before re-running.
+- **Files:** `src/lib/reels.ts`, `tests/e2e/hard75.spec.ts`
+
+## 2026-10-18 · 1.5b revision (orbit) · Ring first cut covered the sub-line
+- **What happened:** in the first ring screenshot the front card sat across the sub-line and part of the headline.
+- **Root cause:** I sized the ring's height (22% of the stage) without measuring where the headline block ends.
+- **Fix:** taller ring (31% of the stage, capped at 280 px) so the front arc passes below the sub-line; one extreme frame still touches the first letters by a few pixels.
+- **Prevention rule:** Place an orbit relative to the measured headline block, and screenshot a frame at the front of the ring, not only the spread state.
+- **Files:** `src/lib/reels.ts`
+
+## 2026-10-18 · 1.5b · The 3D card list swallowed every click
+- **What happened:** the first e2e run showed the reel player never opened and hover never played. `elementFromPoint` at a card's centre returned the `<ul class="hard__cards">`, not the card.
+- **Root cause:** I made the cards a `preserve-3d` layer with negative `translateZ` depths. The full-stage list sits at z = 0, in front of cards behind it, so it takes the hit test. I wrote the visuals and the click handlers but never tried a click until the e2e run.
+- **Fix:** `pointer-events: none` on the list and `auto` on each slot, in the floating layout only.
+- **Prevention rule:** In a 3D-transformed layer, make every full-size wrapper click-through and re-enable pointer events on the children; try a real click on each depth before writing handlers.
+- **Files:** `src/components/landing/Hard75.astro`
+
+## 2026-10-18 · 1.5b · Several of my own assertions checked the wrong thing
+- **What happened:** the hackathon test found rows by their result text ("Participated" is not unique); the card-overlap test measured the title element's box (14ch wide) instead of its text, so it flagged a card that visibly cleared the headline; the audio probe took the max of all gain writes, so the master gain's 1 read as the bed's level; player tests expected a relative `src` but the player sets the absolute `href`.
+- **Root cause:** I wrote the assertions from the intended behaviour without checking what the DOM and fakes actually return. The unit test for `loadingDay` had the same flaw (0.56 × 75 is 42.000…01 in floating point).
+- **Fix:** match rows by position, measure a `Range` over the title text, record only writes after the element is attached, match `src` by file suffix, use 0.55 in the unit test.
+- **Prevention rule:** Before asserting on a DOM or fake value, print it once; measure text with a Range, not the element box; avoid float values that land on a boundary in unit tests.
+- **Files:** `tests/e2e/experience.spec.ts`, `tests/e2e/hard75.spec.ts`, `tests/unit/lib/reels.test.ts`
+
+## 2026-10-18 · 1.5b · `wrangler dev --local` ignores Range, so the player stalled about 15 s
+- **What happened:** a real reel stayed on "loading" for ~15 s in e2e (readyState 0, then it loaded at once on Chromium's retry). curl showed the server answers in 10 ms, but returns 200 with the whole file and no `Accept-Ranges` for any `Range` request.
+- **Root cause:** Chromium asks for `bytes=0-` on video; the local asset server doesn't speak ranges. I suspected my player code first and added tracing before checking the server with curl.
+- **Fix:** none in the app. The e2e specs serve the MP4s through a Playwright route that returns real 206 slices, so tests are fast and deterministic. **Open item for 1.10:** confirm production Workers assets honour Range; if not, the Worker must serve `/media/*` with ranges.
+- **Prevention rule:** When media misbehaves, curl the server with and without a `Range` header before touching player code.
+- **Files:** `tests/e2e/hard75.spec.ts`
+
+## 2026-10-18 · 1.5b · Mobile player box was not 9:16
+- **What happened:** the 375 px screenshot showed grey bands above and below the clip.
+- **Root cause:** `height: 100%` plus `max-width: 100%` and `aspect-ratio`: when the width clamps, an explicit height wins and the ratio is dropped. Only the screenshot showed it.
+- **Fix:** width = `min(100%, (100dvh − 140px) × 9/16)`, `aspect-ratio: 9/16`, `max-height: 100%`.
+- **Prevention rule:** Size an aspect-ratio box from one definite dimension; never give it both a height and a clamped width.
+- **Files:** `src/components/landing/ReelPlayer.astro`
+
+## 2026-10-18 · 1.5b · Smaller wrong turns (caught before review)
+- The fifth card sat at `top: 70%` and its caption ran off the 900 px viewport; moved to 64% after the 1440 screenshot.
+- Wrote a debug log to `/tmp` instead of the session scratchpad; use the scratchpad for every temp file.
+- Linted late: `no-non-null-assertion` flagged `CARD_LAYOUTS[0]!` and the test `ranges` helper; replaced with a named fallback and `?.`.
+
 ## 2026-10-18 · 1.5a · Sticky pane made every project's links unreachable by keyboard
 - **What happened:** I first rendered all five desktop panes `inert` + `aria-hidden`; the mobile inline cards are `display: none` on desktop, so keyboard users could never reach a project's GitHub link. Caught while writing the markup, before any run.
 - **Root cause:** treated the panes as decoration to hide from assistive tech, forgetting they are the only desktop copy of the links.

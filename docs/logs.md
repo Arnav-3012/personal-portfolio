@@ -4,6 +4,42 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.5b Experience and 75 Hard (second of four 1.5 sub-tasks)
+
+**Done** (plus one revision round with Arnav)
+- **Experience** (`Experience.astro`, `src/lib/experience.ts`): five roles from `experience.json`, newest first, on an amber rail that draws with scroll progress; each node lights when the line reaches it. Hackathons from `site.json` honors, newest year first, linking to the project row when it has one. Fully drawn without JS or with reduced motion.
+- **75 Hard** (`Hard75.astro`, `src/lib/reels.ts`): pinned headline, 75 crossed-out squares drawn with gradients, a cursor heat glow, and five reel cards from `discipline.json`. Revision: the cards revolve on a tilted ring round the headline (time-based, slows to a stop) and spread to their own resting spots as the visitor scrolls (`orbitPose`, `separation`); hovering a card holds the ring, straightens the card and scales it 4%, and plays its muted loop. Cards are real links to the MP4s. Below 768 px, with reduced motion or without JS they are a plain swipe strip. Warp-style translucent borders instead of drop shadows.
+- **Reel player** (`ReelPlayer.astro`): one native `<dialog>` and one `<video>` whose `src` is set only on open. Arrow keys, prev/next, swipe, tap to pause, mute, Esc, outside click; focus returns to the card. Loader is the SPEC's `day N / 75` counter driven by the real buffered amount. A failed load shows an error toast.
+- **Proximity audio:** the featured reel (day 4) loops as a quiet bed that fades in as the section nears the viewport centre and out as it leaves (`proximityGain`, max 0.35). Plays only with Settings sound on, after an interaction, with the tab visible and the player closed; routed through the new `AudioManager.attachElement`, so the toggle and tab-hidden suspend silence it.
+- **Content:** `discipline.json` reel paths are now `media/75hard/…`; the 5 MP4s and posters (32 MB) ship from `public/media/75hard/`.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| typecheck, lint, format | pass | 0 errors; check-no-hex 36 files clean; Prettier clean |
+| `pnpm test` | 141/141 | new: rail progress, honors order, reel caption/step/swipe, ring pose maths, separation, proximity gain, buffered ratio, `attachElement`, reel files ship and stay under 25 MiB |
+| `pnpm e2e` | 145/145 | rail draws and lights nodes; ring revolves, holds on hover, spreads on scroll; hover plays; player open/keys/swipe/tap/mute/close/focus return; loader; error toast; pause or skip while starting does not restart or mute (4× repeat, 48/48); mobile strip no overflow; reduced motion flat; no-JS links; proximity audio gated by Settings and interaction; axe 0 in both themes, also with the player open |
+| `pnpm links` | pass | 44 links, 0 broken |
+| Lighthouse (mobile) | pass | 99/100/100/100, LCP 1958 ms (budget 2000), CLS 0, JS 16.9 KB, no MP4 requested on load |
+| Screenshots | reviewed | 375/768/1440 × Day/Night × full/reduced, ring and spread states, player at each width |
+| Mutation | pass | no featured reel, and a reel pointing at a missing file, each failed one test; restored |
+| Arnav | confirmed "done" 2026-10-18 | reviewed in the browser; asked for the orbit |
+
+**Deviations from the approved plan**
+- Cards revolve and spread instead of drifting up and down (Arnav, after review); pose maths replaced `driftY` and the per-card depth fields.
+- `AudioManager.attachElement` added (small, tested), beyond "earlier phases only wire the hook".
+- The player's own audio is not routed through AudioManager: it is media the visitor starts with a click, with its own mute button.
+- Reel paths in `discipline.json` changed to published paths, and 32 MB of media is now committed.
+- e2e serves the MP4s through a Playwright route with real 206 range responses (see open items).
+
+**Open items**
+- **1.10: verify Range on production.** `wrangler dev --local` ignores `Range` (always 200, no `Accept-Ranges`) and Chromium then stalls about 15 s before the first frame. Confirm production Workers assets honour Range; if not, the Worker must serve `/media/*` with ranges.
+- Captions (WebVTT) deferred to the Phase 5 gate (Arnav's call).
+- 75 Hard day numbers are still placeholders 1–5; confirm the real days before 1.10.
+- In one extreme frame the ring's front card can touch the first letters of the sub-line by a few pixels.
+- MARL LLM Router and EDITH still have no `stats` (from 1.5a).
+- 1.5c next: skills by layer with the dock; cricket and 75 Hard teaser tiles (the 75 Hard section id is `75-hard`).
+
 ## 2026-10-18 · 1.5a Work (first of four 1.5 sub-tasks)
 
 **Done** (plus two review rounds with Arnav)

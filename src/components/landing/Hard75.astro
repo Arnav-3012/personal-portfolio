@@ -1,0 +1,327 @@
+---
+// 75 Hard (SPEC "75 Hard", 2D section): the headline stays pinned while five reel cards revolve round it in a
+// ring, then spread out to their own tilted resting spots as the visitor scrolls (src/lib/reels.ts). Hover
+// straightens a card and plays its muted loop; a click opens the full-screen player (ReelPlayer.astro). Below
+// 768 px, with reduced motion, or without JS, the cards are a plain swipe strip under the headline. Every
+// card is a real link to its MP4, so without JS it still plays. All copy comes from discipline.json.
+import { discipline } from '../../lib/content';
+import { cardLayout, reelCaption } from '../../lib/reels';
+
+const url = (path: string): string => `/${path}`;
+---
+
+<section id="75-hard" class="hard" aria-labelledby="hard-title" data-hard>
+  <div class="hard__stage" data-hard-stage>
+    <div class="hard__grid" aria-hidden="true"></div>
+    <div class="hard__glow" aria-hidden="true"></div>
+
+    <div class="hard__head">
+      <p class="hud hard__eyebrow">75 Hard</p>
+      <h2 id="hard-title" class="hard__title">
+        {discipline.headline}
+      </h2>
+      <p class="hard__sub">{discipline.subLine}</p>
+    </div>
+
+    <ul class="hard__cards" aria-label="Selected 75 Hard reels">
+      {discipline.reels.map((r, i) => {
+        const l = cardLayout(i);
+        const style = `--l: ${l.left}; --t: ${l.top}`;
+        return (
+          <li class="hard__slot" style={style}>
+            <a
+              class="reel"
+              href={url(r.file)}
+              aria-haspopup="dialog"
+              data-reel-open
+              data-poster={url(r.poster)}
+              data-caption={reelCaption(r)}
+              data-featured={r.featured || undefined}
+            >
+              <img
+                class="reel__poster"
+                src={url(r.poster)}
+                width="720"
+                height="1280"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+              <video
+                class="reel__video"
+                src={url(r.file)}
+                muted
+                loop
+                playsinline
+                preload="none"
+                tabindex="-1"
+                aria-hidden="true"
+              />
+              {r.featured && (
+                <span class="hud reel__live" data-live-mark hidden>
+                  <span class="reel__bars" aria-hidden="true">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                  </span>
+                  Live · day {r.day}
+                </span>
+              )}
+              <span class="hud reel__caption">
+                {reelCaption(r)}
+                <span class="visually-hidden"> (opens the reel player)</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hard {
+    position: relative;
+    isolation: isolate;
+    /* Glow, grid and the orbiting cards can overhang the section; clip keeps the sticky stage working */
+    overflow-x: clip;
+    scroll-margin-top: 60px;
+  }
+  .hard__stage {
+    position: relative;
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--section-gap) 0 var(--space-6);
+  }
+
+  /* 75 squares (15 × 5), every one crossed out: Arnav's motif, drawn with gradients so it costs no DOM */
+  .hard__grid {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: min(1100px, 92%);
+    aspect-ratio: 15 / 5;
+    margin: auto;
+    background-image:
+      linear-gradient(
+        to top right,
+        transparent calc(50% - 0.5px),
+        var(--cross) 50%,
+        transparent calc(50% + 0.5px)
+      ),
+      linear-gradient(
+        to bottom right,
+        transparent calc(50% - 0.5px),
+        var(--cross) 50%,
+        transparent calc(50% + 0.5px)
+      ),
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: calc(100% / 15) calc(100% / 5);
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    --cross: color-mix(in srgb, var(--action) 38%, transparent);
+    opacity: 0.8;
+  }
+  .hard__glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      440px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--time) 26%, transparent),
+      color-mix(in srgb, var(--action) 12%, transparent) 45%,
+      transparent 72%
+    );
+    pointer-events: none;
+  }
+  :root[data-theme='day'] .hard__glow {
+    background: radial-gradient(
+      440px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--time) 14%, transparent),
+      color-mix(in srgb, var(--action) 6%, transparent) 45%,
+      transparent 72%
+    );
+  }
+
+  .hard__head {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+    text-align: center;
+  }
+  .hard__eyebrow {
+    color: var(--time);
+  }
+  .hard__title {
+    max-width: 14ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--type-display);
+    line-height: var(--lh-display);
+    text-wrap: balance;
+  }
+  .hard__sub {
+    max-width: 44ch;
+    color: var(--text-2);
+  }
+
+  /* Flat layout (mobile, reduced motion, no JS): a swipe strip of cards */
+  .hard__cards {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-4);
+  }
+  .hard__slot {
+    flex: 0 0 min(62vw, 220px);
+    scroll-snap-align: center;
+  }
+  .reel {
+    position: relative;
+    display: block;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    /* Warp-style containment: a translucent border instead of a drop shadow */
+    border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+  .reel__poster,
+  .reel__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .reel__video {
+    opacity: 0;
+    transition: opacity var(--dur-hover) var(--ease-out);
+  }
+  .reel[data-playing] .reel__video {
+    opacity: 1;
+  }
+  .reel__caption {
+    position: absolute;
+    inset: auto 0 0;
+    padding: var(--space-6) var(--space-3) var(--space-3);
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--bg) 88%, transparent),
+      transparent
+    );
+    line-height: 1.35;
+  }
+  .reel__live {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--ok);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    color: var(--ok);
+  }
+  .reel__live[hidden] {
+    display: none;
+  }
+  .reel__bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 10px;
+  }
+  .reel__bars i {
+    width: 2px;
+    height: 100%;
+    background: currentColor;
+    transform-origin: bottom;
+    animation: reel-bar 900ms ease-in-out infinite alternate;
+  }
+  .reel__bars i:nth-child(2) {
+    animation-delay: -300ms;
+  }
+  .reel__bars i:nth-child(3) {
+    animation-delay: -600ms;
+  }
+  @keyframes reel-bar {
+    from {
+      transform: scaleY(0.25);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  .reel:hover,
+  .reel:focus-visible {
+    border-color: var(--time);
+  }
+
+  @media (min-width: 768px) {
+    .hard__cards {
+      justify-content: center;
+      overflow: visible;
+      padding-inline: var(--space-6);
+    }
+    .hard__slot {
+      flex-basis: clamp(120px, 14vw, 200px);
+    }
+  }
+
+  /* Floating layout: only with full motion on a wide screen. The stage is pinned for the whole scroll. */
+  @media (min-width: 768px) {
+    :root[data-motion='full'] .hard {
+      height: 260vh;
+    }
+    :root[data-motion='full'] .hard__stage {
+      position: sticky;
+      top: 0;
+      display: block;
+      height: 100vh;
+      padding: 0;
+      overflow: clip;
+    }
+    :root[data-motion='full'] .hard__grid {
+      top: 0;
+      bottom: 0;
+    }
+    :root[data-motion='full'] .hard__head {
+      position: absolute;
+      inset: 0;
+      align-content: center;
+      /* Cards at the back of the ring (z-index 0) pass behind the headline, the front ones (2) in front */
+      z-index: 1;
+      pointer-events: none;
+    }
+    :root[data-motion='full'] .hard__cards {
+      position: absolute;
+      inset: 0;
+      display: block;
+      padding: 0;
+      overflow: visible;
+      /* The list spans the stage but must not swallow clicks meant for the cards or the headline */
+      pointer-events: none;
+    }
+    /* Position, tilt, scale, opacity and layer come from src/lib/reels.ts (orbitPose) on every frame; the
+       ring starts round the headline and opens to these resting spots as the visitor scrolls. */
+    :root[data-motion='full'] .hard__slot {
+      position: absolute;
+      left: calc(var(--l) * 1%);
+      top: calc(var(--t) * 1%);
+      width: clamp(120px, 12.5vw, 190px);
+      pointer-events: auto;
+      will-change: transform;
+    }
+  }
+</style>

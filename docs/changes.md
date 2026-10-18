@@ -4,6 +4,22 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.5b Experience and 75 Hard
+
+**Added**
+- `src/components/landing/Experience.astro`, `Hard75.astro`, `ReelPlayer.astro`
+- `src/lib/experience.ts`, `src/lib/reels.ts`
+- `public/media/75hard/` (5 MP4s + 5 posters, copied from `assets/incoming/75hard/`)
+- `tests/unit/lib/experience.test.ts`, `reels.test.ts`; `tests/e2e/experience.spec.ts`, `hard75.spec.ts`
+
+**Changed**
+- `src/pages/index.astro`: Experience, 75 Hard and the player replace the `experience` stub; `initExperience()`, `initReels()`
+- `content/discipline.json`, `src/lib/content.ts`: reel paths are `media/75hard/…` (new `publicMedia` schema check)
+- `src/lib/audio.ts`: `AudioManager.attachElement()`; `tests/unit/lib/audio.test.ts`
+- `src/components/Icon.astro`: chevron-left/right, play, pause, volume-2, volume-x
+- `tests/unit/lib/content.test.ts`: reel files ship from `public/`, under 25 MiB, exactly one featured
+- `docs/plan.md` (1.5b ticked), `docs/mistakes.md`, `docs/logs.md`
+
 ## 2026-10-18 · 1.5a Work
 
 **Added**

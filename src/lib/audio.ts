@@ -65,6 +65,25 @@ export class AudioManager {
     node.start();
   }
 
+  /**
+   * Routes a media element through a channel with its own level (0 to 1), so the Settings toggle and the
+   * tab-hidden suspend silence it like any other sound. Returns undefined, and routes nothing, until sound
+   * is on and the visitor has interacted; the caller tries again later. An element can be attached once.
+   */
+  attachElement(
+    el: HTMLMediaElement,
+    channel: Channel = 'music',
+  ): { setLevel: (level: number) => void } | undefined {
+    if (!this.enabled || !this.gestured) return undefined;
+    const { ctx, gains } = this.graph();
+    const level = ctx.createGain();
+    level.gain.value = 0;
+    ctx.createMediaElementSource(el).connect(level);
+    level.connect(gains[channel]);
+    void this.syncState();
+    return { setLevel: (value) => void (level.gain.value = Math.min(1, Math.max(0, value))) };
+  }
+
   private setEnabled(on: boolean): void {
     this.enabled = on;
     void this.syncState();
