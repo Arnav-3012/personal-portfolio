@@ -1,0 +1,78 @@
+[
+  {
+    "id": "credit-intelligence",
+    "company": "Credit Intelligence",
+    "companyNote": "UAE fintech startup",
+    "title": "AI Developer",
+    "location": "Remote",
+    "start": "2026-10",
+    "end": null,
+    "dates": "Oct 2026 – Present",
+    "impact": [
+      "Improve retrieval on a production RAG assistant for credit card comparison (FastAPI, pgvector, LangChain).",
+      "Harden LLM data extraction with Pydantic validation and self-correcting retries, shipped via CI/CD with 300+ tests."
+    ],
+    "stack": ["FastAPI", "pgvector", "LangChain", "Pydantic", "CI/CD"]
+  },
+  {
+    "id": "ticker",
+    "company": "Ticker Ltd",
+    "companyNote": null,
+    "title": "AI / Data Engineering Intern",
+    "location": "Mumbai, India",
+    "start": "2026-06",
+    "end": "2026-07",
+    "dates": "Jun 2026 – Jul 2026",
+    "impact": [
+      "Automated Grafana reporting for 3 teams (Python, Streamlit, Playwright, SMTP), saving ~6 hours of manual work a week.",
+      "Built a KOL mapping tool (Streamlit, MySQL procedures, audit logs) giving 10+ business users safe write access.",
+      "Migrated 40+ tables from MySQL to PostgreSQL with integrity checks; wrote the team's migration onboarding guide."
+    ],
+    "stack": ["Python", "Streamlit", "Playwright", "Grafana", "MySQL", "PostgreSQL"]
+  },
+  {
+    "id": "wingreens-world",
+    "company": "Wingreens World",
+    "companyNote": "FMCG",
+    "title": "AI Solutions Intern",
+    "location": "Mumbai, India",
+    "start": "2025-07",
+    "end": "2025-10",
+    "dates": "Jul 2025 – Oct 2025",
+    "impact": [
+      "Built AI sales enablement tools and data pipelines across 4 FMCG brands; prototypes joined the AI roadmap.",
+      "Shipped an LLM chatbot and dashboards with stakeholders, cutting repeat data requests to the ops team by ~30%."
+    ],
+    "stack": ["LLMs", "Data pipelines", "Dashboards"]
+  },
+  {
+    "id": "datamatics",
+    "company": "Datamatics Global Services Ltd.",
+    "companyNote": null,
+    "title": "Project Trainee, AI / Data Science",
+    "location": "Mumbai, India",
+    "start": "2025-05",
+    "end": "2025-06",
+    "dates": "May 2025 – Jun 2025",
+    "impact": [
+      "Auto-assigned GL codes for 500+ vendors via top-N embedding retrieval (~86% accuracy), deployed to production.",
+      "Extracted and matched company names and IDs from raw bank statements with NLP, cutting reconciliation work by ~40%.",
+      "Rewrote a recurring Excel workflow in Python (pandas), cutting runtime from 15+ minutes to under 30 seconds."
+    ],
+    "stack": ["Python", "pandas", "Embeddings", "NLP"]
+  },
+  {
+    "id": "absolute-wear",
+    "company": "Absolute Wear",
+    "companyNote": "D2C clothing startup",
+    "title": "Co-Founder & CEO",
+    "location": "Mumbai, India",
+    "start": "2024-02",
+    "end": "2025-02",
+    "dates": "Feb 2024 – Feb 2025",
+    "impact": [
+      "Built a D2C clothing brand from scratch to 100+ customers in 45 days, owning design, production and marketing."
+    ],
+    "stack": []
+  }
+]

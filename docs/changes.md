@@ -24,3 +24,16 @@ Newest first. Files changed per task.
 **Changed**
 - `CLAUDE.md`: test stack now names `@cloudflare/vitest-plugin` (vitest-pool-workers is deprecated).
 - `docs/plan.md`: 1.1 ticked after Arnav confirmed "done".
+
+## 2026-10-18 · Assets and content intake
+**Added**
+- `content/experience.json`
+- `assets/incoming/**` (gitignored, not committed)
+
+**Changed**
+- `.gitignore`: `assets/incoming/`
+- `CLAUDE.md`, `docs/plan.md`: portrait path is now `assets/incoming/portrait/portrait-original.png`
+- `docs/SPEC.md`: 5 reels instead of 8–12; asset checklist ticked; two project one-liners
+- `content/timeline.json` (added); `docs/SPEC.md`: timeline.json ticked
+- `content/profile.md` (added); `docs/SPEC.md`: profile.md ticked
+- `CLAUDE.md`, `docs/SPEC.md`: Marvel rule narrowed to visuals, scenes and UI copy

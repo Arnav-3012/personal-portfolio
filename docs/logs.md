@@ -45,3 +45,13 @@ Newest first. Each entry: what was done, how it was verified, open items.
 **Open items**
 - 1.8: create the Vectorize index (`edith-kb`, 768 dims, cosine) and set `"remote": true`.
 - 1.10: verify `arnavworkmail3012@gmail.com` (or another inbox) as an Email Routing destination.
+
+## 2026-10-18 · Assets and content intake (outside plan.md)
+- Sorted media into `assets/incoming/` (gitignored): 2 portraits, 4 avatars, 7 timeline photos, 5 reels, 2 cricket photos + 3 clips, 7 posters, resume.
+- Reels and clip-01 re-encoded to H.264 720p CRF 26 with faststart (5–8 MB each, all under 25 MiB). 75 Hard day numbers are placeholders 01–05.
+- `content/experience.json` written from the Oct 2026 resume. Verified: parses as JSON.
+- SPEC: 75 Hard reels cut from 8–12 to 5 (Arnav's call); RBAC RAG and women-safety one-liners recorded; supplied assets ticked.
+- `content/timeline.json` written: 7 eras from Arnav's notes + resume, photos from `assets/incoming/timeline/`. Verified: parses as JSON.
+- `content/profile.md` written from Arnav's answers (bio, philosophy, origin, proudest work, looking for, outside work, EDITH scope and tone).
+- Avatar set completed: `avatar-05-face-closeup.png`, `avatar-06-a-pose.png` added; the earlier full-body "05" and the 3 selfies left out.
+- Marvel rule narrowed (Arnav's call): visuals/scenes/UI copy stay Marvel-free; factual bio mentions in `profile.md` and EDITH answers allowed. CLAUDE.md + SPEC updated.

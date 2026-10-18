@@ -8,7 +8,7 @@ The site has two layers: a fast 2D website that answers a recruiter in 30 second
 
 - **Who it's for:** AI/ML hiring managers in Singapore and Australia, freelance clients wanting AI automation or data science, and peers who want to play.
 - **The one feeling:** walking into an engineer's workshop at night in Mumbai, where every object is something he built or loves.
-- **Inspiration, never imitation:** Iron Man's workshop, TVA retro-tech and the Miss Minutes guide are moods only. No Marvel names, logos, suits or characters; no photos or likeness of Virat Kohli.
+- **Inspiration, never imitation:** Iron Man's workshop, TVA retro-tech and the Miss Minutes guide are moods only. No Marvel names, logos, suits or characters in visuals, scenes or UI copy; no photos or likeness of Virat Kohli. Factual mentions in Arnav's bio and EDITH's answers about him are fine.
 
 **Design principles**
 
@@ -320,7 +320,7 @@ Arnav completed 75 Hard; the site shows it through his own selected reels, in a 
 **2D section (landing, after Experience)**
 
 - Pinned headline in Unbounded 700, centred: **75 DAYS. ZERO DAYS OFF.** Sub-line in Arnav's words.
-- 8–12 vertical reel cards (9:16 posters) float around the headline in 3D perspective, each tilted differently, at different depths. Caption on each card in mono: "Day 23 · 5:00 am".
+- 5 vertical reel cards (9:16 posters) float around the headline in 3D perspective, each tilted differently, at different depths. Caption on each card in mono: "Day 23 · 5:00 am".
 - Background: a faint grid of 75 squares (Arnav's motif, instead of Gallery Play's map), all crossed out.
 - A soft tungsten-to-red heat glow follows the cursor behind the cards.
 - Scroll: the headline stays pinned while cards drift past at different speeds (parallax by depth).
@@ -597,21 +597,23 @@ Everything below is supplied at build time; the build starts with placeholders s
 **Photos and video**
 
 - [ ] Landing portrait: done: side profile facing right, grey background, black tee. Still needed: upscale to at least 2400 × 3000 px; try a remove.bg cutout, and if the flyaway hair looks jagged, keep the grey background and fade it into the page colour
-- [ ] 4–5 avatar photos: front, 45°, side, full body in A-pose, even light, plain background
-- [ ] 3–5 cricket photos or clips of you playing or watching (each clip under 25 MiB)
-- [ ] One photo per timeline era
+- [x] 4–5 avatar photos: front, 45°, side, full body in A-pose, even light, plain background: 6 in `assets/incoming/avatar/` (01–04 views, 05 face close-up, 06 A-pose)
+- [x] 3–5 cricket photos or clips of you playing or watching (each clip under 25 MiB): 2 photos + 3 clips in `assets/incoming/cricket/`
+- [x] One photo per timeline era: `assets/incoming/timeline/01`–`07`
 
-* [ ] 8–12 selected 75 Hard reels (MP4, under 25 MiB each) with the day number and a one-line caption for each
+* [x] 5 selected 75 Hard reels (MP4, under 25 MiB each) with a one-line caption for each: `assets/incoming/75hard/` (day numbers 01–05 are placeholders, not real days)
 * [ ] Rules you followed and a "what it taught me" note for the calendar
 
 **Text and data**
 
-- [ ] `experience.json`: dates and 2–3 impact lines per role (Credit Intelligence, Ticker, Datamatics, Wingreens World)
-- [ ] `timeline.json`: the eras of your life for the Retro TV
-- [ ] `profile.md`: a long bio in your words for EDITH
-- [ ] One line each for the RBAC-based RAG automation (generic description if it's company work) and the women-safety AI app
+- [x] `experience.json`: dates and 2–3 impact lines per role (Credit Intelligence, Ticker, Datamatics, Wingreens World, plus Absolute Wear), taken from the Oct 2026 resume
+- [x] `timeline.json`: the eras of your life for the Retro TV
+- [x] `profile.md`: a long bio in your words for EDITH
+- [x] One line each for the RBAC-based RAG automation (generic description if it's company work) and the women-safety AI app
+  - RBAC-based RAG automation: "RAG with role-based access control, so every answer only draws on documents the asker's role is allowed to see"
+  - Women-safety AI app: "Smart, AI-powered women's safety app, built end to end"
 - [ ] "Why cricket" paragraph
-- [ ] Resume PDF
+- [x] Resume PDF: `assets/incoming/resume/arnav-resume-2026-10.pdf`
 
 **Accounts and keys**
 

@@ -1,0 +1,88 @@
+[
+  {
+    "id": "childhood",
+    "channel": 1,
+    "title": "Superheroes and Cricket",
+    "years": "2006 – 2009",
+    "lines": [
+      "Born in December 2006.",
+      "Hooked on superheroes and cricket from the very start."
+    ],
+    "photo": "assets/incoming/timeline/01-childhood.jpg",
+    "photoAlt": "Arnav as a toddler in a black suit, standing on stage between two girls in white party dresses"
+  },
+  {
+    "id": "school-days",
+    "channel": 2,
+    "title": "Yellow House Captain",
+    "years": "2009 – 2022",
+    "lines": [
+      "Bhaktivedanta Swami Mission School, from nursery to 10th.",
+      "Yellow House captain in 10th, and into every sport going.",
+      "Played club cricket until 2022."
+    ],
+    "photo": "assets/incoming/timeline/02-school-days.jpg",
+    "photoAlt": "Young Arnav in a checked school shirt and camouflage cap, saluting with his school bag on"
+  },
+  {
+    "id": "first-code",
+    "channel": 3,
+    "title": "Hello, Python",
+    "years": "2022",
+    "lines": [
+      "Started learning Python when I entered college.",
+      "The AI boom is what pulled me into code."
+    ],
+    "photo": "assets/incoming/timeline/03-first-code.jpg",
+    "photoAlt": "Laptop screen showing early queue code: enqueue and dequeue functions for customers and bills"
+  },
+  {
+    "id": "nmims",
+    "channel": 4,
+    "title": "Campus Years",
+    "years": "2022 – present",
+    "lines": [
+      "BTech in Data Science at NMIMS MPSTME, since July 2022.",
+      "Editorial Board: Joint Secretary (2024–25), then Vice Chairperson (2025–26).",
+      "Now President of Data Mavericks."
+    ],
+    "photo": "assets/incoming/timeline/04-2024-nmims.jpeg",
+    "photoAlt": "Group selfie of Arnav with about ten college friends outside a café"
+  },
+  {
+    "id": "first-internships",
+    "channel": 5,
+    "title": "First Real Work",
+    "years": "2025",
+    "lines": [
+      "First internship: AI / Data Science trainee at Datamatics, with a GL-coding model shipped to production.",
+      "Then AI Solutions Intern at Wingreens World, building AI tools across 4 FMCG brands."
+    ],
+    "photo": "assets/incoming/timeline/05-2025-first-internships.jpeg",
+    "photoAlt": "Low-angle shot of Arnav in headphones and a striped shirt under a flowering gulmohar tree"
+  },
+  {
+    "id": "hackathons",
+    "channel": 6,
+    "title": "Hackathon Season",
+    "years": "2026",
+    "lines": [
+      "Smart India Hackathon, Amazon ML Challenge, Paytm and more.",
+      "Learned a lot from every one: building fast, under pressure, as a team."
+    ],
+    "photo": "assets/incoming/timeline/06-2026-hackathons.jpg",
+    "photoAlt": "Laptop screen showing an entity-resolution pipeline run with a table of results"
+  },
+  {
+    "id": "now",
+    "channel": 7,
+    "title": "The Road Ahead",
+    "years": "2026 –",
+    "lines": [
+      "AI Developer at Credit Intelligence, after a summer at Ticker.",
+      "On the road to becoming an AI engineer, and one day making a real impact on the world."
+    ],
+    "photo": "assets/incoming/timeline/07-2026-now.jpg",
+    "photoAlt": "Arnav in a white zip polo, smiling and pointing at the camera"
+  }
+]
