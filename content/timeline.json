@@ -4,10 +4,7 @@
     "channel": 1,
     "title": "Superheroes and Cricket",
     "years": "2006 – 2009",
-    "lines": [
-      "Born in December 2006.",
-      "Hooked on superheroes and cricket from the very start."
-    ],
+    "lines": ["Born in December 2006.", "Hooked on superheroes and cricket from the very start."],
     "photo": "assets/incoming/timeline/01-childhood.jpg",
     "photoAlt": "Arnav as a toddler in a black suit, standing on stage between two girls in white party dresses"
   },

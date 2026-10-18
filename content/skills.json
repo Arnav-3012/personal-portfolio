@@ -1,0 +1,95 @@
+[
+  {
+    "id": "llm-rag-agents",
+    "layer": "LLM / RAG / agents",
+    "skills": [
+      { "name": "RAG", "level": "core", "evidence": ["credit-intelligence", "agentgate"] },
+      { "name": "AI agents", "level": "core", "evidence": ["firewatch", "agentgate"] },
+      { "name": "LangGraph", "level": "core", "evidence": ["firewatch", "agentgate"] },
+      { "name": "LangChain", "level": "working", "evidence": ["credit-intelligence"] },
+      {
+        "name": "Vector databases (pgvector, Qdrant)",
+        "level": "working",
+        "evidence": ["credit-intelligence", "agentgate"]
+      },
+      {
+        "name": "LLM structured extraction (Pydantic)",
+        "level": "working",
+        "evidence": ["credit-intelligence"]
+      },
+      { "name": "NL-to-SQL", "level": "working", "evidence": ["hospital-ops"] },
+      {
+        "name": "Embedding retrieval",
+        "level": "working",
+        "evidence": ["datamatics", "amazon-ml-challenge"]
+      },
+      { "name": "MCP", "level": "learning", "evidence": ["edith"] }
+    ]
+  },
+  {
+    "id": "ml-dl",
+    "layer": "ML and DL",
+    "skills": [
+      {
+        "name": "PyTorch",
+        "level": "core",
+        "evidence": ["firewatch", "sih-speech-enhancement", "statcalib"]
+      },
+      { "name": "Computer vision", "level": "working", "evidence": ["firewatch", "statcalib"] },
+      { "name": "Speech enhancement", "level": "working", "evidence": ["sih-speech-enhancement"] },
+      {
+        "name": "Gradient boosting (LightGBM)",
+        "level": "working",
+        "evidence": ["amazon-ml-challenge"]
+      },
+      { "name": "scikit-learn", "level": "core", "evidence": ["amazon-ml-challenge"] },
+      { "name": "Model calibration", "level": "working", "evidence": ["statcalib"] },
+      { "name": "Reinforcement learning", "level": "learning", "evidence": ["marl-llm-router"] },
+      {
+        "name": "Statistics and time series",
+        "level": "working",
+        "evidence": ["fx-vol-garch", "kohli-100", "options-engine"]
+      }
+    ]
+  },
+  {
+    "id": "data-engineering",
+    "layer": "Data engineering",
+    "skills": [
+      { "name": "Python and pandas", "level": "core", "evidence": ["datamatics", "ticker"] },
+      {
+        "name": "SQL (PostgreSQL, MySQL)",
+        "level": "core",
+        "evidence": ["ticker", "hospital-ops"]
+      },
+      { "name": "Database migration", "level": "working", "evidence": ["ticker"] },
+      {
+        "name": "Entity resolution at scale (Polars)",
+        "level": "working",
+        "evidence": ["amazon-ml-challenge"]
+      },
+      {
+        "name": "Data pipelines and dashboards",
+        "level": "working",
+        "evidence": ["wingreens-world", "grafana-reporter"]
+      }
+    ]
+  },
+  {
+    "id": "infra-deploy",
+    "layer": "Infra and deploy",
+    "skills": [
+      { "name": "FastAPI", "level": "core", "evidence": ["credit-intelligence", "hospital-ops"] },
+      {
+        "name": "On-device inference (ONNX, Core ML)",
+        "level": "working",
+        "evidence": ["firewatch", "sih-speech-enhancement"]
+      },
+      { "name": "AWS (Lambda)", "level": "working", "evidence": ["firewatch", "agentgate"] },
+      { "name": "Docker", "level": "working", "evidence": ["taskflow", "marl-llm-router"] },
+      { "name": "CI/CD and testing", "level": "working", "evidence": ["credit-intelligence"] },
+      { "name": "Edge hardware (ESP32)", "level": "working", "evidence": ["firewatch"] },
+      { "name": "Cloudflare Workers", "level": "learning", "evidence": [] }
+    ]
+  }
+]

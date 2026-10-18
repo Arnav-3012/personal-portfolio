@@ -1,0 +1,31 @@
+{
+  "open": true,
+  "note": null,
+  "headline": "Open to freelance",
+  "bookedLabel": "Currently booked",
+  "services": [
+    {
+      "id": "ai-automation",
+      "title": "AI automation",
+      "description": "Agents and workflow automation for repetitive business tasks."
+    },
+    {
+      "id": "rag-assistants",
+      "title": "RAG assistants",
+      "description": "Chatbots over a company's own documents, with access control."
+    },
+    {
+      "id": "data-science",
+      "title": "Data science",
+      "description": "Analysis, forecasting, dashboards."
+    },
+    {
+      "id": "ml-models",
+      "title": "ML models",
+      "description": "Training, evaluation and deployment of custom models."
+    }
+  ],
+  "timelines": ["ASAP", "1–3 months", "Later"],
+  "confirmation": "Sent. Arnav replies within a few days.",
+  "emailLine": "Prefer email? Write to me directly."
+}

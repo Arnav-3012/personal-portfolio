@@ -4,6 +4,39 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.3 Content
+
+**Done**
+- New: `content/site.json` (name, role line, location, socials, public email `arnavc.work@gmail.com`, resume, `currentlyBuilding: "edith"`, education, proof strip, honors, dock), `projects.json` (21 projects: 5 hero worlds + EDITH, 9 shipped wall/tools incl. Kohli-100 in the Cricket World, 2 building, 6 coming soon), `skills.json` (4 layers, `core`/`working`/`learning`, evidence ids), `freelance.json` (open, 4 services, timelines, confirmation, email line; no budget field).
+- `src/lib/content.ts`: zod schemas (`astro/zod`, no new dependency) for all 8 JSON files, length caps from the awesome-design-md cross-check (one-liner ≤ 90, stat ≤ 28), typed exports. `Base.astro` imports `site`, so every page build parses all content.
+- Arnav's answers: hackathons "Participated"; 75 Hard sub-line and lesson "Anything you put your mind to is already yours, if you stay consistent."; MARL without results or progress until they exist; coming-soon one-liners from his notes; budget field removed.
+- SPEC: content model (new `site.json` keys, optional project fields, validation) and freelance form fields.
+
+**Sources for project stats:** SPEC first, then the Oct 2026 resume, then each repo README (`gh`, read-only). StatCalib uses the README (isotonic: ECE 0.169 → 0.011, −93.5%); the resume credits Platt scaling (README: 90.2%), so the resume needs a fix. Nothing invented: anything not in a source was a TODO until Arnav answered.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| `pnpm typecheck`, `lint`, `format:check` | pass | 0 errors; check-no-hex 16 files clean; Prettier clean |
+| `pnpm build` | pass | 3 pages; description now from `site.json` |
+| `pnpm test` | 55/55 | 19 new content tests: files present, no phone number, unique ids, 5 heroes + EDITH, proof values in project stats, honors/skills ids resolve, newest-first experience, timeline channels, reel days, media files exist (local only), schema guards |
+| Mutation | pass | `projects[0].status = "done"` → build fails `content/projects.json is invalid … at [0].status`; tests fail; restored |
+| `pnpm e2e` | 29/29 | no regressions |
+| `pnpm links` | pass | 7 links, 0 broken |
+| Screenshots, Lighthouse | N/A | no page renders content yet (1.4) |
+| TODOs in `content/` | 0 | `grep -rn TODO content` |
+| Arnav's own run | pass | typecheck, lint, build, test, e2e green; confirmed "done" 2026-10-18 |
+
+**Deviations from the approved plan**
+- `Base.astro` changed (not in the plan) so the build actually runs the parser; see mistakes.md.
+- EDITH is `tier: "hero"`, order 6 (plan said exactly 5 heroes).
+- Grafana Reporter and KOL mapper link to their public repos (plan said company work gets no link).
+- `tsconfig.json` Prettier-formatted (pre-existing `format:check` failure).
+
+**Open items**
+- 1.4: media in `assets/incoming/` is gitignored; decide how optimised copies reach `dist/` before Workers Builds (1.10).
+- Resume: StatCalib method (isotonic, not Platt).
+
 ## 2026-10-18 · 1.2 follow-up · Skeleton, progress and toast polish
 
 **Done** (Arnav's feedback: skeleton sweep invisible, toasts and progress too plain)

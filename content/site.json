@@ -1,0 +1,83 @@
+{
+  "name": "Arnav Chaturvedi",
+  "shortName": "ARNAV",
+  "monogram": "AR",
+  "roleLine": "AI engineer · RAG and agents · Mumbai",
+  "location": {
+    "city": "Mumbai",
+    "country": "India",
+    "lat": 19.07,
+    "lon": 72.87,
+    "timezone": "Asia/Kolkata"
+  },
+  "email": "arnavc.work@gmail.com",
+  "socials": {
+    "linkedin": "https://www.linkedin.com/in/arnavchat",
+    "github": "https://github.com/Arnav-3012",
+    "instagram": "https://www.instagram.com/life.with.arnav"
+  },
+  "resume": {
+    "source": "assets/incoming/resume/arnav-resume-2026-10.pdf",
+    "file": "arnav-chaturvedi-resume-2026-10.pdf"
+  },
+  "currentlyBuilding": "edith",
+  "education": {
+    "school": "NMIMS University (MPSTME)",
+    "degree": "BTech in Data Science",
+    "dates": "Jul 2022 – May 2028 (expected)"
+  },
+  "proof": [
+    {
+      "value": "0.971",
+      "label": "macro F0.5",
+      "projectId": "amazon-ml-challenge"
+    },
+    {
+      "value": "95.75%",
+      "label": "fire recall",
+      "projectId": "firewatch"
+    },
+    {
+      "value": "−93.5%",
+      "label": "ECE",
+      "projectId": "statcalib"
+    },
+    {
+      "value": "+8.28 dB",
+      "label": "SNR",
+      "projectId": "sih-speech-enhancement"
+    },
+    {
+      "value": "2.2M",
+      "label": "entities",
+      "projectId": "amazon-ml-challenge"
+    }
+  ],
+  "honors": [
+    {
+      "event": "Smart India Hackathon",
+      "year": 2026,
+      "result": "Participated",
+      "projectId": "sih-speech-enhancement"
+    },
+    {
+      "event": "Amazon ML Challenge",
+      "year": 2026,
+      "result": "0.971 macro F0.5 on the public leaderboard",
+      "projectId": "amazon-ml-challenge"
+    },
+    {
+      "event": "Paytm Build for India",
+      "year": 2026,
+      "result": "Participated",
+      "projectId": null
+    },
+    {
+      "event": "Smart India Hackathon",
+      "year": 2025,
+      "result": "Participated",
+      "projectId": null
+    }
+  ],
+  "dock": ["PyTorch", "MLX", "scikit-learn", "FastAPI", "PostgreSQL", "Cloudflare", "AWS", "Docker"]
+}

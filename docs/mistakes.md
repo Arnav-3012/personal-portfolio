@@ -4,6 +4,20 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.3 · Mutation check "passed" because the mutation never applied
+- **What happened:** after breaking `projects.json` for the mutation check, build and tests both passed.
+- **Root cause:** I used `sed -i '' '0,/re/s//…/'`. `0,/re/` is GNU sed syntax; macOS BSD sed silently matched nothing, so the file was never changed. The green result looked like a real finding.
+- **Fix:** mutated with a `node -e` JSON edit, checked the bad value was actually in the file (`grep -c` = 1), then saw the build fail with `content/projects.json is invalid … at [0].status`; restored from a backup and confirmed the value was gone.
+- **Prevention rule:** In a mutation check, first prove the mutation landed (grep for it) before trusting a pass; on macOS make structured edits with `node -e`, not GNU-only sed syntax.
+- **Files:** none (temporary edit to `content/projects.json`, restored)
+
+## 2026-10-18 · 1.3 · Plan claimed build-time validation nothing triggered
+- **What happened:** the approved plan said "parsing at import means `astro build` fails on invalid content", but no page imported `src/lib/content.ts`, so the build would never have run the parser.
+- **Root cause:** I reasoned about the module in isolation and didn't trace which entry point would import it.
+- **Fix:** `Base.astro` now builds its default description from `site.json` (also removing the last hardcoded bio string in a component), so every page build parses all content.
+- **Prevention rule:** When a check is meant to run at build, name the entry point that imports it and prove it with a failing build.
+- **Files:** `src/layouts/Base.astro`
+
 ## 2026-10-18 · 1.2 follow-up · Skeleton sweep invisible, shell UI too plain
 - **What happened:** after closing 1.2, Arnav couldn't see the skeleton loading sweep and found toasts and the progress bar bland.
 - **Root cause:** the sweep was a 10% tint over 40% of the block, so it was barely visible. I signed it off from full-page static screenshots, which can't show whether an animation reads, and I never captured the progress bar mid-run.

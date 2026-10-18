@@ -420,7 +420,7 @@ When `open` is false, every instance turns grey and reads "Currently booked" (pl
 - Data science: analysis, forecasting, dashboards.
 - ML models: training, evaluation and deployment of custom models.
 
-**Form fields:** name, email, company (optional), service (dropdown of the four), timeline (ASAP / 1–3 months / later), budget range (optional), project description. Turnstile protected. Submissions are emailed to Arnav and stored in D1 so nothing is lost.
+**Form fields:** name, email, company (optional), service (dropdown of the four), timeline (ASAP / 1–3 months / later), project description. No budget field (Arnav quotes per project). Beside the form, a "Prefer email?" line with Arnav's address from `site.json`. Turnstile protected. Submissions are emailed to Arnav and stored in D1 so nothing is lost.
 
 No rates are shown on the site; Arnav quotes per project.
 
@@ -556,14 +556,14 @@ All content lives in a `content/` folder of plain files; the 2D site, the 3D wor
 
 | File | Holds |
 | --- | --- |
-| `site.json` | Name, role line, location, socials (LinkedIn, GitHub, Instagram, email), resume filename |
+| `site.json` | Name, role line, location, socials (LinkedIn, GitHub, Instagram, email), resume filename, default "currently building" project id, `proof` strip (`value`, `label`, `projectId`), `honors` (hackathons: `event`, `year`, `result`, `projectId`), `dock` stack |
 | `profile.md` | Long bio in Arnav's words (EDITH's main source) |
 | `experience.json` | Roles: company, title, dates, impact lines, stack |
 | `projects.json` | Every project (schema below) |
-| `skills.json` | Skills by layer, level, evidence project |
+| `skills.json` | Skills by layer, level (`core` / `working` / `learning`), evidence (project or role ids) |
 | `timeline.json` | Retro TV eras: title, years, lines, photo |
 | `cricket.json` | Cricket story text, clips, poster list |
-| `freelance.json` | `open`, note, services |
+| `freelance.json` | `open`, note, services, form timelines, confirmation text, email line (address from `site.json`) |
 
 **One project entry**
 
@@ -586,6 +586,8 @@ All content lives in a `content/` folder of plain files; the 2D site, the 3D wor
 - `tier`: `hero` (custom 3D world), `diorama` (shared template), `wall` (monitor wall only).
 - `status`: `shipped`, `building`, `coming-soon`. `progress` (e.g. "phase 1 of 4") drives EDITH's under-construction gauge.
 - Swapping a hero: change `tier`. A project with no custom scene automatically falls back to the diorama template.
+- Also: `year` (null until shipped), optional `world: "cricket"` (lives in the Cricket World, not the monitor wall, e.g. Kohli-100), optional `sound` (Phase 5). EDITH is `tier: "hero"` with `order` 6 and `heroScene: "edith-construction"`; orders 1–5 are the hero worlds and the top 5 of Selected work.
+- Validation: `src/lib/content.ts` parses every file with zod at build (length caps: one-liner ≤ 90, stat ≤ 28 characters); cross-file ids are checked in `tests/unit/lib/content.test.ts`. A string starting with `TODO:` marks a placeholder.
 
 **Live values without a deploy:** "Currently building" and the freelance switch are also editable on the private `/admin` page (written to KV), alongside note moderation and the message inbox.
 

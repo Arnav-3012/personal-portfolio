@@ -5,17 +5,14 @@ import SettingsPanel from '../components/SettingsPanel.astro';
 import Toaster from '../components/Toaster.astro';
 import ProgressBar from '../components/ProgressBar.astro';
 import { SETTINGS_KEY } from '../lib/settings';
+import { site } from '../lib/content';
 
 interface Props {
   title: string;
   description?: string;
   noindex?: boolean;
 }
-const {
-  title,
-  description = 'Arnav: AI engineer, RAG and agents, Mumbai.',
-  noindex = false,
-} = Astro.props;
+const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false } = Astro.props;
 ---
 
 <!doctype html>

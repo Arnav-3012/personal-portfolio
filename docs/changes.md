@@ -4,6 +4,19 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.3 Content
+
+**Added**
+- `content/site.json`, `content/projects.json`, `content/skills.json`, `content/freelance.json`
+- `src/lib/content.ts`
+- `tests/unit/lib/content.test.ts`
+
+**Changed**
+- `src/layouts/Base.astro`: default description from `site.json`
+- `content/timeline.json`, `tsconfig.json`: Prettier format only
+- `docs/SPEC.md`: content model table and notes, freelance form fields (no budget, email line)
+- `docs/mistakes.md`: 2 entries; `docs/plan.md`: 1.3 ticked; `docs/logs.md`
+
 ## 2026-10-18 · 1.2 follow-up · Shell UI polish
 
 **Changed**

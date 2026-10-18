@@ -1,0 +1,360 @@
+[
+  {
+    "id": "firewatch",
+    "name": "FireWatch",
+    "oneLiner": "IoT fire and gas detection with edge inference and agentic alerts",
+    "status": "shipped",
+    "tier": "hero",
+    "heroScene": "firewatch",
+    "order": 1,
+    "year": 2026,
+    "stats": ["95.75% fire recall", "~23 ms local inference", "11/12 live trials"],
+    "stack": ["PyTorch", "MobileNetV3", "ONNX", "ESP32-CAM", "LangGraph", "AWS Lambda"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/fire-detection-model-dl",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "sih-speech-enhancement",
+    "name": "SIH26052 speech enhancement",
+    "oneLiner": "Strips gunfire and engine noise from defence radio speech, live on an iPhone",
+    "status": "shipped",
+    "tier": "hero",
+    "heroScene": "sih-battlefield",
+    "order": 2,
+    "year": 2026,
+    "stats": ["+8.28 dB SNR", "~54 ms on device", "18.9M params"],
+    "stack": ["PyTorch", "Core ML", "Swift", "Streamlit"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/ai-ml-based-active-noise-cancellation",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "amazon-ml-challenge",
+    "name": "Amazon ML Challenge",
+    "oneLiner": "Matches millions of business records across 3 vendors that share no common ID",
+    "status": "shipped",
+    "tier": "hero",
+    "heroScene": "data-foundry",
+    "order": 3,
+    "year": 2026,
+    "stats": ["0.971 macro F0.5", "2.2M S1 entities", "≤45 candidates"],
+    "stack": ["Python", "LightGBM", "Polars", "scikit-learn", "sentence-transformers"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/amazon-ml-challenge",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "marl-llm-router",
+    "name": "MARL LLM Router",
+    "oneLiner": "Double-DQN agents learn to accept, forward or defer LLM requests across servers",
+    "status": "building",
+    "tier": "hero",
+    "heroScene": "server-farm",
+    "order": 4,
+    "year": 2026,
+    "stats": [],
+    "stack": ["Python", "Double DQN", "llama.cpp", "FastAPI", "Docker", "Gradio"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/marl-llm-router",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "statcalib",
+    "name": "StatCalib",
+    "oneLiner": "Proves a chest X-ray model's confidence is miscalibrated, then fixes it",
+    "status": "shipped",
+    "tier": "hero",
+    "heroScene": "radiology-lightbox",
+    "order": 5,
+    "year": 2026,
+    "stats": ["ECE 0.169 → 0.011", "−93.5% ECE", "AUC unchanged 0.784"],
+    "stack": ["PyTorch", "DenseNet-121", "SciPy", "Streamlit"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/statcalib",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "edith",
+    "name": "EDITH",
+    "oneLiner": "A personal AI agent: wake word, MCP tool dispatch, sub-agents, undo",
+    "status": "building",
+    "tier": "hero",
+    "heroScene": "edith-construction",
+    "order": 6,
+    "year": 2026,
+    "stats": [],
+    "stack": ["MCP", "Agents"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": "phase 1 of 4"
+  },
+  {
+    "id": "hospital-ops",
+    "name": "Hospital Ops",
+    "oneLiner": "Hospital back office with a FastAPI service and plain English → SQL",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 7,
+    "year": 2026,
+    "stats": ["63 FastAPI endpoints", "~85% NL-to-SQL correct"],
+    "stack": ["PostgreSQL", "FastAPI", "Streamlit", "LLM", "JWT"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/hospital-ops",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "agentgate",
+    "name": "AgentGate",
+    "oneLiner": "Cost-aware router that picks single-pass RAG or a capped agent loop per query",
+    "status": "building",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 8,
+    "year": 2026,
+    "stats": ["~40% cost cut", "500-query benchmark"],
+    "stack": ["Python", "LangGraph", "Qdrant", "AWS"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "options-engine",
+    "name": "Options Engine",
+    "oneLiner": "Monte Carlo options pricing on NSE data, benchmarked against Black-Scholes",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 9,
+    "year": 2026,
+    "stats": ["~2.19× variance reduction"],
+    "stack": ["Python", "Monte Carlo", "Black-Scholes"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/options-engine",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "fx-vol-garch",
+    "name": "FX-vol GARCH",
+    "oneLiner": "ACF/PACF rules pick GARCH orders for daily FX volatility at a fraction of the cost",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 10,
+    "year": 2026,
+    "stats": ["42 vs 1,260 models fitted"],
+    "stack": ["Python", "ARCH/GARCH", "Streamlit"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/fx-vol-acf-pacf",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "grafana-reporter",
+    "name": "Grafana Reporter",
+    "oneLiner": "Scheduled PDF reports from Grafana panels, emailed automatically",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 11,
+    "year": 2026,
+    "stats": ["~6 h a week saved"],
+    "stack": ["Python", "Streamlit", "Playwright", "SMTP"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/Email-Automation",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "kol-mapper",
+    "name": "KOL mapper",
+    "oneLiner": "Safe, audited write access to a MySQL table for business users",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 12,
+    "year": 2026,
+    "stats": ["10+ business users"],
+    "stack": ["Streamlit", "MySQL"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/Sql-data-form-autofilling",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "csv-uploader",
+    "name": "CSV uploader",
+    "oneLiner": "CSV and Excel into MySQL with schema checks, audit log and one-click rollback",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 13,
+    "year": 2026,
+    "stats": [],
+    "stack": ["Streamlit", "MySQL"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/csv-sql-data",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "taskflow",
+    "name": "TaskFlow",
+    "oneLiner": "A task tracker built end to end: Django backend, Docker deployment",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 14,
+    "year": 2026,
+    "stats": [],
+    "stack": ["Django", "Docker"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/arnav-taskflow",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "kohli-100",
+    "name": "Kohli-100",
+    "oneLiner": "Binomial hypothesis test: will Kohli reach 100 international centuries?",
+    "status": "shipped",
+    "tier": "wall",
+    "heroScene": null,
+    "world": "cricket",
+    "order": 15,
+    "year": 2026,
+    "stats": ["85 → 100 centuries", "best case 2.94%"],
+    "stack": ["Python", "Binomial test", "Streamlit", "Cricsheet"],
+    "links": {
+      "github": "https://github.com/Arnav-3012/kohli-100-centuries",
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "rbac-rag",
+    "name": "RBAC-based RAG automation",
+    "oneLiner": "RAG where every answer only draws on documents the asker's role may see",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 16,
+    "year": null,
+    "stats": [],
+    "stack": [],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "women-safety-ai",
+    "name": "Women-safety AI app",
+    "oneLiner": "Smart, AI-powered women's safety app, built end to end",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 17,
+    "year": null,
+    "stats": [],
+    "stack": [],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "trustlens",
+    "name": "TrustLens",
+    "oneLiner": "Fintech-support RAG copilot with guardrails, a CI eval gate and live telemetry",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 18,
+    "year": null,
+    "stats": [],
+    "stack": ["RAG", "LLM", "Prometheus", "Grafana"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "mark-3000",
+    "name": "Mark-3000",
+    "oneLiner": "Self-improving coding agent: planner, coder, critic and librarian loop in a sandbox",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 19,
+    "year": null,
+    "stats": [],
+    "stack": ["Agents", "RAG"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "health-ai",
+    "name": "Health AI app",
+    "oneLiner": "Snap-and-track food logging with multi-agent nutrition coaching and a local LLM",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 20,
+    "year": null,
+    "stats": [],
+    "stack": ["Agents", "RAG", "Mistral-7B"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  },
+  {
+    "id": "historic-world-sim",
+    "name": "Historic world simulation",
+    "oneLiner": "Agents read historic texts and simulate what that era felt and looked like",
+    "status": "coming-soon",
+    "tier": "wall",
+    "heroScene": null,
+    "order": 21,
+    "year": null,
+    "stats": [],
+    "stack": ["RAG", "Agents"],
+    "links": {
+      "github": null,
+      "demo": null
+    },
+    "progress": null
+  }
+]
