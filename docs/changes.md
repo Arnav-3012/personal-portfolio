@@ -168,3 +168,4 @@ Newest first. Files changed per task.
 - `CLAUDE.md`, `docs/SPEC.md`: Marvel rule narrowed to visuals, scenes and UI copy
 - `content/cricket.json`, `content/discipline.json` (added); `content/experience.json`, `CLAUDE.md`, `docs/SPEC.md` (updated)
 - `CLAUDE.md`, `docs/SPEC.md`, `docs/plan.md`: domain `arnavc.in`
+- `README.md` (added): site overview, badges, feature status, coming-soon 3D phases, setup and scripts
