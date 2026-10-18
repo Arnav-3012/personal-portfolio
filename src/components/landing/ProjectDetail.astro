@@ -1,0 +1,138 @@
+---
+// One project's stats, stack and links, shared by the sticky pane (desktop) and the inline card (mobile)
+// of the selected-work split. Numbers lead: each stat is a big amber figure with a small mono label. Children
+// carry --k so the pane can build them in one after another when the project becomes active.
+import Icon from '../Icon.astro';
+import type { Project } from '../../lib/content';
+import { STATUS_LABEL, splitStat } from '../../lib/work';
+
+interface Props {
+  project: Project;
+}
+const { project: p } = Astro.props;
+---
+
+<div class="detail">
+  <p class="hud detail__status" data-status-dot={p.status} style="--k: 0">
+    {STATUS_LABEL[p.status]}
+    {p.year !== null ? ` · ${p.year}` : ''}
+  </p>
+  <p class="detail__line" style="--k: 1">
+    {p.oneLiner}
+  </p>
+  {p.progress && (
+    <p class="hud detail__progress" style="--k: 2">
+      {p.progress}
+    </p>
+  )}
+  {p.stats.length > 0 && (
+    <ul class="detail__stats">
+      {p.stats.map((s, i) => {
+        const { value, label } = splitStat(s);
+        return (
+          <li class="detail__stat" style={`--k: ${i + 2}`}>
+            <span class="detail__value">{value}</span>
+            <span class="hud detail__label">{label}</span>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+  <ul class="detail__stack" aria-label={`${p.name} stack`} style="--k: 5">
+    {p.stack.slice(0, 4).map((s) => (
+      <li class="hud">{s}</li>
+    ))}
+  </ul>
+  <p class="detail__links" style="--k: 6">
+    {p.links.github && (
+      <a class="button button--ghost" href={p.links.github} rel="noopener">
+        GitHub <Icon name="arrow-up-right" size={16} />
+        <span class="visually-hidden"> for {p.name}</span>
+      </a>
+    )}
+    {p.links.demo && (
+      <a class="button button--ghost" href={p.links.demo} rel="noopener">
+        Demo <Icon name="arrow-up-right" size={16} />
+        <span class="visually-hidden"> for {p.name}</span>
+      </a>
+    )}
+  </p>
+</div>
+
+<style>
+  .detail {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+  .detail__status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-2);
+  }
+  .detail__status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--text-2);
+  }
+  .detail__status[data-status-dot='shipped']::before {
+    background: var(--ok);
+  }
+  .detail__status[data-status-dot='building']::before {
+    background: var(--time);
+  }
+  .detail__line {
+    font-size: var(--type-body);
+    line-height: var(--lh-body);
+  }
+  .detail__progress {
+    color: var(--time);
+  }
+  .detail__stats {
+    display: grid;
+    padding: 0;
+    list-style: none;
+    border-top: var(--border);
+  }
+  .detail__stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: var(--border);
+  }
+  .detail__value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--type-heading);
+    line-height: var(--lh-heading);
+    color: var(--time);
+    white-space: nowrap;
+  }
+  .detail__label {
+    color: var(--text-2);
+    text-align: right;
+  }
+  .detail__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .detail__stack li {
+    padding: var(--space-1) var(--space-2);
+    border: var(--border);
+    border-radius: var(--radius-chip);
+    color: var(--text-2);
+  }
+  .detail__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

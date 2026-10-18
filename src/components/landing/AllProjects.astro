@@ -1,0 +1,219 @@
+---
+// All projects (SPEC row 5): a filterable index of every project in projects.json. Without JS every row shows;
+// src/lib/work.ts wires the filter buttons and the row reveal.
+import Icon from '../Icon.astro';
+import { projects } from '../../lib/content';
+import { STATUS_FILTERS, STATUS_LABEL, filterLabel, statusCounts, yearLabel } from '../../lib/work';
+
+const counts = statusCounts(projects);
+---
+
+<section id="projects" class="index" aria-labelledby="projects-title">
+  <header class="index__head">
+    <h2 id="projects-title" class="display">
+      All projects
+    </h2>
+    <div class="index__filters" role="group" aria-label="Filter by status">
+      {STATUS_FILTERS.map((f) => (
+        <button type="button" class="hud index__filter" data-filter={f} aria-pressed={f === 'all'}>
+          {filterLabel(f)} <span class="index__count">{counts[f]}</span>
+        </button>
+      ))}
+    </div>
+  </header>
+  <p class="small visually-hidden" role="status" data-index-count>
+    {projects.length} projects
+  </p>
+
+  <div class="index__scroll">
+    <table class="index__table" data-index-table>
+      <thead>
+        <tr class="hud">
+          <th scope="col">Project</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="index__year">
+            Year
+          </th>
+          <th scope="col" class="index__stack">
+            Stack
+          </th>
+          <th scope="col">Links</th>
+        </tr>
+      </thead>
+      <tbody>
+        {projects.map((p, i) => (
+          <tr data-status={p.status} style={`--i: ${i}`}>
+            <th scope="row">
+              <div class="index__cell">
+                <span class="index__name">{p.name}</span>
+                <span class="small index__line">{p.oneLiner}</span>
+              </div>
+            </th>
+            <td>
+              <span class="hud index__status" data-status-dot={p.status}>
+                {STATUS_LABEL[p.status]}
+              </span>
+            </td>
+            <td class="index__year">{yearLabel(p)}</td>
+            <td class="index__stack small">{p.stack.slice(0, 4).join(' · ')}</td>
+            <td class="index__links">
+              {p.links.github && (
+                <a href={p.links.github} rel="noopener">
+                  GitHub <Icon name="arrow-up-right" size={14} />
+                  <span class="visually-hidden"> for {p.name}</span>
+                </a>
+              )}
+              {p.links.demo && (
+                <a href={p.links.demo} rel="noopener">
+                  Demo <Icon name="arrow-up-right" size={14} />
+                  <span class="visually-hidden"> for {p.name}</span>
+                </a>
+              )}
+              {!p.links.github && !p.links.demo && <span class="small">—</span>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="small index__empty" data-index-empty hidden>
+    No projects with that status yet.
+  </p>
+</section>
+
+<style>
+  .index {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding: var(--section-gap) var(--space-4) 0;
+    scroll-margin-top: 60px;
+  }
+  .index__head {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+  .index__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .index__filter {
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+  .index__filter:hover {
+    color: var(--text);
+  }
+  .index__filter[aria-pressed='true'] {
+    border-color: var(--time);
+    color: var(--text);
+  }
+  .index__count {
+    color: var(--time);
+  }
+  .index__scroll {
+    overflow-x: auto;
+  }
+  .index__table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .index__table th,
+  .index__table td {
+    padding: var(--space-4) var(--space-3) var(--space-4) 0;
+    border-bottom: var(--border);
+    vertical-align: top;
+    font-weight: 400;
+  }
+  .index__table thead th {
+    color: var(--text-2);
+    border-bottom-color: var(--text-2);
+  }
+  .index__cell {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .index__name {
+    font-weight: 600;
+    font-size: var(--type-body);
+  }
+  .index__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    white-space: nowrap;
+  }
+  .index__status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--text-2);
+  }
+  .index__status[data-status-dot='shipped']::before {
+    background: var(--ok);
+  }
+  .index__status[data-status-dot='building']::before {
+    background: var(--time);
+  }
+  .index__links {
+    white-space: nowrap;
+  }
+  .index__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 44px;
+    margin-right: var(--space-3);
+  }
+  .index__empty {
+    padding: var(--space-5) 0;
+  }
+  .index__year,
+  .index__stack {
+    display: none;
+  }
+
+  /* Rows stagger in once the table scrolls into view (the class is added by JS, so no-JS shows everything). */
+  .index__table[data-reveal='ready'] tbody tr {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .index__table[data-reveal='in'] tbody tr {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-reveal) var(--ease-out),
+      transform var(--dur-reveal) var(--ease-out);
+    transition-delay: calc(var(--i) * var(--stagger));
+  }
+  :global(:root[data-motion='reduced']) .index__table tbody tr {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  @media (min-width: 768px) {
+    .index {
+      padding-inline: var(--space-6);
+    }
+    .index__head {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+    .index__year,
+    .index__stack {
+      display: table-cell;
+    }
+  }
+</style>

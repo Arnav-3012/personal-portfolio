@@ -4,6 +4,17 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.5a Work
+
+**Added**
+- `src/components/landing/SelectedWork.astro`, `ProjectDetail.astro`, `AllProjects.astro`
+- `src/lib/work.ts`
+- `tests/unit/lib/work.test.ts`; `tests/e2e/work.spec.ts`
+
+**Changed**
+- `src/pages/index.astro`: Selected work and All projects replace the `work` stub; `initWork()`
+- `docs/plan.md` (1.5 split into 1.5a–d; 1.5a ticked), `docs/mistakes.md`, `docs/logs.md`
+
 ## 2026-10-18 · 1.4 Landing, part A
 
 **Added**

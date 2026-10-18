@@ -4,6 +4,37 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.5a Work (first of four 1.5 sub-tasks)
+
+**Done** (plus two review rounds with Arnav)
+- **Split:** 1.5 became 1.5a–1.5d in plan.md (Arnav approved): a single commit would have been unreviewable, and forms/GitHub backends arrive in 1.6/1.7.
+- **Selected work** (`SelectedWork.astro`, `ProjectDetail.astro`): the first five hero-tier projects by `order` as a sticky split. A compact pinned card (≤ 400 × 460 px) shows a "03 / 05" counter and progress rail, the status and year, a one-liner, stats as big amber figures with mono labels (`splitStat`), up to four stack chips and the links. Rows are 70vh; the card switches only when the next project is 12% of the viewport closer (`activeIndex` hysteresis) and builds in piece by piece after a 250 ms fade-out. Below 768 px each name carries its own detail card. Only the visible pane is focusable (`inert` toggled).
+- **Background** (Warp-style restraint, tokens only): full-bleed dot grid faded at both ends, a terminal-log spine with a node per project, outlined ghost numerals, a "Next · …" hint, and a slow-breathing amber glow behind the card (clipped with `overflow-x: clip`).
+- **All projects** (`AllProjects.astro`): filterable table of all 21 projects (All / Shipped / Building / Coming soon, with counts and a polite live count). Vanilla JS; every row shows without JS; rows stagger in; off with reduced motion.
+- **Logic** (`src/lib/work.ts`): `selectedWork`, `filterProjects`, `statusCounts`, `splitStat`, `activeIndex`, `initWork`.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| typecheck, lint, format | pass | 0 errors; check-no-hex 31 files clean; Prettier clean |
+| `pnpm test` | 102/102 | 18 new: ordering, fewer-than-five, filters, counts, year dash, `activeIndex` + hysteresis, `splitStat` on every real stat |
+| `pnpm e2e` | 80/80 (exit 0) | 26 new: pane follows scroll, one focusable pane, pane pinned, compact size, no switch on a small nudge, filters (mouse + keyboard), no-JS rows, mobile stack without overflow, axe 0 in both themes, screenshots 375/768/1440 × Day/Night × full/reduced |
+| `pnpm links` | pass | 34 links, 0 broken |
+| Lighthouse (mobile) | pass | 99/100/100/100, LCP 1808 ms, CLS 0.000 |
+| Screenshots | reviewed | 1440 Night/Day, 768 Day, 375 Night after each round |
+| Mutation | pass | StatCalib set to `coming-soon`: 6 → 7 coming-soon rows; restored, no diff |
+| Arnav | confirmed "done" 2026-10-18 | reviewed in the browser |
+
+**Deviations from the approved plan**
+- SPEC row 4 says the pane swaps a "clip"; `projects.json` has no clips, so the pane shows stats, stack and links. "See it in 3D" waits for Phase 2.
+- Added `ProjectDetail.astro` (shared by pane and mobile cards), not in the approved file list.
+- Arnav's review asked for a smaller pane, slower switching, more engaging content and a richer background; all four are implemented (see mistakes.md).
+
+**Open items**
+- MARL LLM Router and EDITH have no `stats` in `projects.json`; their cards show no number rows until Arnav adds some.
+- 1.5b next: experience rail, 75 Hard section and reel player (reels live in the gitignored `assets/incoming/`; plan a copy into `public/` at that point).
+- The EDITH spoken-replies docs edits (SPEC, phase gate) are committed separately.
+
 ## 2026-10-18 · 1.4 Landing, part A
 
 **Done** (three review rounds with Arnav; final state below)

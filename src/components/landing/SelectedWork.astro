@@ -1,0 +1,361 @@
+---
+// Selected work (SPEC row 4): the top five hero projects as a sticky split. Big names scroll on the left; the
+// pane on the right crossfades to the project crossing the viewport centre (src/lib/work.ts). Below 768 px each
+// name carries its own detail card. Projects have no clips yet, so the pane shows stats, stack and links.
+import ProjectDetail from './ProjectDetail.astro';
+import { projects } from '../../lib/content';
+import { selectedWork } from '../../lib/work';
+
+const picks = selectedWork(projects);
+---
+
+<section id="work" class="work" aria-labelledby="work-title">
+  <div class="work__inner">
+    <header class="work__head">
+      <p class="hud work__eyebrow">01 · Work</p>
+      <h2 id="work-title" class="display">
+        Selected work
+      </h2>
+    </header>
+
+    <div class="work__split" data-work-split>
+      <ol class="work__list">
+        {picks.map((p, i) => (
+          <li class="work__item" id={`work-${p.id}`} data-work-item>
+            <span class="work__ghost" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <p class="hud work__n">{String(i + 1).padStart(2, '0')}</p>
+            <h3 class="work__name">{p.name}</h3>
+            <p class="hud work__next" aria-hidden="true">
+              Next · {picks[i + 1]?.name ?? 'All projects'}
+            </p>
+            <div class="work__inline">
+              <ProjectDetail project={p} />
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <div class="work__stick">
+        <div class="work__pane">
+          <div class="work__rail" aria-hidden="true">
+            <span class="hud work__counter">
+              <span data-work-count>01</span> / {String(picks.length).padStart(2, '0')}
+            </span>
+            <span class="work__ticks">
+              {picks.map((_, i) => (
+                <span class="work__tick" data-work-tick data-active={i === 0 || undefined} />
+              ))}
+            </span>
+          </div>
+          {picks.map((p, i) => (
+            <div
+              class="work__panel"
+              data-work-pane
+              data-active={i === 0 || undefined}
+              inert={i !== 0 || undefined}
+            >
+              <ProjectDetail project={p} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Full-bleed section with a faint dot grid (echoes the dot-matrix hero) that fades out at both ends */
+  .work {
+    position: relative;
+    isolation: isolate;
+    /* The glow's halo overhangs the card; clip (unlike hidden) keeps the sticky card working */
+    overflow-x: clip;
+    scroll-margin-top: 60px;
+  }
+  .work::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(circle, var(--line) 1px, transparent 1.5px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to bottom, transparent, black 14%, black 86%, transparent);
+    pointer-events: none;
+  }
+  .work__inner {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding: var(--section-gap) var(--space-4) 0;
+  }
+  .work__head {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+  }
+  .work__eyebrow {
+    color: var(--time);
+  }
+  .work__list {
+    display: grid;
+    gap: var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+  .work__item {
+    display: grid;
+    gap: var(--space-3);
+    scroll-margin-top: 80px;
+  }
+  .work__n {
+    color: var(--text-2);
+  }
+  .work__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--type-display);
+    line-height: var(--lh-display);
+    color: var(--text);
+  }
+  .work__stick,
+  .work__ghost,
+  .work__next {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .work__inner {
+      padding-inline: var(--space-6);
+    }
+    .work__split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .work__list {
+      gap: 0;
+    }
+    @media (min-width: 1024px) {
+      .work__split {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      }
+    }
+    /* Tall rows so each project lingers; the pane only switches once the next is clearly in view */
+    .work__item {
+      position: relative;
+      align-content: center;
+      min-height: 70vh;
+      color: var(--text-2);
+    }
+    .work__item > :not(.work__ghost) {
+      position: relative;
+    }
+    /* Terminal-log spine: a hairline down the left with a node per project that lights when active */
+    .work__list {
+      position: relative;
+    }
+    .work__list::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(-1 * var(--space-4));
+      width: 1px;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--line) 10%,
+        var(--line) 90%,
+        transparent
+      );
+    }
+    .work__item::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: calc(-1 * var(--space-4) - 4px);
+      width: 9px;
+      height: 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      background: var(--bg);
+      transition:
+        background var(--dur-reveal) var(--ease-out),
+        border-color var(--dur-reveal) var(--ease-out),
+        box-shadow var(--dur-reveal) var(--ease-out);
+    }
+    .work__item[data-active]::before {
+      border-color: var(--time);
+      background: var(--time);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--time) 22%, transparent);
+    }
+    /* Oversized outlined numeral behind each name fills the row without adding noise */
+    .work__ghost {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      display: block;
+      transform: translateY(-50%);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(140px, 20vw, 280px);
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--line);
+      pointer-events: none;
+      user-select: none;
+      transition: -webkit-text-stroke-color var(--dur-reveal) var(--ease-out);
+    }
+    .work__item[data-active] .work__ghost {
+      -webkit-text-stroke-color: color-mix(in srgb, var(--time) 45%, transparent);
+    }
+    .work__next {
+      display: block;
+      color: var(--text-2);
+      opacity: 0;
+      transform: translateY(6px);
+      transition:
+        opacity var(--dur-reveal) var(--ease-out),
+        transform var(--dur-reveal) var(--ease-out);
+    }
+    .work__item[data-active] .work__next {
+      opacity: 1;
+      transform: none;
+      transition-delay: 300ms;
+    }
+    .work__name {
+      color: var(--text-2);
+      font-size: clamp(32px, 4vw, 64px);
+      overflow-wrap: anywhere;
+      line-height: var(--lh-display-xl);
+      transition: color var(--dur-reveal) var(--ease-out);
+    }
+    .work__item[data-active] .work__name {
+      color: var(--text);
+    }
+    .work__item[data-active] .work__n {
+      color: var(--time);
+    }
+    .work__inline {
+      display: none;
+    }
+    /* A compact card pinned beside the list; fixed height so swapping panels never shifts layout */
+    .work__stick {
+      position: sticky;
+      top: calc(50vh - 230px);
+      isolation: isolate;
+      display: block;
+      width: min(100%, 400px);
+      justify-self: end;
+      height: 460px;
+    }
+    /* Warm glow behind the card, breathing slowly (static with reduced motion) */
+    .work__stick::before {
+      content: '';
+      position: absolute;
+      inset: -140px;
+      z-index: -1;
+      background: radial-gradient(
+        closest-side,
+        color-mix(in srgb, var(--time) 24%, transparent),
+        transparent
+      );
+      pointer-events: none;
+      animation: work-breathe 6s ease-in-out infinite;
+    }
+    :global(:root[data-theme='day']) .work__stick::before {
+      background: radial-gradient(
+        closest-side,
+        color-mix(in srgb, var(--time) 10%, transparent),
+        transparent
+      );
+    }
+    :global(:root[data-motion='reduced']) .work__stick::before {
+      animation: none;
+    }
+    .work__pane {
+      position: relative;
+      height: 100%;
+      padding: var(--space-4) var(--space-5);
+      border: var(--border);
+      border-top: 2px solid var(--time);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .work__rail {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+    }
+    .work__counter {
+      color: var(--text-2);
+    }
+    .work__counter [data-work-count] {
+      color: var(--time);
+    }
+    .work__ticks {
+      display: flex;
+      gap: var(--space-1);
+    }
+    .work__tick {
+      width: 20px;
+      height: 2px;
+      background: var(--line);
+      transition: background var(--dur-reveal) var(--ease-out);
+    }
+    .work__tick[data-active] {
+      background: var(--time);
+    }
+    .work__panel {
+      position: absolute;
+      inset: 52px var(--space-5) var(--space-4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 250ms var(--ease-out);
+    }
+    .work__panel[data-active] {
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 400ms var(--ease-out) 250ms;
+    }
+    /* New details build in one after another, after the old panel has faded */
+    .work__panel :global(.detail > *),
+    .work__panel :global(.detail__stat) {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .work__panel[data-active] :global(.detail > *),
+    .work__panel[data-active] :global(.detail__stat) {
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 500ms var(--ease-out),
+        transform 500ms var(--ease-out);
+      transition-delay: calc(250ms + var(--k, 0) * 90ms);
+    }
+    .work__panel :global(.detail__stats) {
+      opacity: 1;
+      transform: none;
+    }
+    :global(:root[data-motion='reduced']) .work__panel,
+    :global(:root[data-motion='reduced']) .work__panel :global(.detail > *),
+    :global(:root[data-motion='reduced']) .work__panel :global(.detail__stat) {
+      transform: none;
+      transition: none;
+      transition-delay: 0s;
+    }
+    :global(:root[data-motion='reduced']) .work__panel :global(.detail > *),
+    :global(:root[data-motion='reduced']) .work__panel :global(.detail__stat) {
+      opacity: 1;
+    }
+  }
+  @keyframes work-breathe {
+    50% {
+      opacity: 0.6;
+    }
+  }
+</style>

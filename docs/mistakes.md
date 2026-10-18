@@ -4,6 +4,55 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.5a · Sticky pane made every project's links unreachable by keyboard
+- **What happened:** I first rendered all five desktop panes `inert` + `aria-hidden`; the mobile inline cards are `display: none` on desktop, so keyboard users could never reach a project's GitHub link. Caught while writing the markup, before any run.
+- **Root cause:** treated the panes as decoration to hide from assistive tech, forgetting they are the only desktop copy of the links.
+- **Fix:** server-render pane 0 as active and focusable; `setActive` in `src/lib/work.ts` toggles `inert` so only the visible pane is reachable. e2e asserts 4 inert panes and one active.
+- **Prevention rule:** When content is duplicated per breakpoint, check that each breakpoint has exactly one reachable copy of every link before hiding the other.
+- **Files:** `src/components/landing/SelectedWork.astro`, `src/lib/work.ts`
+
+## 2026-10-18 · 1.5a · Scripted line-delete left a broken test (REPEAT)
+- **What happened:** `sed -i` failed on macOS (BSD sed needs `-i ''`), then my Python line filter removed only the middle line of a Prettier-wrapped `toContainText(...)` call, leaving `toContainText()` and a lint error.
+- **Root cause:** deleted by line match instead of replacing the whole statement; assumed Prettier had not wrapped it. Repeats the "scripted edits" entry below.
+- **Fix:** replaced it with `toContainText(p.oneLiner)` via an exact-string replace.
+- **Prevention rule (strengthened):** Use the Edit tool for any removal in a file Prettier has formatted; never delete by single-line grep, and never use `sed -i` on macOS.
+- **Files:** `tests/e2e/work.spec.ts`
+
+## 2026-10-18 · 1.5a · Screenshots caught the pane mid-crossfade, and a test assumed item 0 was pinned
+- **What happened:** the first screenshots showed overlapping pane text (an element screenshot scrolls while the 700 ms crossfade runs), and the "pane stays pinned" test failed by 168 px because item 0 sits above the pin point.
+- **Root cause:** shot without waiting for the transition to settle (same family as the 1.4 "name mid-reveal" entry); assumed the pin starts at the first item.
+- **Fix:** park the third project centred, wait 1.2 s, then take a viewport screenshot; compare items 1 and 3 for the pin test.
+- **Prevention rule:** Park the scroll position, wait out the longest transition, then screenshot; test sticky behaviour between two mid-list items.
+- **Files:** `tests/e2e/work.spec.ts`
+
+## 2026-10-18 · 1.5a revision · Pane too big, switched too fast, plain
+- **What happened:** Arnav's review: the pane was too big, the next project's info swapped in too quickly, and the content wasn't engaging. A first card redesign then clipped its own chips and GitHub button at 1440 and 768 px, and my "≤ 400 px" test cap was set before the content was measured.
+- **Root cause:** I built the pane to the SPEC's "crossfade as each name crosses centre" literally, sized it to fill the column, and listed stats as plain text. I never checked how long a viewer actually lingers on one project (50vh rows, no hysteresis), and sized a fixed-height card from a guess.
+- **Fix:** compact card (≤ 400 px wide, 460 px tall) with a progress rail, stats split into big amber figures and mono labels (`splitStat`), 80vh rows, a 12%-of-viewport hysteresis band, and a staggered build-in after a 250 ms fade-out.
+- **Prevention rule:** For scroll-driven UI, set dwell time (row height) and a switch threshold up front, and size fixed-height cards from the longest real content at the narrowest split width, not from a guess.
+- **Files:** `src/components/landing/SelectedWork.astro`, `ProjectDetail.astro`, `src/lib/work.ts`, `tests/e2e/work.spec.ts`
+
+## 2026-10-18 · 1.5a revision 2 · Glow halo made the page scroll sideways
+- **What happened:** after adding the background (dot grid, spine, ghost numerals, glow), the existing hero layout test failed at 768 and 1440 px: `scrollWidth` 1468 > 1440. A throwaway screenshot spec also failed first because I put it outside `tests/e2e` (the configured `testDir`).
+- **Root cause:** the glow is `inset: -140px` around the card, which sits 112 px from the right edge, so it overhung the viewport. I checked the new section visually but only ran its own tests, not the whole suite, before the screenshot.
+- **Fix:** `overflow-x: clip` on `.work` (clip, not hidden, so the sticky card keeps working).
+- **Prevention rule:** Any decoration that extends past its box (glows, halos, ghost text) gets clipped at its section, and the full `pnpm e2e`, not just the new spec, runs before a visual change is reported. Put throwaway specs under `tests/e2e`.
+- **Files:** `src/components/landing/SelectedWork.astro`
+
+## 2026-10-18 · 1.5a · Stale dev server on port 8787 blocked e2e
+- **What happened:** `pnpm e2e` failed with "http://localhost:8787/api/health is already used".
+- **Root cause:** an earlier backgrounded Playwright run left its `wrangler dev` server alive.
+- **Fix:** killed the process on 8787 and re-ran.
+- **Prevention rule:** Before starting e2e after a backgrounded run, free port 8787 (`lsof -ti tcp:8787 | xargs -r kill`).
+- **Files:** none
+
+## 2026-10-18 · 1.5a · Project names overflowed their column at 1440 px
+- **What happened:** "enhancement" in the 80 px display size touched the pane edge. Found only by opening the screenshot.
+- **Root cause:** sized the name for the headline scale without checking the longest real word in `projects.json`.
+- **Fix:** `clamp(32px, 4vw, 64px)` with `overflow-wrap: anywhere`; pane stats drop to body size below 1024 px.
+- **Prevention rule:** Size display text against the longest word in the content, and open the screenshot at every width.
+- **Files:** `src/components/landing/SelectedWork.astro`, `src/components/landing/ProjectDetail.astro`
+
 ## 2026-10-18 · 1.4 revision 3 · Day still a flat blob; hover felt mechanical
 - **What happened:** after revision 2, Arnav still found Day "weird" (a tan figure where hair and skin shared one tone) and our circle lens "weird" next to the reference site's hover.
 - **Root cause:** every figure cell was drawn and only its colour varied, so the shape came from hue, which collapses on paper. For the hover I guessed at an effect instead of studying how the reference actually works.
@@ -43,6 +92,7 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **What happened:** (1) A regex meant to rewrite the dotmatrix import also swallowed the `vitest` import above it, which broke typecheck. (2) A doc-update script had a leftover throwaway replacement at the end. It threw after SPEC.md and CLAUDE.md were written but before plan.md was.
 - **Root cause:** the non-greedy `import \{[\s\S]*?\}` started at the first `import {` in the file. The script wrote each file as it went, so a late failure left a partial update. This repeats the 1.2 "regex bulk edit corrupted a test" entry.
 - **Fix:** restored the import; redid plan.md alone; checked `git diff --stat` for all four docs.
+- **Repeated again in 1.5a** (line-delete left a broken test); see that entry.
 - **Prevention rule (strengthened):** Anchor regex edits to the exact line (or use Edit), and in a multi-file script validate every replacement before writing any file. After a scripted edit, diff the result before running anything.
 - **Revision 3 repeat:** a three-file script wrote dotmatrix.ts and hero.ts, then threw on Hero.astro, whose markup Prettier had re-wrapped. **Rule now:** one file per script, or run every check first and only then write; prefer the Edit tool for Astro/HTML, which Prettier reflows.
 - **Files:** `tests/unit/lib/dotmatrix.test.ts`, `docs/plan.md`
