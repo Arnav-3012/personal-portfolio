@@ -2,11 +2,24 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="Scaffold OK">
-  <main>
-    <h1>Scaffold OK</h1>
-    <p>
-      Static site served from <code>./dist</code>. API check: <a href="/api/health">/api/health</a>
+<Base title="Under construction">
+  <main id="main" class="page">
+    <p class="hud">[ OK ] design.sys</p>
+    <h1>Under construction</h1>
+    <p class="small">
+      The landing page arrives in tasks 1.4 and 1.5. API check:{' '}
+      <a href="/api/health">/api/health</a>
     </p>
   </main>
 </Base>
+
+<style>
+  .page {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-10) var(--space-5);
+  }
+  .hud {
+    color: var(--ok);
+  }
+</style>

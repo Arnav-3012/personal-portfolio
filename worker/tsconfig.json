@@ -8,5 +8,5 @@
     "types": ["@cloudflare/vitest-plugin/types"],
     "noEmit": true
   },
-  "include": ["./**/*.ts", "../tests/unit/**/*.ts", "../worker-configuration.d.ts"]
+  "include": ["./**/*.ts", "../tests/unit/worker/**/*.ts", "../worker-configuration.d.ts"]
 }

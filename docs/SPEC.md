@@ -43,7 +43,8 @@ Two themes, Night and Day, share one token set: each accent belongs to one layer
 | `--action` Signal Red | `#FF4B3E` | Primary buttons, links, armor accents | 5.7:1 |
 | `--time` Tungsten | `#F2A33A` | Retro TV, timeline, "open to freelance" | 9.1:1 |
 | `--board` Board Green | `#1F3B2D` | Chalkboard surface (chalk on it 10.6:1) | — |
-| `--ok` Live Green | `#3DDC84` | Live dot, GitHub "online" | — |
+| `--ok` Live Green | `#3DDC84` | Live dot, GitHub "online" | 10.7:1 |
+| `--on-action` | `#0E1013` | Text on `--action` buttons (white on Signal Red is only 3.3:1) | 5.7:1 on `--action` |
 
 Rules: one accent per screen region; never cyan and tungsten in the same panel; no purple-pink "AI gradient".
 
@@ -59,12 +60,14 @@ Rules: one accent per screen region; never cyan and tungsten in the same panel; 
 | `--holo` | `#4FD8FF` | `#00739E` | 4.8:1 |
 | `--action` | `#FF4B3E` | `#C8281C` | 5.1:1 |
 | `--time` | `#F2A33A` | `#8F5300` | 5.6:1 |
+| `--ok` | `#3DDC84` | `#177A42` | 4.9:1 (Night green is 1.6:1 on paper) |
+| `--on-action` | `#0E1013` | `#FFFFFF` | 5.6:1 on Day `--action` |
 
 **Theme switching**
 
 - Modes: Auto (default: follows Mumbai time for the 3D room and the OS setting for the 2D site), Day, Night.
 - Keyboard: **D** toggles Day/Night anywhere, except while typing in a field. In free-roam walking, D is movement, so the toggle there is **Shift+D**.
-- **Settings panel** (gear icon in the nav and in the workshop HUD): Theme (Auto / Day / Night), Sound (on/off), Motion (full / reduced), 3D quality (high / low / auto), Hologram colour. Saved in localStorage, wrapped in try/catch.
+- **Settings panel** (gear icon in the nav and in the workshop HUD): Theme (Auto / Day / Night), Sound (on/off), Motion (auto / full / reduced; auto follows the OS `prefers-reduced-motion`), 3D quality (high / low / auto), Hologram colour (Arc Cyan only until Phase 2 adds contrast-checked options). Saved in localStorage, wrapped in try/catch.
 - A 600 ms colour cross-fade on the 2D site; a 1.2 s light cross-fade in 3D.
 
 **Typography** (all free, self-hosted woff2, subset to Latin)

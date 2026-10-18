@@ -1,0 +1,16 @@
+---
+// Skeleton block with a slow scanline sweep (SPEC "Loading states"); static under reduced motion.
+interface Props {
+  width?: string;
+  height?: string;
+  shape?: 'block' | 'card' | 'pill';
+}
+
+const { width = '100%', height = '1em', shape = 'block' } = Astro.props;
+---
+
+<span
+  class:list={['skeleton', `skeleton--${shape}`]}
+  style={{ width, height }}
+  aria-hidden="true"
+></span>

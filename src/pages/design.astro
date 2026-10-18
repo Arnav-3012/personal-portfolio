@@ -1,0 +1,239 @@
+---
+// Internal style guide for task 1.2: every token and shell component on one page, used by e2e and
+// screenshots. noindex; to be removed or moved behind /admin at task 1.10.
+import Base from '../layouts/Base.astro';
+import Skeleton from '../components/Skeleton.astro';
+
+const colours = [
+  'bg',
+  'surface',
+  'line',
+  'text',
+  'text-2',
+  'holo',
+  'action',
+  'time',
+  'board',
+  'ok',
+] as const;
+const spacing = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+---
+
+<Base title="Design system" noindex>
+  <main id="main" class="page">
+    <header class="intro">
+      <p class="hud">Internal · task 1.2</p>
+      <h1>Design system</h1>
+      <p class="small">
+        Press <kbd>D</kbd> to switch Day and Night, or open Settings.
+      </p>
+    </header>
+
+    <section aria-labelledby="colour-title">
+      <h2 id="colour-title">Colour</h2>
+      <ul class="swatches">
+        {colours.map((name) => (
+          <li>
+            <span class="swatch" style={`background: var(--${name})`} />
+            <code>--{name}</code>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section aria-labelledby="type-title">
+      <h2 id="type-title">Type</h2>
+      <p class="display-xl">Display XL</p>
+      <p class="display">Display section title</p>
+      <p class="heading">Heading for a card</p>
+      <p>
+        Body copy in Geist at 17 px with a 1.6 line height, capped at 68 characters per line so long
+        paragraphs stay readable on wide screens.
+      </p>
+      <p class="small">Small caption and meta text.</p>
+      <p class="hud">[ OK ] rag.sys · [ OK ] agents.drv · [ !! ] chai.sys … low</p>
+      <p class="era">Era title</p>
+    </section>
+
+    <section aria-labelledby="space-title">
+      <h2 id="space-title">Spacing and shape</h2>
+      <ul class="spaces">
+        {spacing.map((step) => (
+          <li>
+            <span class="space" style={`width: var(--space-${step})`} />
+            <code>--space-{step}</code>
+          </li>
+        ))}
+      </ul>
+      <div class="shapes">
+        <span class="shape chip">Chip 6</span>
+        <span class="shape card">Card 12</span>
+        <span class="shape pill">Pill 999</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="controls-title">
+      <h2 id="controls-title">Controls</h2>
+      <div class="row">
+        <a class="button" href="#main">
+          Primary action
+        </a>
+        <button class="button button--ghost" type="button">
+          Ghost button
+        </button>
+      </div>
+      <label class="field">
+        <span class="small">Typing here must not toggle the theme</span>
+        <input type="text" name="typing-test" data-testid="typing-test" />
+      </label>
+    </section>
+
+    <section aria-labelledby="feedback-title">
+      <h2 id="feedback-title">Toasts and progress</h2>
+      <div class="row">
+        <button class="button button--ghost" type="button" data-demo-toast="ok">
+          Success toast
+        </button>
+        <button class="button button--ghost" type="button" data-demo-toast="warn">
+          Warning toast
+        </button>
+        <button class="button button--ghost" type="button" data-demo-toast="error">
+          Error toast
+        </button>
+        <button class="button button--ghost" type="button" data-demo-progress>
+          Run progress
+        </button>
+      </div>
+    </section>
+
+    <section aria-labelledby="skeleton-title">
+      <h2 id="skeleton-title">Skeletons</h2>
+      <div class="skeletons">
+        <Skeleton shape="card" height="160px" />
+        <Skeleton width="60%" />
+        <Skeleton width="40%" />
+        <Skeleton shape="pill" width="120px" height="32px" />
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { toast, type ToastKind } from '../lib/toast';
+  import { doneProgress, setProgress, startProgress } from '../lib/progress';
+
+  const messages: Record<ToastKind, string> = {
+    ok: 'Message sent. Arnav replies within a few days.',
+    warn: 'EDITH is resting for today. Use the contact form.',
+    error: "Couldn't send. Check your connection and try again.",
+  };
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-demo-toast]')) {
+    button.addEventListener('click', () => {
+      const kind = button.dataset['demoToast'] as ToastKind;
+      toast({ kind, message: messages[kind] });
+    });
+  }
+
+  document.querySelector('[data-demo-progress]')?.addEventListener('click', () => {
+    startProgress({ wipe: false });
+    let value = 0;
+    const tick = setInterval(() => {
+      value += 20;
+      setProgress(value);
+      if (value >= 100) {
+        clearInterval(tick);
+        doneProgress();
+      }
+    }, 150);
+  });
+</script>
+
+<style>
+  .page {
+    display: grid;
+    gap: var(--section-gap);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-9) var(--space-5) var(--space-10);
+  }
+  section,
+  .intro {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .intro .hud {
+    color: var(--holo);
+  }
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-4);
+  }
+  .swatches li {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .swatch {
+    display: block;
+    height: 72px;
+    border: var(--border);
+    border-radius: var(--radius-card);
+  }
+  .spaces {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .spaces li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .space {
+    display: block;
+    height: var(--space-3);
+    background: var(--action);
+    border-radius: var(--radius-chip);
+  }
+  .shapes,
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  .shape {
+    padding: var(--space-3) var(--space-5);
+    border: var(--border);
+    background: var(--surface);
+  }
+  .chip {
+    border-radius: var(--radius-chip);
+  }
+  .card {
+    border-radius: var(--radius-card);
+  }
+  .pill {
+    border-radius: var(--radius-pill);
+  }
+  .field {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 420px;
+  }
+  .field input {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border);
+    border-radius: var(--radius-chip);
+    background: var(--surface);
+  }
+  .skeletons {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 480px;
+  }
+</style>

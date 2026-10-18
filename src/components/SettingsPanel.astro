@@ -1,0 +1,113 @@
+---
+// Settings panel (SPEC "Theme switching"): gear button + native <dialog>, which gives focus trapping,
+// Esc to close and focus return for free. Every change applies immediately via the settings store.
+import Icon from './Icon.astro';
+
+const groups = [
+  {
+    key: 'theme',
+    legend: 'Theme',
+    options: [
+      ['auto', 'Auto'],
+      ['day', 'Day'],
+      ['night', 'Night'],
+    ],
+  },
+  {
+    key: 'motion',
+    legend: 'Motion',
+    options: [
+      ['auto', 'Auto'],
+      ['full', 'Full'],
+      ['reduced', 'Reduced'],
+    ],
+  },
+  {
+    key: 'quality',
+    legend: '3D quality',
+    options: [
+      ['auto', 'Auto'],
+      ['high', 'High'],
+      ['low', 'Low'],
+    ],
+  },
+  { key: 'holo', legend: 'Hologram colour', options: [['cyan', 'Arc Cyan']] },
+] as const;
+---
+
+<button class="icon-button" type="button" aria-haspopup="dialog" data-settings-open>
+  <Icon name="settings" />
+  <span class="visually-hidden">Settings</span>
+</button>
+
+<dialog class="settings" aria-labelledby="settings-title" data-settings>
+  <form method="dialog" class="settings__form">
+    <div class="settings__header">
+      <h2 id="settings-title" class="hud">
+        Settings
+      </h2>
+      <button class="icon-button" type="submit" aria-label="Close settings">
+        <Icon name="x" />
+      </button>
+    </div>
+
+    {groups.map((group) => (
+      <fieldset class="settings__group">
+        <legend class="hud">{group.legend}</legend>
+        <div class="segmented">
+          {group.options.map(([value, label]) => (
+            <label>
+              <input type="radio" name={group.key} value={value} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    ))}
+
+    <fieldset class="settings__group">
+      <legend class="hud">Sound</legend>
+      <label class="switch">
+        <input type="checkbox" role="switch" name="sound" />
+        <span>Sound effects and music</span>
+      </label>
+    </fieldset>
+
+    <p class="settings__hint">
+      Press <kbd>D</kbd> to switch Day and Night.
+    </p>
+  </form>
+</dialog>
+
+<script>
+  import { settings, type Settings } from '../lib/settings';
+
+  const store = settings();
+  const dialog = document.querySelector<HTMLDialogElement>('[data-settings]');
+  const opener = document.querySelector<HTMLButtonElement>('[data-settings-open]');
+  const form = dialog?.querySelector('form');
+
+  const sync = (s: Settings): void => {
+    if (!form) return;
+    for (const input of form.querySelectorAll<HTMLInputElement>('input')) {
+      const value = s[input.name as keyof Settings];
+      input.checked = input.type === 'checkbox' ? value === true : input.value === value;
+    }
+  };
+
+  if (dialog && opener && form) {
+    sync(store.get());
+    store.subscribe(sync);
+    opener.addEventListener('click', () => {
+      dialog.showModal();
+    });
+    // Click on the backdrop closes the dialog.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    form.addEventListener('change', (e) => {
+      const input = e.target as HTMLInputElement;
+      store.set({ [input.name]: input.type === 'checkbox' ? input.checked : input.value });
+    });
+  }
+</script>

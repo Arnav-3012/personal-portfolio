@@ -12,7 +12,8 @@ export default defineConfig({
   webServer: {
     command: `pnpm build && pnpm wrangler dev --local --port ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
-    reuseExistingServer: !process.env['CI'],
+    // Never reuse: wrangler can orphan workerd on :8787, and a reused server serves a stale ./dist.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

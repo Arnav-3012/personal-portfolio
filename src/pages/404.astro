@@ -3,10 +3,18 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="Not found">
-  <main>
+  <main id="main" class="page">
     <h1>Page not found</h1>
     <p>
       <a href="/">Back to the site</a>
     </p>
   </main>
 </Base>
+
+<style>
+  .page {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-10) var(--space-5);
+  }
+</style>

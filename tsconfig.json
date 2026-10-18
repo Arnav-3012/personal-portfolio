@@ -4,6 +4,6 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react"
   },
-  "include": [".astro/types.d.ts", "src/**/*", "scripts/**/*", "tests/e2e/**/*", "*.config.ts"],
-  "exclude": ["dist", "node_modules", "worker", "tests/unit"]
+  "include": [".astro/types.d.ts", "src/**/*", "scripts/**/*", "tests/e2e/**/*", "tests/unit/lib/**/*", "*.config.ts"],
+  "exclude": ["dist", "node_modules", "worker", "tests/unit/worker"]
 }

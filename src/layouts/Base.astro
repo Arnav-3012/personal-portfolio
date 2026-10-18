@@ -1,8 +1,21 @@
 ---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import SettingsPanel from '../components/SettingsPanel.astro';
+import Toaster from '../components/Toaster.astro';
+import ProgressBar from '../components/ProgressBar.astro';
+import { SETTINGS_KEY } from '../lib/settings';
+
 interface Props {
   title: string;
+  description?: string;
+  noindex?: boolean;
 }
-const { title } = Astro.props;
+const {
+  title,
+  description = 'Arnav: AI engineer, RAG and agents, Mumbai.',
+  noindex = false,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -10,11 +23,66 @@ const { title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Arnav: AI engineer, RAG and agents, Mumbai." />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
+    {/* Sets theme + motion before first paint so there is no flash. Mirrors src/lib/theme.ts. */}
+    <script is:inline define:vars={{ key: SETTINGS_KEY }}>
+      (() => {
+        const d = document.documentElement;
+        let s = {};
+        try {
+          s = JSON.parse(localStorage.getItem(key) || '{}') || {};
+        } catch {
+          // Storage blocked: fall back to the OS preferences below.
+        }
+        const m = (q) => matchMedia(q).matches;
+        d.dataset.theme =
+          s.theme === 'day' || s.theme === 'night'
+            ? s.theme
+            : m('(prefers-color-scheme: dark)')
+              ? 'night'
+              : 'day';
+        d.dataset.motion =
+          s.motion === 'reduced' || (s.motion !== 'full' && m('(prefers-reduced-motion: reduce)'))
+            ? 'reduced'
+            : 'full';
+      })();
+    </script>
+    <Font cssVariable="--font-display" preload={[{ weight: 700 }]} />
+    <Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-era" />
   </head>
   <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <ProgressBar />
+    <header class="shell-bar">
+      <slot name="nav" />
+      <SettingsPanel />
+    </header>
     <slot />
+    <Toaster />
+    <script>
+      import { initTheme } from '../lib/theme';
+      import { audio } from '../lib/audio';
+
+      initTheme();
+      audio();
+    </script>
   </body>
 </html>
+
+<style>
+  .shell-bar {
+    position: fixed;
+    top: var(--space-4);
+    right: var(--space-4);
+    z-index: var(--z-progress);
+    display: flex;
+    gap: var(--space-2);
+  }
+</style>

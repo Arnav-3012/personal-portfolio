@@ -1,0 +1,101 @@
+/*
+ * Design tokens (SPEC "Design system"). The only place raw colour values live.
+ * Night is the default; Day overrides follow. Contrast is checked by tests/unit/contrast.test.ts.
+ */
+
+:root,
+:root[data-theme='night'] {
+  color-scheme: dark;
+
+  --bg: #0e1013;
+  --surface: #171a1f;
+  --line: #2a2f37;
+  --text: #edeff2;
+  --text-2: #8a93a0;
+  --holo: #4fd8ff;
+  --action: #ff4b3e;
+  --on-action: #0e1013;
+  --time: #f2a33a;
+  --board: #1f3b2d;
+  --ok: #3ddc84;
+}
+
+:root[data-theme='day'] {
+  color-scheme: light;
+
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --line: #dad7d0;
+  --text: #14161a;
+  --text-2: #565c66;
+  --holo: #00739e;
+  --action: #c8281c;
+  --on-action: #ffffff;
+  --time: #8f5300;
+  --ok: #177a42;
+}
+
+:root {
+  /* Type: families come from the Astro fonts API (astro.config.mjs) */
+  --type-display-xl: clamp(56px, 9vw, 128px);
+  --type-display: clamp(36px, 5vw, 64px);
+  --type-heading: 24px;
+  --type-body: 17px;
+  --type-small: 14px;
+  --type-hud: 12px;
+  --type-era: 40px;
+  --lh-display-xl: 0.95;
+  --lh-display: 1.05;
+  --lh-heading: 1.25;
+  --lh-body: 1.6;
+  --lh-small: 1.5;
+  --lh-hud: 1.2;
+  --lh-era: 1.1;
+  --track-display-xl: -0.02em;
+  --track-hud: 0.08em;
+  --measure: 68ch;
+
+  /* Spacing scale (px): 4, 8, 12, 16, 24, 32, 48, 64, 96, 128 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --section-gap: var(--space-8);
+
+  /* Shape: no drop shadows; depth from 1px lines */
+  --radius-chip: 6px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --border: 1px solid var(--line);
+  --focus-ring: 2px solid var(--holo);
+  --focus-offset: 2px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cam: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-hover: 180ms;
+  --dur-reveal: 700ms;
+  --dur-theme: 600ms;
+  --dur-curtain: 250ms;
+  --stagger: 60ms;
+
+  /* Texture */
+  --grain-opacity: 0.04;
+
+  /* Layers */
+  --z-grain: 900;
+  --z-progress: 950;
+  --z-toast: 1000;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --section-gap: var(--space-10);
+  }
+}

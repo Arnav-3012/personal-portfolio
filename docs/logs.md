@@ -4,6 +4,43 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.2 Design system
+
+**Done**
+- `src/styles/tokens.css`: Night (default) + Day colour tokens per SPEC, plus `--on-action` and a Day `--ok` (`#177A42`); type, spacing, radii, motion, focus and layer tokens. The only file with raw hex (enforced by `scripts/check-no-hex.ts` in `pnpm lint`).
+- Fonts via Astro's built-in `fonts` API (Fontsource provider): Unbounded 600/700, Geist 400/600, JetBrains Mono 500, Fraunces 600 italic. Self-hosted Latin woff2 (6 files, 113 KB), metric-matched fallbacks; only Unbounded 700 + Geist 400 preloaded (34 KB).
+- Theme: inline head script sets `data-theme`/`data-motion` before first paint; `src/lib/theme.ts` keeps them in sync (Auto = OS scheme, 600 ms cross-fade only on change). `D` toggles (not in fields, not with modifiers; Shift+D reserved for free-roam).
+- `src/lib/settings.ts`: typed store (theme, sound, motion, quality, holo) in localStorage, every access in try/catch, invalid fields fall back to defaults.
+- Settings panel: gear + native `<dialog>` (Theme, Motion incl. Auto, 3D quality, Hologram colour = Arc Cyan only, Sound switch).
+- Shell, all vanilla TS (no React on the landing yet): grain overlay (static SVG noise, 4%), `toast()` + `Toaster` (polite/assertive regions, 4 s, pause on hover/focus), progress pill + curtain (`start/set/done`), `Skeleton` with scanline, `AudioManager` (lazy AudioContext after a gesture, muted by default, master/music/sfx, suspends when hidden).
+- Lucide icons copied into `Icon.astro` (lucide-static 1.59.0, ISC).
+- `/design` internal style guide (noindex).
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| `pnpm typecheck` | pass | 0 errors / 0 warnings / 0 hints (24 files); worker tsc clean |
+| `pnpm lint` | pass | eslint clean; check-no-hex 15 files clean (mutation: temp file with `#fff` caught) |
+| `pnpm build` | pass | 3 pages, 6 font files |
+| `pnpm test` | 36/36 | lib: contrast (19), settings (9), audio (6); worker: health (2). Contrast test fails when SPEC's Day `--ok` is restored (mutation check) |
+| `pnpm e2e` | 29/29 | no-flash first paint with module JS blocked; Auto live; D + typing guard; settings keyboard/Esc/focus return/persist; corrupt storage; OS reduced motion; toasts (fake clock); progress; axe 0 violations on `/` and `/design/` in both themes + open dialog |
+| Screenshots | reviewed | 24 at 375/768/1440 × Day/Night × full/reduced, + dialog + toasts. Fixed: mobile toasts covered the gear |
+| `pnpm links` | pass | 7 links, 0 broken |
+| Lighthouse (mobile) | pass on `/`, `/404` | 100/100/100/100, LCP 1.4–1.5 s, CLS 0. `/design` 99/100/100, SEO 60 only from `is-crawlable` (intentional noindex) |
+| Shell JS | ~2.2 KB gz | React client bundle emitted but not loaded by any page |
+| Arnav's own run | pass | typecheck, lint, build, test, e2e green; `/design` checked in `wrangler dev --local`. Confirmed "working" 2026-10-18 |
+
+**Deviations from the approved plan**
+- `playwright.config.ts`: `reuseExistingServer: false` (an orphaned workerd served a stale build; see mistakes.md).
+- Unit tests split into `tests/unit/worker` (Workers pool, worker tsconfig) and `tests/unit/lib` (Node project, root tsconfig).
+- No happy-dom: browser libs take injected fakes instead (no new dependency).
+
+**Open items**
+- `/design` ships to production: remove or move behind `/admin` at 1.10.
+- Progress bar navigation wiring and offline banner / paper-plane: 1.4 and 1.6.
+- `content/timeline.json` fails `prettier --check` (pre-existing, from content intake).
+- `astro build` downloads fonts from Fontsource: Workers Builds (1.10) needs network at build time.
+
 ## 2026-10-18 · 1.1 Scaffold
 
 **Done**

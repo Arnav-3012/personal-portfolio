@@ -4,6 +4,28 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.2 Design system
+
+**Added**
+- `src/styles/tokens.css`, `src/styles/global.css`
+- `src/lib/settings.ts`, `src/lib/theme.ts`, `src/lib/toast.ts`, `src/lib/progress.ts`, `src/lib/audio.ts`
+- `src/components/Icon.astro`, `SettingsPanel.astro`, `Toaster.astro`, `ProgressBar.astro`, `Skeleton.astro`
+- `src/pages/design.astro`
+- `scripts/check-no-hex.ts`
+- `tests/unit/lib/{contrast,settings,audio}.test.ts`, `tests/e2e/design-system.spec.ts`
+
+**Changed**
+- `astro.config.mjs`: `fonts` (Fontsource provider, 4 families)
+- `src/layouts/Base.astro`: fonts, inline theme init, skip link, shell components; `noindex` + `description` props
+- `src/pages/index.astro`, `src/pages/404.astro`: token styles, `#main`
+- `package.json`: `lint` runs `check-no-hex`
+- `vitest.config.ts`: `worker` + `lib` projects; `tests/unit/health.test.ts` → `tests/unit/worker/health.test.ts`
+- `tsconfig.json`, `worker/tsconfig.json`: split unit test coverage by runtime
+- `playwright.config.ts`: never reuse an existing server
+- `docs/SPEC.md`: `--on-action`, Day `--ok` `#177A42`, Motion Auto, Hologram colour scope
+- `docs/prompts.md`: QA gate names `@cloudflare/vitest-plugin`
+- `docs/mistakes.md`: 6 entries; `docs/plan.md`: 1.2 ticked
+
 ## 2026-10-18 · 1.1 Scaffold
 
 **Added**

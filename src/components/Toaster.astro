@@ -1,0 +1,22 @@
+---
+// Live regions + icon templates for toast() in src/lib/toast.ts. Rendered once in Base.astro.
+import Icon from './Icon.astro';
+---
+
+<div class="toaster">
+  <div role="status" aria-live="polite" data-toast-region="polite"></div>
+  <div role="alert" aria-live="assertive" data-toast-region="assertive"></div>
+</div>
+
+<template data-toast-icon="ok">
+  <Icon name="circle-check" />
+</template>
+<template data-toast-icon="warn">
+  <Icon name="triangle-alert" />
+</template>
+<template data-toast-icon="error">
+  <Icon name="circle-alert" />
+</template>
+<template data-toast-icon="close">
+  <Icon name="x" size={16} />
+</template>

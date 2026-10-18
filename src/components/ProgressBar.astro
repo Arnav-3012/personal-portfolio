@@ -1,0 +1,17 @@
+---
+// Top progress pill + curtain wipe, driven by src/lib/progress.ts. Rendered once in Base.astro.
+---
+
+<div
+  class="progress"
+  role="progressbar"
+  aria-label="Loading"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-valuenow="0"
+  hidden
+  data-progress
+>
+  <div class="progress__bar"></div>
+</div>
+<div class="curtain" aria-hidden="true" data-curtain></div>

@@ -47,7 +47,7 @@ Read the existing entries first. If this repeats an earlier mistake, mark it REP
 Before we move on, QA everything this task touched and anything it could affect.
 
 1. Tests — write or update:
-   - Unit tests (Vitest; Worker code via @cloudflare/vitest-pool-workers) for logic and API handlers, including error paths.
+   - Unit tests (Vitest; Worker code via @cloudflare/vitest-plugin; browser libs in the Node `lib` project) for logic and API handlers, including error paths.
    - Playwright end-to-end tests for every user flow in this task.
    - Accessibility checks with @axe-core/playwright.
    - Playwright screenshots at 375, 768 and 1440 px wide, in Day and Night themes, and with reduced motion.
