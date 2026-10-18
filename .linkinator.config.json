@@ -1,0 +1,4 @@
+{
+  "skip": ["/api/", "/admin"],
+  "verbosity": "error"
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "arnav-portfolio",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Astro builds the static site into ./dist. The Worker only runs first for the API and admin.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/admin*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+  },
+
+  // IDs are omitted on purpose: local dev needs none, and Wrangler provisions them on first deploy (task 1.10).
+  "d1_databases": [
+    { "binding": "DB", "database_name": "portfolio", "migrations_dir": "migrations" },
+  ],
+  "kv_namespaces": [{ "binding": "KV" }],
+
+  // Vectorize has no local mode. Task 1.8 creates the index (768 dims, cosine) and sets "remote": true.
+  "vectorize": [{ "binding": "VECTORIZE", "index_name": "edith-kb" }],
+
+  // Workers AI always runs remotely, so `wrangler dev` needs `wrangler login`. `wrangler dev --local` skips it (AI unavailable).
+  "ai": { "binding": "AI" },
+
+  // Must be a verified Email Routing destination (task 1.10).
+  "send_email": [{ "name": "EMAIL", "destination_address": "arnavworkmail3012@gmail.com" }],
+
+  "observability": { "enabled": true },
+
+  // Cron triggers arrive in task 1.7. Turnstile is a secret only (TURNSTILE_SECRET), added in task 1.6.
+}

@@ -11,7 +11,7 @@ Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop
 - API: Hono in one Cloudflare Worker with static assets (`wrangler.jsonc`: assets from `./dist`, Worker runs first for `/api/*` and `/admin*`)
 - Data: D1, KV, Vectorize, Workers AI, Email Routing send-email binding, Turnstile
 - Asset compression: gltf-transform CLI (Draco + KTX2)
-- Testing: Vitest (+ @cloudflare/vitest-pool-workers for the Worker), Playwright, @axe-core/playwright, linkinator, Lighthouse CI
+- Testing: Vitest (+ @cloudflare/vitest-plugin for the Worker; formerly vitest-pool-workers, now deprecated), Playwright, @axe-core/playwright, linkinator, Lighthouse CI
 
 ## Hard rules
 - No Blender. 3D = procedural geometry + shaders in code, CC0/CC-BY models (Poly Haven, Kenney, Quaternius, Poly Pizza), Meshy/Tripo for hero props and the avatar.

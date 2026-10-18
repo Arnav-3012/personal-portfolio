@@ -1,0 +1,10 @@
+dist/
+.astro/
+.wrangler/
+pnpm-lock.yaml
+worker-configuration.d.ts
+playwright-report/
+test-results/
+.lighthouseci/
+docs/SPEC.md
+*.md
