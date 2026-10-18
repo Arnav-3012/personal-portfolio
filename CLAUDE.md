@@ -17,7 +17,7 @@ Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop
 - No Blender. 3D = procedural geometry + shaders in code, CC0/CC-BY models (Poly Haven, Kenney, Quaternius, Poly Pizza), Meshy/Tripo for hero props and the avatar.
 - No Marvel names, logos, suits, characters or posters. No Virat Kohli images or likeness. Original designs only.
 - No BEINN brand and no guitar anywhere on the site.
-- Hero layout: portrait on the LEFT, name and text on the RIGHT (Arnav faces right, toward the text). Never mirror the portrait. Source image: `assets/portrait-original.png` (1122 × 1402; upscaled version to come). If the hair cutout looks jagged, keep the grey background and fade it into `--bg` with a radial mask.
+- Hero layout: portrait on the LEFT, name and text on the RIGHT (Arnav faces right, toward the text). Never mirror the portrait. Source image: `assets/incoming/portrait/portrait-original.png` (1122 × 1402; upscaled version to come). If the hair cutout looks jagged, keep the grey background and fade it into `--bg` with a radial mask.
 - All content comes from `content/*` files. Never hardcode bio, roles, projects or stats in components.
 - Colours, type, spacing, motion only from `src/styles/tokens.css` (Night + Day themes per SPEC). No raw hex in components.
 - Theme: Auto (Mumbai time for 3D, OS setting for 2D) / Day / Night. `D` toggles (not while typing; `Shift+D` in free-roam). Settings panel persists to localStorage inside try/catch.

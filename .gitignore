@@ -20,3 +20,6 @@ playwright-report/
 
 # OS
 .DS_Store
+
+# local media inbox
+assets/incoming/
