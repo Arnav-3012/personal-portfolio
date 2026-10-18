@@ -4,6 +4,46 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.6 + 1.7 Forms API and live data (run as one batch, Arnav approved the plan)
+
+**Done** (plus one review round with Arnav: free-plan limits, the tilt-test failure, the missing local migration, Open-Meteo 503)
+- **Forms API** (`worker/forms.ts`, `worker/email.ts`, `migrations/0001_forms.sql`): `POST /api/forms/{contact,freelance,notebook}`. Order: JSON-only, 8 KB cap, honeypot (`website` filled → quiet 200, nothing stored), shared field rules, dropdown values checked against `freelance.json` / the four notebook topics, Turnstile siteverify, per-IP limit (5/hour) and a global daily cap (200), D1 insert, then email. If storage fails the email still goes out; if the email fails the row stays with `emailed = 0`; both failing returns 500. No `TURNSTILE_SECRET` or a siteverify outage fails closed (503); a bad or missing token is 403. The IP is stored only as a salted hash.
+- **Email:** hand-built MIME through the `EMAIL` binding (no new dependency): UTF-8 base64 body, RFC 2047 subject, CR/LF and U+2028/2029 stripped from every header value, `Reply-To` is the visitor. `MAIL_FROM` and `MAIL_TO` live in `wrangler.jsonc` vars.
+- **Client:** form rules moved to `src/lib/form-rules.ts` (browser and Worker share them; new `notebook` kind; the email regex now rejects commas, brackets and quotes so it can't add recipients). `src/lib/turnstile.ts` loads Cloudflare's script on first focus of a form, renders an interaction-only widget, resets it after each send; the token travels as `turnstile`. A refused check (403) has its own toast. `turnstileSiteKey` is a new `site.json` field (Cloudflare's always-pass test key until 1.10).
+- **Live data:** `worker/github.ts` (GraphQL contribution calendar + REST repos, mapped to the existing contract and checked with `parseGithub` before it is written to KV; no token → skip, any failure keeps the previous value), `worker/weather.ts` (Open-Meteo for Mumbai from `site.json` location), `worker/data.ts` (`GET /api/github`, `/api/weather`: KV read plus 5-minute edge cache, 404 `not_ready` while empty), `worker/cron.ts` (two schedules: `0 */6 * * *` GitHub, `*/30 * * * *` weather). The contract moved to `src/lib/github-data.ts` so the Worker and the landing share it.
+- **Free-plan design:** ~52 KV writes/day of 1,000; read endpoints edge-cached; the count query uses the `created_at` index (query-plan test); at most 200 stored/emailed submissions a day; 2 of 5 cron triggers.
+- **Found in QA and fixed:** the GitHub skeleton was a flat 320 px but the loaded block is 652 / ~420 / ~358 px, so the sections below jumped 332 / 99 / 38 px when data arrived (and the tilt test flaked). Skeleton now 640 / 420 / 350 px with a regression test. An idle Turnstile slot added a stray grid gap (`display: contents`).
+- **Weather kept as planned:** nothing on the landing reads it (Phase 2 window and holotable do); Arnav asked why, did not ask to drop it, and confirmed "done".
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| typecheck, lint, format | pass | 0 errors / 0 warnings; check-no-hex 53 files clean; Prettier clean |
+| `pnpm build` | pass | HTML budget 14,101 B gzipped (limit 14,200) |
+| `pnpm test` | 284/284 | Worker project 77 (forms incl. Turnstile fail and outage, rate limits, daily cap, email/storage failure, MIME injection, GitHub mapping and failures, weather, cache, cron, query plan) + lib project (form rules, Turnstile client) |
+| `pnpm e2e` | 273/273 | real Worker with local D1 + KV (fresh state per run): real sends for freelance and contact through Cloudflare's siteverify, API contract and rate limit, lazy Turnstile load, token and reset, blocked script, seeded `/api/github` feeding the section, no layout jump at 375/768/1440, axe 0 both themes; run 4 times |
+| `pnpm links` | pass | 45 links, 0 broken |
+| Lighthouse (mobile) | pass | 99/100/100/100, LCP 1956 ms (budget 2000), CLS 0, script 21.9 KB |
+| Screenshots | reviewed | forms at 375/768/1440 × Day/Night × full/reduced; found the stray gap, fixed, rechecked |
+| Mutation | pass | 7 breaks caught: Turnstile result ignored, hourly limit off by one, header cleaning removed, wrong contribution level, edge cache bypassed, `created_at` index dropped, old skeleton height |
+| Manual, `wrangler dev --local` | pass | form → real siteverify → D1 row → decoded `.eml` (From, To, Reply-To, subject, body); weather cron → real Open-Meteo data in `/api/weather`; GitHub cron skips without a token |
+| Arnav | confirmed "done" 2026-10-18 | ran e2e (reported the tilt failure), ran the Worker locally (hit the missing-migration and Open-Meteo 503 paths) |
+
+**Deviations from the approved plan**
+- Added a global daily cap (200) and the `created_at` index after Arnav asked for everything within free limits.
+- Added the skeleton sizing fix and the two layout tests (found in QA).
+- Playwright's server command now builds a fresh local D1/KV, applies the migration, seeds `github` from `tests/e2e/fixtures/github.json` and passes the test Turnstile secret with `--var`, so e2e needs no `.dev.vars`.
+- Two e2e tests that relied on the endpoint being absent now stub the empty case.
+
+**Open items**
+- **Not verified:** the live GitHub GraphQL call (needs the token; steps given: fine-grained, public repositories, read-only, `GITHUB_TOKEN` in `.dev.vars` locally and `wrangler secret put` at deploy); real email delivery (Email Routing on `arnavc.in`, 1.10); the real Turnstile keys (site key into `site.json`, `TURNSTILE_SECRET` secret); Worker CPU per request (check in observability after deploy).
+- **1.10:** set `TURNSTILE_SECRET` and `GITHUB_TOKEN` with `wrangler secret put`, apply the migration to the remote D1 (`wrangler d1 migrations apply DB --remote`), verify the inbox, replace the test site key, recheck the 403 with real keys.
+- A failed GitHub fetch still shrinks the section from the skeleton to the one-line fallback (rare, accepted).
+- A local `wrangler dev` needs `pnpm wrangler d1 migrations apply DB --local` once, or storage fails (the email still sends).
+- **Headroom is tiny:** HTML 99 B under budget and LCP 44 ms under 2.0 s. The next landing task must first move interaction-only markup into JS.
+- 1.9 inbox should list rows with `emailed = 0`.
+- 1.8 EDITH-lite is next.
+
 ## 2026-10-18 · 1.5cd Skills, freelance, GitHub, beyond code, contact, footer (third and fourth of the 1.5 sub-tasks, run as one batch)
 
 **Done** (plus three review rounds with Arnav: GitHub "not available", form error toast, footer redesign)

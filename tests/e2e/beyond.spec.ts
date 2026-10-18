@@ -70,6 +70,10 @@ test.describe('beyond code', () => {
   test('tilts toward the pointer and settles back', async ({ page }) => {
     await open(page);
     const tile = page.locator('#beyond .tile').first();
+    // Reaching the tiles starts the GitHub section above them loading; measure only once the page has settled,
+    // or the tile can move out from under the pointer between the move and the reads.
+    await tile.scrollIntoViewIfNeeded();
+    await expect(page.locator('#github')).toHaveAttribute('data-state', /ready|error/);
     await tile.scrollIntoViewIfNeeded();
     const box = await tile.boundingBox();
     if (!box) throw new Error('no tile box');

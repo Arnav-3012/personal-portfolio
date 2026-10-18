@@ -72,3 +72,22 @@ test.describe('POST /api/forms/<kind>', () => {
     );
   });
 });
+
+test.describe('cached data endpoints', () => {
+  test('/api/github serves the seeded cache with a public five-minute header', async ({
+    request,
+  }) => {
+    const res = await request.get('/api/github');
+    expect(res.status()).toBe(200);
+    expect(res.headers()['cache-control']).toBe('public, max-age=300');
+    const body = (await res.json()) as { repos: { name: string }[]; weeks: unknown[] };
+    expect(body.repos.map((r) => r.name)).toEqual(['firewatch', 'agentgate', 'statcalib', 'edith']);
+    expect(body.weeks).toHaveLength(53);
+  });
+
+  test('/api/weather is 404 not_ready until the cron has run', async ({ request }) => {
+    const res = await request.get('/api/weather');
+    expect(res.status()).toBe(404);
+    expect(await res.json()).toEqual({ ok: false, error: 'not_ready' });
+  });
+});

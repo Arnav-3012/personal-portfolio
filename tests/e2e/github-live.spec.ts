@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 // A year of contributions ending on Sunday 2026-10-18: 53 weeks, the last holding only that Sunday, as GitHub returns it.
 const fixture = () => {
@@ -38,6 +39,13 @@ const fixture = () => {
 const ok = (data: unknown) => (route: Route) =>
   route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
 
+const notReady = (route: Route) =>
+  route.fulfill({
+    status: 404,
+    contentType: 'application/json',
+    body: '{"ok":false,"error":"not_ready"}',
+  });
+
 const open = async (page: Page, theme: 'day' | 'night' = 'night') => {
   await page.addInitScript((t) => {
     sessionStorage.setItem('arnav:boot:v1', 'seen');
@@ -66,6 +74,21 @@ test.describe('github live', () => {
     expect(requests).toHaveLength(1);
   });
 
+  test('the real endpoint feeds the section with nothing mocked', async ({ page }) => {
+    // The e2e Worker's KV is seeded from tests/e2e/fixtures/github.json (see playwright.config.ts).
+    await open(page);
+    await toSection(page);
+    await expect(section(page)).toHaveAttribute('data-state', 'ready');
+    const seeded = JSON.parse(readFileSync('tests/e2e/fixtures/github.json', 'utf8')) as {
+      weeks: unknown[][];
+      repos: { name: string }[];
+    };
+    await expect(section(page).locator('.gh__cell')).toHaveCount(seeded.weeks.flat().length);
+    await expect(section(page).locator('.gh__repo-name')).toHaveText(
+      seeded.repos.map((r) => r.name),
+    );
+  });
+
   test('shows a skeleton while loading, then the data', async ({ page }) => {
     let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => (release = resolve));
@@ -82,6 +105,28 @@ test.describe('github live', () => {
     await expect(section(page)).toHaveAttribute('data-state', 'ready');
     await expect(section(page).locator('.gh__skeleton')).toBeHidden();
   });
+
+  for (const width of [375, 768, 1440]) {
+    test(`the section below does not jump when the data arrives (${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      let release: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => (release = resolve));
+      await page.route('**/api/github', async (route) => {
+        await gate;
+        await ok(fixture())(route);
+      });
+      await open(page);
+      await toSection(page);
+      await expect(section(page)).toHaveAttribute('data-state', 'loading');
+      const below = page.locator('#beyond');
+      const before = (await below.boundingBox())?.y ?? NaN;
+      release();
+      await expect(section(page)).toHaveAttribute('data-state', 'ready');
+      const after = (await below.boundingBox())?.y ?? NaN;
+      // The skeleton is sized to the loaded block; a few pixels of difference come from text wrapping.
+      expect(Math.abs(after - before)).toBeLessThan(30);
+    });
+  }
 
   test('draws every day in the right cell, in fill order, with a total and months', async ({
     page,
@@ -137,10 +182,11 @@ test.describe('github live', () => {
     await expect(repos.nth(3).locator('.gh__repo-meta')).toHaveText('pushed 3d ago');
   });
 
-  test('falls back to a profile link when the endpoint is missing (before task 1.7)', async ({
+  test('falls back to a profile link when the endpoint has no data yet (404 before the first cron run)', async ({
     page,
   }) => {
-    // No route: the real Worker answers /api/github with its JSON 404.
+    // What the Worker answers while KV is empty (the e2e Worker's KV is seeded, so this is stubbed).
+    await page.route('**/api/github', notReady);
     await open(page);
     await toSection(page);
     await expect(section(page)).toHaveAttribute('data-state', 'error');
@@ -232,6 +278,7 @@ test.describe('github live: mobile', () => {
 
 for (const theme of ['night', 'day'] as const) {
   test(`axe: github live has no violations, loaded and fallback (${theme})`, async ({ page }) => {
+    await page.route('**/api/github', notReady);
     await open(page, theme);
     await toSection(page);
     await expect(section(page)).toHaveAttribute('data-state', 'error');

@@ -10,13 +10,14 @@ export default defineConfig({
   use: { baseURL: `http://localhost:${PORT}` },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Serves the built site through the real Worker. --local disables remote bindings (AI, Vectorize) so e2e needs no Cloudflare login.
-  // Every run starts from a fresh local D1 + KV (so the form rate limit never carries over): the migration is applied
-  // and Cloudflare's always-pass Turnstile test secret is set.
+  // Every run starts from a fresh local D1 + KV (so the form rate limit never carries over): the migration is applied,
+  // the GitHub cache is seeded from a fixture, and Cloudflare's always-pass Turnstile test secret is set.
   webServer: {
     command: [
       `rm -rf ${STATE}`,
       'pnpm build',
       `pnpm wrangler d1 migrations apply DB --local --persist-to ${STATE}`,
+      `pnpm wrangler kv key put github --path tests/e2e/fixtures/github.json --binding KV --local --persist-to ${STATE}`,
       `pnpm wrangler dev --local --port ${PORT} --persist-to ${STATE} --var TURNSTILE_SECRET:1x0000000000000000000000000000000AA`,
     ].join(' && '),
     url: `http://localhost:${PORT}/api/health`,

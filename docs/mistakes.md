@@ -4,6 +4,55 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.6+1.7 · REPEAT: a count typed from memory (365 cells, not 371)
+- **What happened:** the new "real endpoint feeds the section" e2e test expected 371 heatmap cells; the fixture it loads has 365. Caught when I counted the fixture, before the run, not by a failure.
+- **Root cause:** same as the 1.5cd entry: I wrote the number I "knew" (53 weeks × 7) instead of reading it. The last week holds one day, so 53 × 7 is wrong.
+- **Fix:** the test reads `tests/e2e/fixtures/github.json` and compares with `weeks.flat().length` and the repo names from the file.
+- **Prevention rule:** When a test loads a fixture, compute every expected count and name from that fixture. (Strengthens the rule under "expected values written from my head".)
+- **Files:** `tests/e2e/github-live.spec.ts`
+
+## 2026-10-18 · 1.6+1.7 · Two e2e tests relied on an endpoint that did not exist yet
+- **What happened:** after the Worker gained `/api/github`, two GitHub tests (fallback and axe) failed: they expected the unmocked real endpoint to 404, and it now answers 200 from the seeded KV.
+- **Root cause:** in 1.5cd I wrote "No route: the real Worker answers with its JSON 404" and labelled the test "before task 1.7". The test's premise was the missing backend, so building the backend was bound to break it.
+- **Fix:** the fallback tests stub the 404 the Worker sends while KV is empty (`notReady`); a new test covers the real endpoint with nothing mocked.
+- **Prevention rule:** Never let a test depend on an endpoint being absent. Stub the absent or empty case explicitly, and grep tests for "before task" / "No route" when a task builds a backend.
+- **Files:** `tests/e2e/github-live.spec.ts`, `tests/e2e/freelance-contact.spec.ts`
+
+## 2026-10-18 · 1.6+1.7 · A JSON round trip reformatted unrelated lines
+- **What happened:** adding `turnstileSiteKey` to `content/site.json` with a Python `json.dump` also expanded the `boot.tokens` array and changed 19 lines. Seen in `git diff --stat` right after.
+- **Root cause:** I treated the file as data to re-serialise instead of text to edit; the dump ignores the hand-chosen layout (same family as "Prettier rewrote hand-written docs").
+- **Fix:** `git checkout content/site.json`, then one inserted line via a text replace (1 line changed).
+- **Prevention rule:** Edit hand-formatted JSON and Markdown as text (insert or replace a line); never parse and re-dump them. Check `git diff --stat` after any scripted edit.
+- **Files:** `content/site.json`
+
+## 2026-10-18 · 1.6+1.7 · Unicode escapes written as raw line separators
+- **What happened:** `worker/email.ts` failed to parse ("Unterminated regular expression") and took down every Worker test, including the old health tests.
+- **Root cause:** I wrote `\u2028` and `\u2029` in a regex through the file tool, which stored the actual U+2028/U+2029 characters. JavaScript treats those as line terminators, so the regex literal ended early.
+- **Fix:** replaced them with the six-character escapes; `grep -P` for U+2028/2029 across `worker src tests` is now empty.
+- **Prevention rule:** Write invisible or special characters (U+2028/2029, zero-width, bidi) only as escapes, and run the test file that imports the module straight after creating it.
+- **Files:** `worker/email.ts`
+
+## 2026-10-18 · 1.6+1.7 · Idle Turnstile slot added a stray grid gap
+- **What happened:** the first 375 px form screenshot showed a taller gap above the submit button than between fields. No test failed; only the screenshot showed it.
+- **Root cause:** the empty `[data-turnstile]` div became a grid item in `.form`, and the grid `gap` applies to it even at zero height.
+- **Fix:** `.form [data-turnstile] { display: contents; }` plus an e2e assertion on the computed display; re-screenshotted at 375, 768 and 1440 in both themes.
+- **Prevention rule:** An empty placeholder inside a grid or flex container still costs a gap: give it `display: contents` (or no box) and look at the screenshot before moving on.
+- **Files:** `src/styles/global.css`, `tests/e2e/freelance-contact.spec.ts`
+
+## 2026-10-18 · 1.6+1.7 · GitHub skeleton 320 px, loaded block up to 652 px (layout shift, flaky tilt test)
+- **What happened:** one early e2e run failed 1 of 270 and I logged it as "unexplained"; you then hit `beyond.spec.ts › tilts toward the pointer and settles back`. Repeating that test 40 times with 4 workers reproduced it (`--ry` set, `--rx` empty a moment later).
+- **Root cause:** the GitHub section sits right above the Beyond tiles. Its skeleton was a flat 320 px, but the loaded block is 652 px below 768 px, about 420 px up to 1099 px and about 358 px above. When data arrived the tiles jumped 332 / 99 / 38 px and left the stationary pointer. The shift existed since 1.5d but stayed hidden while the endpoint 404'd (the section shrank instead of growing); the seeded real endpoint exposed it. I should have chased the first unexplained failure instead of logging it and moving on.
+- **Fix:** skeleton heights 640 / 420 / 350 px at the existing 768 and 1100 px breakpoints; a regression test at 375 / 768 / 1440 px (the section below moves < 30 px; it fails on the old skeleton with 332 / 99 / 38); the tilt test waits for `#github` to settle before measuring. 40 repeats with 4 workers now pass, and the full suite passed 273 of 273.
+- **Prevention rule:** A skeleton must be sized to the loaded block at every breakpoint, and any failure with no captured name gets reproduced (`--repeat-each` under load) before the task is called done, never logged as "unexplained". When a backend lands, rerun the whole e2e suite twice, since a real response can expose layout shifts that an error state hid.
+- **Known gap:** on a failed fetch the section still shrinks from the skeleton to the one-line fallback (rare path, accepted).
+- **Files:** `src/components/landing/GithubLive.astro`, `tests/e2e/github-live.spec.ts`, `tests/e2e/beyond.spec.ts`
+
+## 2026-10-18 · 1.6+1.7 · Smaller wrong turns (caught before review)
+- **Test race:** asserted the Turnstile reset count right after the request arrived, but the reset runs after the response. Fix: `expect.poll`. Rule: assert on effects that happen after a response with a polling expectation.
+- **Console spy:** `vi.spyOn(console, 'warn')` then `expect(console.warn)` failed in workerd ("not a spy"). Fix: keep the spy reference and assert on it.
+- **Unformatted fixture:** `github.json` written minified failed `format:check`. Fix: `prettier --write` the generated file.
+- **zsh quirk:** an unquoted `=====` in `echo` is parsed as command expansion. Quote echo labels.
+
 ## 2026-10-18 · 1.5cd (footer redesign) · An oversized child stretched the whole grid
 - **What happened:** the first footer screenshot had the "Based in" column, the "Back to top" link and the end of the bottom line cut off at the right edge, at every width; the giant ARNAV wordmark itself was also clipped.
 - **Root cause:** `.foot__inner` was a one-column grid with an implicit `auto` track, and the wordmark's own width (24vw × 5 letters, wider than the screen) stretched that track past the container, so every sibling was laid out on a wider canvas and clipped by `overflow: hidden`.
@@ -36,11 +85,11 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Prevention rule:** Open the source photo before choosing a crop and store the focal point in content; test every long unbreakable string (email, URL) at 375 and 768 px; never call a visual task done before reading the screenshots.
 - **Files:** `content/cricket.json`, `src/lib/content.ts`, `src/lib/landing.ts`, `src/lib/github.ts`, `src/components/landing/{BeyondCode,Contact,Skills,GithubLive}.astro`
 
-## 2026-10-18 · 1.5cd · REPEAT: expected values written from my head (four times)
+## 2026-10-18 · 1.5cd · REPEAT: expected values written from my head (five times, see 1.6+1.7)
 - **What happened:** four tests failed on values I had guessed: `(-0).toFixed(2)` is `"0.00"` so the expected `-0` was wrong; `Intl` `en-GB` prints September as "Sept", not "Sep"; a dock neighbour at 110 px scaled to 1.097, not "above 1.1"; my month-label fixture put Oct one column after Sep, which the crowding rule drops by design.
 - **Root cause:** I wrote the expectation from the intended behaviour and never evaluated it first (same cause as the 1.5b entry "Several of my own assertions checked the wrong thing"). The `Intl` one is also environment-dependent: ICU versions disagree on short month names.
 - **Fix:** corrected each expectation after printing the real value; month names come from a fixed table (`src/lib/dates.ts`), not `Intl`.
-- **Prevention rule:** Evaluate an expected number or string once (node REPL or a throwaway test) before committing it to a test; use fixed tables, not `Intl`, for any text a test compares.
+- **Prevention rule:** Evaluate an expected number or string once (node REPL or a throwaway test) before committing it to a test; use fixed tables, not `Intl`, for any text a test compares. Derive counts from the fixture file the test loads, never type them. _(Repeated in 1.6+1.7: see that entry.)_
 - **Files:** `tests/unit/lib/{dock,github}.test.ts`, `src/lib/{dates,github,landing}.ts`
 
 ## 2026-10-18 · 1.5cd · Dock designed without measuring its tiles

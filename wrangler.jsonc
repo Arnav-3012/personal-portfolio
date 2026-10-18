@@ -35,5 +35,8 @@
 
   "observability": { "enabled": true },
 
+  // worker/cron.ts dispatches on these exact strings. The free plan allows five cron triggers per account.
+  "triggers": { "crons": ["0 */6 * * *", "*/30 * * * *"] },
+
   // Secrets (wrangler secret put, or .dev.vars locally): TURNSTILE_SECRET, GITHUB_TOKEN. Typed in worker/secrets.d.ts.
 }

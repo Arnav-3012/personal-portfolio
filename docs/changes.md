@@ -4,6 +4,27 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.6 + 1.7 Forms API and live data
+
+**Added**
+- `worker/forms.ts`, `email.ts`, `github.ts`, `weather.ts`, `data.ts`, `cron.ts`, `secrets.d.ts`
+- `migrations/0001_forms.sql` (`submissions` table, `created_at` index)
+- `src/lib/form-rules.ts`, `turnstile.ts`, `github-data.ts`
+- `tests/unit/worker/forms.test.ts`, `email.test.ts`, `github.test.ts`, `weather.test.ts`, `data.test.ts`, `cron.test.ts`, `helpers.ts`, `raw.d.ts`; `tests/unit/lib/form-rules.test.ts`, `turnstile.test.ts`
+- `tests/e2e/forms-api.spec.ts`, `tests/e2e/fixtures/github.json`
+
+**Changed**
+- `worker/index.ts`: mounts `/api/forms` and the data routes; exports `fetch` and `scheduled`
+- `wrangler.jsonc`: `MAIL_FROM` / `MAIL_TO` vars, two cron triggers; `worker-configuration.d.ts` regenerated
+- `src/lib/forms.ts`: rules moved out, Turnstile token, `verification` failure reason; `src/lib/github.ts`: contract moved to `github-data.ts`
+- `src/components/FormField.astro`, `landing/Contact.astro`, `landing/Freelance.astro`: Turnstile slot and site key
+- `src/components/landing/GithubLive.astro`: skeleton sized to the loaded block per breakpoint
+- `src/styles/global.css`: idle Turnstile slot takes no row
+- `content/site.json`, `src/lib/content.ts`: `turnstileSiteKey`
+- `playwright.config.ts`: fresh local D1/KV per run, migration, KV seed, test Turnstile secret
+- `tests/e2e/freelance-contact.spec.ts` (Turnstile stub, real sends), `github-live.spec.ts` (stubbed 404, real endpoint, no-jump tests), `beyond.spec.ts` (tilt waits for the page to settle); `tests/unit/lib/forms.test.ts`
+- `docs/plan.md` (1.6 and 1.7 ticked), `docs/mistakes.md`, `docs/logs.md`
+
 ## 2026-10-18 · 1.5cd Skills, freelance, GitHub, beyond code, contact, footer
 
 **Added**
