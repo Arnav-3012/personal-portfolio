@@ -10,6 +10,7 @@ export interface ToastOptions {
 }
 
 export const TOAST_MS = 4000;
+const LEAVE_MS = 200;
 const MAX_VISIBLE = 3;
 const LABELS: Record<ToastKind, string> = { ok: 'OK', warn: '!!', error: 'ERR' };
 
@@ -42,17 +43,24 @@ export function toast({ kind, message, label = LABELS[kind] }: ToastOptions): vo
   close.setAttribute('aria-label', 'Dismiss');
   if (closeIcon) close.append(closeIcon.content.cloneNode(true));
 
+  const body = document.createElement('div');
+  body.className = 'toast__body';
+  body.append(tag, text);
+
   if (icon) item.append(icon.content.cloneNode(true));
-  item.append(tag, text, close);
+  item.append(body, close);
 
   let remaining = TOAST_MS;
   let startedAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const dismiss = (): void => {
     clearTimeout(timer);
-    item.remove();
+    // Play the exit animation (global.css), then remove.
+    item.classList.add('is-leaving');
+    setTimeout(() => item.remove(), LEAVE_MS);
   };
   const resume = (): void => {
+    if (item.classList.contains('is-leaving')) return;
     startedAt = Date.now();
     timer = setTimeout(dismiss, remaining);
   };

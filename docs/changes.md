@@ -4,6 +4,13 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.2 follow-up · Shell UI polish
+
+**Changed**
+- `src/styles/global.css`: skeleton scanline, progress tail, head and fade-out, toast redesign (chip, stacked label, countdown, exit)
+- `src/lib/toast.ts`: `.toast__body` wrapper, exit animation before removal, no resume once leaving
+- `docs/mistakes.md`: skeleton visibility entry
+
 ## 2026-10-18 · 1.2 Design system
 
 **Added**

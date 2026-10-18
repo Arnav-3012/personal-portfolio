@@ -4,6 +4,21 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.2 follow-up · Skeleton, progress and toast polish
+
+**Done** (Arnav's feedback: skeleton sweep invisible, toasts and progress too plain)
+- Skeleton: bright scanline with a fading trail, transform-based, 1.8 s; static under reduced motion.
+- Progress: fading tail, glowing head driven by the same `--progress`, eased steps, fades out at 100%; glow hidden under reduced motion.
+- Toasts: tinted icon chip, HUD label stacked over the message, kind-tinted border and glow, frosted surface, 4 s countdown line that pauses with the timer, 200 ms exit animation.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| `pnpm lint`, `pnpm typecheck` | pass | check-no-hex clean; 0 errors |
+| `pnpm e2e` | 29/29 | toast timing, pause and dismiss tests unchanged and passing |
+| Mid-animation captures | reviewed | skeleton at 3 frames, progress mid-run, 3 toasts; Night and Day |
+| Arnav | confirmed "done" 2026-10-18 | |
+
 ## 2026-10-18 · 1.2 Design system
 
 **Done**

@@ -192,13 +192,14 @@ body::after {
     fill var(--dur-theme) var(--ease-out) !important;
 }
 
-/* Skeleton with a slow scanline sweep */
+/* Skeleton: a bright scanline with a fading trail sweeps top to bottom (SPEC: not grey pulses) */
 .skeleton {
   display: block;
   position: relative;
   overflow: hidden;
+  border: var(--border);
   border-radius: var(--radius-chip);
-  background: var(--line);
+  background: color-mix(in srgb, var(--line) 55%, var(--surface));
 }
 .skeleton--card {
   border-radius: var(--radius-card);
@@ -209,27 +210,25 @@ body::after {
 .skeleton::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -60% 0 auto;
+  height: 60%;
+  min-height: 24px;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    color-mix(in srgb, var(--text) 10%, transparent) 50%,
-    transparent 100%
+    color-mix(in srgb, var(--text) 6%, transparent) 70%,
+    color-mix(in srgb, var(--text) 22%, transparent) 97%,
+    color-mix(in srgb, var(--text) 45%, transparent) 100%
   );
-  background-size: 100% 40%;
-  background-repeat: no-repeat;
-  animation: scanline 2.4s linear infinite;
+  animation: scanline 1.8s var(--ease-cam) infinite;
 }
 @keyframes scanline {
-  from {
-    background-position: 0 -40%;
-  }
   to {
-    background-position: 0 140%;
+    transform: translateY(270%);
   }
 }
 
-/* Progress pill + curtain */
+/* Progress: --action pill with a fading tail and a glowing head */
 .progress {
   position: fixed;
   top: 0;
@@ -238,17 +237,42 @@ body::after {
   z-index: var(--z-progress);
   height: 3px;
   pointer-events: none;
+  transition: opacity 250ms var(--ease-out);
 }
 .progress[hidden] {
   display: none;
 }
+.progress[aria-valuenow='100'] {
+  opacity: 0;
+  transition-delay: 120ms;
+}
 .progress__bar {
   height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--action);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--action) 15%, transparent),
+    var(--action) 40%
+  );
   transform: scaleX(var(--progress, 0));
   transform-origin: left;
-  transition: transform 200ms var(--ease-out);
+  transition: transform 300ms var(--ease-out);
+}
+/* Head: a soft light at the leading edge, moved with the same --progress value */
+.progress::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 96px;
+  height: 15px;
+  background: radial-gradient(
+    ellipse 100% 50% at 100% 50%,
+    color-mix(in srgb, var(--action) 70%, transparent),
+    transparent 70%
+  );
+  transform: translateX(calc(var(--progress, 0) * 100vw - 100%));
+  transition: transform 300ms var(--ease-out);
 }
 .curtain {
   position: fixed;
@@ -274,7 +298,7 @@ body::after {
   z-index: var(--z-toast);
   display: grid;
   gap: var(--space-2);
-  width: min(calc(100% - var(--space-6)), 480px);
+  width: min(calc(100% - var(--space-6)), 440px);
   transform: translateX(-50%);
 }
 .toaster > div {
@@ -288,40 +312,60 @@ body::after {
   }
 }
 .toast {
+  --kind: var(--ok);
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  border: var(--border);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--kind) 35%, var(--line));
   border-radius: var(--radius-pill);
-  background: var(--surface);
+  background:
+    radial-gradient(
+      120% 160% at 0% 50%,
+      color-mix(in srgb, var(--kind) 12%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
   color: var(--text);
-  animation: toast-in 300ms var(--ease-out);
+  animation: toast-in 420ms var(--ease-out);
 }
-.toast[data-kind='ok'] > .icon,
-.toast[data-kind='ok'] .toast__label {
-  color: var(--ok);
+.toast[data-kind='warn'] {
+  --kind: var(--time);
 }
-.toast[data-kind='warn'] > .icon,
-.toast[data-kind='warn'] .toast__label {
-  color: var(--time);
+.toast[data-kind='error'] {
+  --kind: var(--action);
 }
-.toast[data-kind='error'] > .icon,
-.toast[data-kind='error'] .toast__label {
-  color: var(--action);
+.toast.is-leaving {
+  animation: toast-out 200ms var(--ease-out) forwards;
 }
+/* Icon in a tinted round chip */
 .toast > .icon {
   flex: none;
+  box-sizing: content-box;
+  padding: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--kind) 16%, transparent);
+  color: var(--kind);
+}
+.toast__body {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-block: var(--space-1);
 }
 .toast__label {
-  flex: none;
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: var(--type-hud);
+  line-height: var(--lh-hud);
   letter-spacing: var(--track-hud);
+  color: var(--kind);
 }
 .toast__message {
-  flex: 1;
   font-size: var(--type-small);
   line-height: var(--lh-small);
 }
@@ -336,11 +380,47 @@ body::after {
   background: transparent;
   color: var(--text-2);
   cursor: pointer;
+  transition:
+    background-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
+}
+.toast__close:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+/* Countdown line: drains over the 4 s auto-dismiss and pauses with the timer */
+.toast::after {
+  content: '';
+  position: absolute;
+  left: var(--space-6);
+  right: var(--space-6);
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--kind);
+  opacity: 0.7;
+  transform-origin: left;
+  animation: toast-timer 4s linear forwards;
+}
+.toast:hover::after,
+.toast:focus-within::after {
+  animation-play-state: paused;
 }
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px) scale(0.96);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes toast-timer {
+  to {
+    transform: scaleX(0);
   }
 }
 
@@ -451,6 +531,9 @@ body::after {
 }
 
 /* Reduced motion: from the Settings panel or the OS (no-JS fallback) */
+:root[data-motion='reduced'] .progress::after {
+  display: none;
+}
 :root[data-motion='reduced'] *,
 :root[data-motion='reduced'] *::before,
 :root[data-motion='reduced'] *::after {

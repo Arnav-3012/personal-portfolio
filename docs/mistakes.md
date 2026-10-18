@@ -4,6 +4,13 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.2 follow-up · Skeleton sweep invisible, shell UI too plain
+- **What happened:** after closing 1.2, Arnav couldn't see the skeleton loading sweep and found toasts and the progress bar bland.
+- **Root cause:** the sweep was a 10% tint over 40% of the block, so it was barely visible. I signed it off from full-page static screenshots, which can't show whether an animation reads, and I never captured the progress bar mid-run.
+- **Fix:** bright scanline with a fading trail (transform-based); progress bar with a fading tail, a glowing head and a fade-out; toasts with a tinted icon chip, stacked HUD label and message, kind-tinted border and glow, a 4 s countdown line that pauses with the timer, and an exit animation.
+- **Prevention rule:** For anything animated, capture element screenshots mid-animation (2–3 frames) and review those, not just the page at rest.
+- **Files:** `src/styles/global.css`, `src/lib/toast.ts`
+
 ## 2026-10-18 · 1.2 · e2e ran against a stale build
 - **What happened:** an axe failure persisted after the fix; the HTML still had the old `<header>`.
 - **Root cause:** the first `pnpm e2e` left an orphaned `workerd` on :8787, and `reuseExistingServer: true` silently reused it, skipping `pnpm build`. It looked safe because Playwright normally stops the server it starts.
