@@ -1,0 +1,372 @@
+---
+// Hero (SPEC row 2): Arnav centre stage as an amber dot-matrix (src/lib/dotmatrix.ts), facing right and never
+// mirrored; ARNAV huge across the lower third; four corner quadrants link the sections. The <img> stays in the
+// DOM as the LCP element, the alt text and the no-JS fallback; the canvas paints over it and the img fades out.
+// The brain hotspot arrives with the workshop in Phase 2.
+import { Picture } from 'astro:assets';
+import portrait from '../../assets/portrait/portrait.jpg';
+import Icon from '../Icon.astro';
+import FreelancePill from '../FreelancePill.astro';
+import { experience, projects, site } from '../../lib/content';
+import { buildingProject, currentRole, quadrants, resumeHref } from '../../lib/landing';
+
+const letters = [...site.shortName];
+const role = currentRole(experience);
+const building = buildingProject(site, projects);
+const resume = resumeHref(site.resume.file);
+const quads = quadrants(site, projects, experience);
+const links = [
+  ...(resume ? [{ label: 'Resume', href: resume, icon: 'file-text' as const }] : []),
+  { label: 'LinkedIn', href: site.socials.linkedin, icon: 'arrow-up-right' as const },
+  { label: 'GitHub', href: site.socials.github, icon: 'arrow-up-right' as const },
+  { label: 'Instagram', href: site.socials.instagram, icon: 'arrow-up-right' as const },
+];
+const { lat, lon, city } = site.location;
+---
+
+<section class="hero" aria-labelledby="hero-name" data-hero>
+  <div class="hero__stage">
+    <div class="hero__media">
+      <Picture
+        src={portrait}
+        alt={site.portrait.alt}
+        formats={['avif', 'webp']}
+        widths={[480, 800, 1200]}
+        sizes="(min-width: 768px) 560px, 88vw"
+        loading="eager"
+        fetchpriority="high"
+        data-portrait
+      />
+      <canvas class="hero__dots" aria-hidden="true"></canvas>
+    </div>
+    <p class="hud hero__coords" aria-hidden="true">
+      {city} · {lat}° N · {lon}° E
+    </p>
+    <div class="hero__title">
+      <p class="hero__role">{site.roleLine}</p>
+      <h1 id="hero-name" class="hero__name">
+        <span class="visually-hidden">{site.name}</span>
+        <span aria-hidden="true">
+          {letters.map((ch, i) => (
+            <span class="hero__letter" style={`--i: ${i}`}>
+              {ch}
+            </span>
+          ))}
+        </span>
+      </h1>
+    </div>
+  </div>
+
+  <div class="hero__meta">
+    <ul class="hero__chips">
+      <li>
+        <FreelancePill variant="chip" />
+      </li>
+      {role && (
+        <li class="chip">
+          <span class="chip__dot" aria-hidden="true" />
+          <span class="chip__key">Currently</span> {role.title} at {role.company}
+        </li>
+      )}
+      {building && (
+        <li class="chip">
+          <span class="chip__key">Building</span> {building.name}
+        </li>
+      )}
+    </ul>
+    <ul class="hero__links">
+      {links.map((l) => (
+        <li>
+          <a
+            class="hero__link"
+            href={l.href}
+            rel={l.href.startsWith('http') ? 'me noopener' : undefined}
+          >
+            {l.label}
+            <Icon name={l.icon} size={16} />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <ul class="hero__quads" aria-label="Sections">
+    {quads.map((q) => (
+      <li class={`quad quad--${q.n}`}>
+        <a href={`#${q.id}`}>
+          <span class="quad__n">{q.n}</span>
+          <span class="quad__meta">{q.meta}</span>
+          <span class="quad__title">{q.title}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-6);
+    min-height: 100svh;
+    padding: calc(56px + var(--space-6)) var(--space-4) var(--space-7);
+    overflow: hidden;
+  }
+
+  /* Stage: the figure, with the name crossing its lower third */
+  .hero__stage {
+    position: relative;
+    width: min(88vw, calc((100svh - 56px - 220px) * 0.8));
+    min-width: min(88vw, 300px);
+    aspect-ratio: 4 / 5;
+  }
+  .hero__media {
+    position: absolute;
+    inset: 0;
+  }
+  .hero__media :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* No-JS fallback: the photo feathered into the page */
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 60%, transparent 100%);
+    transition: opacity 600ms var(--ease-out);
+  }
+  /* Once the dots are drawn the photo hides; the canvas reveals it under the pointer (src/lib/dotmatrix.ts). */
+  .hero[data-dots] .hero__media :global(img) {
+    opacity: 0;
+  }
+  .hero__dots {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero__coords {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+
+  .hero__title {
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    width: max-content;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .hero__role {
+    max-width: min(88vw, 60ch);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--type-hud);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--time);
+  }
+  .hero__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(64px, 13vw, 210px);
+    line-height: 0.85;
+    letter-spacing: var(--track-display-xl);
+    white-space: nowrap;
+    color: var(--text);
+  }
+  .hero__letter {
+    display: inline-block;
+    animation: letter-in var(--dur-reveal) var(--ease-out) both;
+    animation-delay: calc(var(--i) * var(--stagger));
+  }
+  /* Dot-matrix lettering: real text, filled with a dot grid that scales with the type. */
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .hero__letter {
+      background: radial-gradient(circle, var(--text) 40%, transparent 46%) 0 0 / 0.04em 0.04em;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+  /* Held until the boot hands off: the decoded letters fly in as these reveal. */
+  :global(:root[data-boot='on']) .hero__letter {
+    animation: none;
+    opacity: 0;
+  }
+  @keyframes letter-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.25em) scale(0.96);
+    }
+  }
+
+  .hero__meta {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+  }
+  .hero__chips,
+  .hero__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    padding: 0 var(--space-3);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    font-size: var(--type-small);
+    line-height: 1;
+  }
+  .chip__key {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--type-hud);
+    letter-spacing: var(--track-hud);
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .chip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--ok);
+  }
+  .hero__links {
+    gap: var(--space-1);
+  }
+  .hero__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .hero__link:hover {
+    color: var(--time);
+  }
+  .hero__link :global(.icon) {
+    color: var(--time);
+  }
+
+  /* Quadrants: a 2×2 grid on small screens, the four corners on wide ones */
+  .hero__quads {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    width: 100%;
+    padding: 0;
+    list-style: none;
+  }
+  .quad a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: var(--border);
+    border-radius: var(--radius-chip);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+  .quad a:hover {
+    border-color: var(--time);
+  }
+  .quad__n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--type-small);
+    color: var(--time);
+  }
+  .quad__meta {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--type-hud);
+    letter-spacing: var(--track-hud);
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-2);
+  }
+  .quad__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-heading);
+    line-height: var(--lh-heading);
+  }
+  @media (min-width: 768px) {
+    .hero__role {
+      letter-spacing: 0.32em;
+    }
+  }
+  @media (min-width: 960px) {
+    .hero {
+      padding-bottom: var(--space-6);
+    }
+    .hero__quads {
+      position: absolute;
+      width: auto;
+      inset: calc(56px + var(--space-7)) var(--space-7) var(--space-7);
+      display: block;
+      pointer-events: none;
+    }
+    .quad {
+      position: absolute;
+      pointer-events: auto;
+    }
+    .quad a {
+      padding: 0;
+      border: 0;
+    }
+    .quad a:hover .quad__title {
+      color: var(--time);
+    }
+    .quad--01 {
+      top: 0;
+      left: 0;
+    }
+    .quad--02 {
+      top: 0;
+      right: 0;
+      text-align: right;
+    }
+    .quad--03 {
+      bottom: 0;
+      left: 0;
+    }
+    .quad--04 {
+      bottom: 0;
+      right: 0;
+      text-align: right;
+    }
+    .quad__n {
+      font-size: var(--type-heading);
+    }
+    .quad__title {
+      font-size: clamp(28px, 2.6vw, 40px);
+      font-weight: 600;
+      transition: color var(--dur-hover) var(--ease-out);
+    }
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+// "Open to freelance" status (SPEC "Open to freelance"): one component for the nav pill and the hero chip, both
+// driven by freelance.json. Booked turns grey and reads "Currently booked" plus the note.
+import { freelance } from '../lib/content';
+import { freelanceStatus } from '../lib/landing';
+
+interface Props {
+  variant: 'nav' | 'chip';
+}
+const { variant } = Astro.props;
+const status = freelanceStatus(freelance);
+---
+
+<a class={`status-pill status-pill--${variant}`} href="#freelance" data-open={String(status.open)}>
+  <span class="status-pill__dot" aria-hidden="true"></span>
+  <span>
+    {status.label}
+    {status.note && <span class="status-pill__note"> · {status.note}</span>}
+  </span>
+</a>
+
+<style>
+  .status-pill {
+    --tone: var(--time);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    padding: 0 var(--space-3) 0 var(--space-2);
+    border: 1px solid color-mix(in srgb, var(--tone) 45%, var(--line));
+    border-radius: var(--radius-pill);
+    color: var(--text);
+    font-size: var(--type-small);
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+  .status-pill:hover {
+    border-color: var(--tone);
+  }
+  .status-pill[data-open='false'] {
+    --tone: var(--text-2);
+    color: var(--text-2);
+  }
+  /* In the HUD bar the pill is a plain cell label (the cell draws the borders). */
+  .status-pill--nav {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    font: inherit;
+    letter-spacing: inherit;
+  }
+  .status-pill--nav:hover {
+    color: var(--time);
+  }
+  .status-pill__note {
+    color: var(--text-2);
+  }
+  /* Dot with a slow tungsten glow pulse (static when booked or with reduced motion) */
+  .status-pill__dot {
+    position: relative;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--tone);
+  }
+  .status-pill[data-open='true'] .status-pill__dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: var(--tone);
+    opacity: 0;
+    animation: pulse 2.4s var(--ease-out) infinite;
+  }
+  @keyframes pulse {
+    from {
+      opacity: 0.55;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.4);
+    }
+  }
+</style>

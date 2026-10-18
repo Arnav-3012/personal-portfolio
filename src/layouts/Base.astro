@@ -5,14 +5,23 @@ import SettingsPanel from '../components/SettingsPanel.astro';
 import Toaster from '../components/Toaster.astro';
 import ProgressBar from '../components/ProgressBar.astro';
 import { SETTINGS_KEY } from '../lib/settings';
+import { BOOT_KEY, FAILSAFE_MS } from '../lib/boot';
 import { site } from '../lib/content';
 
 interface Props {
   title: string;
   description?: string;
   noindex?: boolean;
+  /** Plays the ARNAV-OS boot (landing only). */
+  boot?: boolean;
 }
-const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false } = Astro.props;
+const {
+  title,
+  description = `${site.name}: ${site.roleLine}.`,
+  noindex = false,
+  boot = false,
+} = Astro.props;
+const hasNav = Astro.slots.has('nav');
 ---
 
 <!doctype html>
@@ -25,7 +34,10 @@ const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
     {/* Sets theme + motion before first paint so there is no flash. Mirrors src/lib/theme.ts. */}
-    <script is:inline define:vars={{ key: SETTINGS_KEY }}>
+    <script
+      is:inline
+      define:vars={{ key: SETTINGS_KEY, boot, bootKey: BOOT_KEY, failsafe: FAILSAFE_MS }}
+    >
       (() => {
         const d = document.documentElement;
         let s = {};
@@ -45,6 +57,22 @@ const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false 
           s.motion === 'reduced' || (s.motion !== 'full' && m('(prefers-reduced-motion: reduce)'))
             ? 'reduced'
             : 'full';
+        // ARNAV-OS boot: once per session, never with reduced motion (mirrors shouldBoot in src/lib/boot.ts).
+        // The timeout is a failsafe so the page can never stay covered if the module script fails to load.
+        if (boot && d.dataset.motion === 'full') {
+          let seen = false;
+          try {
+            seen = sessionStorage.getItem(bootKey) === 'seen';
+          } catch {
+            // Storage blocked: show the boot.
+          }
+          if (!seen) {
+            d.dataset.boot = 'on';
+            setTimeout(() => {
+              if (d.dataset.boot === 'on') delete d.dataset.boot;
+            }, failsafe);
+          }
+        }
       })();
     </script>
     <Font cssVariable="--font-display" preload={[{ weight: 700 }]} />
@@ -57,7 +85,10 @@ const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false 
       Skip to content
     </a>
     <ProgressBar />
-    <header class="shell-bar">
+    <header
+      class:list={['shell-bar', { 'shell-bar--nav': hasNav }]}
+      data-nav-bar={hasNav || undefined}
+    >
       <slot name="nav" />
       <SettingsPanel />
     </header>
@@ -81,5 +112,35 @@ const { title, description = `${site.name}: ${site.roleLine}.`, noindex = false 
     z-index: var(--z-progress);
     display: flex;
     gap: var(--space-2);
+  }
+  /* With a nav: a full-width sticky bar that slides away on scroll down (src/lib/nav.ts). */
+  .shell-bar--nav {
+    top: 0;
+    right: 0;
+    left: 0;
+    /* Under the progress bar and the page-transition curtain */
+    z-index: calc(var(--z-progress) - 2);
+    align-items: stretch;
+    gap: 0;
+    height: 56px;
+    border-bottom: 1px solid color-mix(in srgb, var(--time) 35%, var(--line));
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    transition: transform 300ms var(--ease-out);
+  }
+  /* Icon buttons (settings gear, menu) become square cells of the HUD bar. */
+  .shell-bar--nav > :global(.icon-button) {
+    width: 56px;
+    height: auto;
+    border: 0;
+    border-left: var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+  .shell-bar--nav > :global(.icon-button:hover) {
+    color: var(--time);
+  }
+  .shell-bar--nav[data-hidden]:not(:focus-within) {
+    transform: translateY(-100%);
   }
 </style>

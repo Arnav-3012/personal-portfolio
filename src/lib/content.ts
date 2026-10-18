@@ -37,6 +37,14 @@ export const siteSchema = z.strictObject({
   email: z.email(),
   socials: z.strictObject({ linkedin: url, github: url, instagram: url }),
   resume: z.strictObject({ source: media, file: z.string().regex(/^[a-z0-9-]+\.pdf$/) }),
+  portrait: z.strictObject({ alt: text.max(120) }),
+  // ARNAV-OS boot: input tokens flow through the transformer and decode `output` letter by letter;
+  // log lines ("[ OK ]" / "[ !! ]" pick the status colour) print in the HUD corner.
+  boot: z.strictObject({
+    tokens: z.array(text.max(10)).min(3).max(8),
+    output: text.max(12),
+    log: z.array(text.max(40)).min(2).max(8),
+  }),
   currentlyBuilding: id,
   education: z.strictObject({ school: text, degree: text, dates: text }),
   proof: z

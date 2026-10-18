@@ -16,7 +16,7 @@ The site has two layers: a fast 2D website that answers a recruiter in 30 second
 2. Content before chrome: every number on screen comes from a real repo or role.
 3. One signature moment per layer: the photo-to-brain dive (2D) and the Earth-to-Mumbai holotable (3D). Everything else stays calm.
 4. The 3D never gates information: anything shown in 3D also exists in the 2D site.
-5. Colour carries meaning: cyan = hologram, tungsten = time and history, red = action.
+5. Colour carries meaning: amber (tungsten) = Arnav's 2D signature, time and history; cyan = hologram (3D); red = action; green = live. The 2D site is a warm amber terminal (warm near-black, parchment text), after Warp's warmth (awesome-design-md) without its no-accent rule.
 
 ## Site map and user flows
 
@@ -34,34 +34,34 @@ Two themes, Night and Day, share one token set: each accent belongs to one layer
 
 | Token | Hex | Role | Contrast on bg |
 | --- | --- | --- | --- |
-| `--bg` Graphite | `#0E1013` | Page and room shadow | — |
-| `--surface` Gunmetal | `#171A1F` | Cards, panels, nav | — |
-| `--line` Steel line | `#2A2F37` | Borders, dividers | — |
-| `--text` Chalk | `#EDEFF2` | Primary text | 16.5:1 |
-| `--text-2` Steel | `#8A93A0` | Secondary text, captions | 6.1:1 |
+| `--bg` Warm void | `#14110D` | Page and room shadow | — |
+| `--surface` Ember | `#1C1813` | Cards, panels, nav | — |
+| `--line` Umber line | `#3A3128` | Borders, dividers | — |
+| `--text` Parchment | `#F3EDE2` | Primary text | 16.2:1 |
+| `--text-2` Warm stone | `#A89C8A` | Secondary text, captions | 7.0:1 |
 | `--holo` Arc Cyan | `#4FD8FF` | Hologram layer only (holotable, EDITH, HUD) | 11.4:1 |
-| `--action` Signal Red | `#FF4B3E` | Primary buttons, links, armor accents | 5.7:1 |
-| `--time` Tungsten | `#F2A33A` | Retro TV, timeline, "open to freelance" | 9.1:1 |
+| `--action` Signal Red | `#FF5A3C` | Primary buttons, links, armor accents | 6.1:1 |
+| `--time` Tungsten amber | `#E8A24A` | 2D signature: dot-matrix portrait, HUD labels, nav marker, "open to freelance"; Retro TV, timeline | 8.7:1 |
 | `--board` Board Green | `#1F3B2D` | Chalkboard surface (chalk on it 10.6:1) | — |
 | `--ok` Live Green | `#3DDC84` | Live dot, GitHub "online" | 10.7:1 |
-| `--on-action` | `#0E1013` | Text on `--action` buttons (white on Signal Red is only 3.3:1) | 5.7:1 on `--action` |
+| `--on-action` | `#14110D` | Text on `--action` buttons (white on Signal Red is only 3.3:1) | 6.1:1 on `--action` |
 
 Rules: one accent per screen region; never cyan and tungsten in the same panel; no purple-pink "AI gradient".
 
 **Day theme overrides** (same token names; everything not listed is shared)
 
-| Token | Night | Day | Day contrast on `#F6F4EF` |
+| Token | Night | Day | Day contrast on `#F4EEE3` |
 | --- | --- | --- | --- |
-| `--bg` | `#0E1013` | `#F6F4EF` paper | — |
-| `--surface` | `#171A1F` | `#FFFFFF` | — |
-| `--line` | `#2A2F37` | `#DAD7D0` | — |
-| `--text` | `#EDEFF2` | `#14161A` | 16.5:1 |
-| `--text-2` | `#8A93A0` | `#565C66` | 6.1:1 |
+| `--bg` | `#14110D` | `#F4EEE3` paper | — |
+| `--surface` | `#1C1813` | `#FFFDF8` | — |
+| `--line` | `#3A3128` | `#DCD2C2` | — |
+| `--text` | `#F3EDE2` | `#1A1510` | 15.7:1 |
+| `--text-2` | `#A89C8A` | `#5E5346` | 6.5:1 |
 | `--holo` | `#4FD8FF` | `#00739E` | 4.8:1 |
-| `--action` | `#FF4B3E` | `#C8281C` | 5.1:1 |
-| `--time` | `#F2A33A` | `#8F5300` | 5.6:1 |
+| `--action` | `#FF5A3C` | `#B8321C` | 5.2:1 |
+| `--time` | `#E8A24A` | `#8A4B00` | 5.9:1 |
 | `--ok` | `#3DDC84` | `#177A42` | 4.9:1 (Night green is 1.6:1 on paper) |
-| `--on-action` | `#0E1013` | `#FFFFFF` | 5.6:1 on Day `--action` |
+| `--on-action` | `#14110D` | `#FFFFFF` | 6.0:1 on Day `--action` |
 
 **Theme switching**
 
@@ -109,9 +109,9 @@ One long page that holds everything a recruiter or client needs: resume, LinkedI
 
 | # | Section | What it holds | Motion |
 | --- | --- | --- | --- |
-| 0 | ARNAV-OS boot | \~2.5 s of terminal lines (`[ OK ] rag.sys`, `[ OK ] agents.drv`, `[ !! ] chai.sys … low`), then the page. Once per session, skip on any key | Typewriter lines, CRT wipe out |
-| 1 | Sticky nav | AR monogram · Work · Experience · About · Contact · **Open to freelance** pill · Resume button · **Enter workshop** button | Hides on scroll down, returns on scroll up |
-| 2 | Hero | Right: ARNAV in Display XL, "AI engineer · RAG and agents · Mumbai", live chips (Currently: AI developer at Credit Intelligence · Building: EDITH). Left: portrait (Arnav faces right, toward the text; never mirrored) with depth parallax and a pulsing "click here" hotspot by the brain. Icon row: Resume, LinkedIn, GitHub, Instagram | Name splits in by letter; portrait reacts to cursor |
+| 0 | ARNAV-OS boot | ~2.5–3 s transformer forward pass on a canvas: input tokens (`site.boot.tokens`) embed, signals climb 4 attention + FFN blocks as real assets load (fonts + portrait, true %), the softmax decodes ARNAV letter by letter, and the letters fly into the hero name. HUD log keeps `[ OK ] rag.sys` · `[ !! ] chai.sys … low`. Once per session, skip on any key | Neuron rows with flowing signal pulses, attention arcs + per-block head heatmap, embedding vectors, rising activation glow, live top-5 softmax, decode with cursor, hand-off |
+| 1 | Sticky nav | Segmented HUD bar: AR monogram · 01 Work · 02 Experience · 03 About · 04 Contact (amber marker on the section in view) · **Open to freelance** status · live Mumbai clock (IST) · Resume · settings · **Enter workshop** button (Phase 2; hidden until the workshop exists) | Hides on scroll down, returns on scroll up |
+| 2 | Hero | Centre stage: Arnav as an ordered-dither dot-matrix (canvas, 4×4 Bayer, contrast-stretched; Night lights where bright, Day inks where dark; facing right, never mirrored); the role line in tracked mono and ARNAV huge in dot-matrix lettering across the lower third (dots behind the text dim so it stays readable); four corner quadrants 01 Work · 02 Experience · 03 About · 04 Contact with labels derived from content (2×2 grid on mobile); chips (Open to freelance · Currently · Building) and links (Resume, LinkedIn, GitHub, Instagram) under it. Brain hotspot over the dot-matrix head arrives in Phase 2 | Dots assemble as the boot hands off; hovering pushes the dots aside and leaves a fading, motion-smeared trail through which the original photo shows (fine pointers only; static soft reveal with reduced motion); the torso fades out below the chin so the name sits on clean page; static with reduced motion |
 | 3 | Proof strip | Real numbers from repos: 0.971 F0.5 · 95.75% fire recall · ECE −93.5% · +8.28 dB SNR · 2.2M entities | Slow marquee, pauses on hover |
 | 4 | Selected work | Top 5 as a sticky split: big project names on the left, a media pane on the right swapping clip, stat, stack and links (GitHub, demo, "See it in 3D") | Pane crossfades as each name crosses centre |
 | 5 | All projects | Filterable index table: Shipped / Building / Coming soon, year, stack, links | Rows stagger in |
@@ -132,7 +132,7 @@ One long page that holds everything a recruiter or client needs: resume, LinkedI
 - Opening chips: "What does Arnav build?", "Show me FireWatch", "Is he available for freelance?", "Take me to the 3D workshop".
 - Rate-limited per visitor; says plainly when it doesn't know and offers the contact form.
 
-**Responsive:** below 768 px the split sections stack, the portrait sits above the name, the marquee becomes a 2-column grid, and the workshop button opens a short "best on desktop" note with a "try anyway" option.
+**Responsive:** below 768 px the split sections stack, the portrait sits above the name, the marquee becomes a 2-column grid, and the workshop button (Phase 2) opens a short "best on desktop" note with a "try anyway" option.
 
 ## The Workshop (3D room)
 
@@ -492,7 +492,7 @@ Every wait shows real progress and says something about Arnav's work; nothing is
 
 | Where | Loader | Copy (mono HUD) |
 | --- | --- | --- |
-| First visit | ARNAV-OS boot: typewriter system lines, CRT wipe out | `[ OK ] rag.sys` · `[ OK ] agents.drv` · `[ !! ] chai.sys … low` |
+| First visit | ARNAV-OS boot: transformer forward pass (tokens → attention + FFN → softmax decodes ARNAV → letters fly into the hero) | `FORWARD PASS · 64%` · `[ OK ] rag.sys` · `[ !! ] chai.sys … low` |
 | 2D page transitions | Thin `--action` pill bar across the top + a 250 ms curtain wipe in `--surface` | — |
 | Images and cards | Skeleton blocks with a slow scanline sweep, not grey pulses | — |
 | Workshop entry | Photo dissolves to particles that assemble into the wireframe brain as assets load | `loading neural pathways · 64%` |
@@ -556,7 +556,7 @@ All content lives in a `content/` folder of plain files; the 2D site, the 3D wor
 
 | File | Holds |
 | --- | --- |
-| `site.json` | Name, role line, location, socials (LinkedIn, GitHub, Instagram, email), resume filename, default "currently building" project id, `proof` strip (`value`, `label`, `projectId`), `honors` (hackathons: `event`, `year`, `result`, `projectId`), `dock` stack |
+| `site.json` | Name, role line, location, socials (LinkedIn, GitHub, Instagram, email), resume filename, `portrait.alt`, `boot` (`tokens` ≤ 8 × ≤ 10 chars, `output`, `log` lines ≤ 40 chars), default "currently building" project id, `proof` strip (`value`, `label`, `projectId`), `honors` (hackathons: `event`, `year`, `result`, `projectId`), `dock` stack |
 | `profile.md` | Long bio in Arnav's words (EDITH's main source) |
 | `experience.json` | Roles: company, title, dates, impact lines, stack |
 | `projects.json` | Every project (schema below) |

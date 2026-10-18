@@ -4,6 +4,77 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-18 · 1.4 revision 3 · Day still a flat blob; hover felt mechanical
+- **What happened:** after revision 2, Arnav still found Day "weird" (a tan figure where hair and skin shared one tone) and our circle lens "weird" next to the reference site's hover.
+- **Root cause:** every figure cell was drawn and only its colour varied, so the shape came from hue, which collapses on paper. For the hover I guessed at an effect instead of studying how the reference actually works.
+- **Fix:** read the reference's public bundles for the *technique* (ordered dither, pointer push, fluid trail reveal); rebuilt the portrait as a 4×4 Bayer dither with a contrast stretch (Day inks the dark, Night lights the bright), with push + a fading trail field revealing the photo.
+- **Prevention rule:** When matching a reference interaction, inspect how it is built before designing; for image effects, carry form with density or size, not hue alone.
+- **Files:** `src/lib/dotmatrix.ts`, `src/lib/hero.ts`, `src/components/landing/Hero.astro`
+
+## 2026-10-18 · 1.4 revision 2 · Day dot-matrix looked muddy; edge fade darkened instead of fading
+- **What happened:** Arnav found Day "a bit weird": a grey blob of dimmed shirt dots behind ARNAV, a hard dark strip under it, and heavy near-black hair. After the first fix, dark speckle remained at the bottom of the figure in Day.
+- **Root cause:** (1) I tuned the dot-matrix in Night, where low values sink into the background. In Day the same values are dark ink, so dimmed and faded dots turned grey or dark. (2) `edgeFade` scaled luminance, not opacity, so faded dots moved toward the dark end of the Day ramp.
+- **Fix:** fade drives opacity (`Dot.a`); the torso fades from 64% to 88% of the height; warm umber Day ramp (no black); Day squares at 70% of the cell; Day clear zone at 12%.
+- **Prevention rule:** Any effect that fades or dims must work on opacity, never on the colour value; review every visual effect in Day and Night side by side before showing it.
+- **Files:** `src/lib/dotmatrix.ts`, `tests/unit/lib/dotmatrix.test.ts`
+
+## 2026-10-18 · 1.4 revision · Dimmed amber text failed Day contrast
+- **What happened:** axe flagged the nav's 01–04 numbers at 3.2:1 in Day; `contrast.test.ts` had passed.
+- **Root cause:** I added `opacity: 0.7` to amber text for a softer look. The token test checks raw token pairs, not the composited colour, so it couldn't see it.
+- **Fix:** removed the opacity; the text uses `--time` at full strength (5.9:1 in Day).
+- **Prevention rule:** Never put `opacity` on text; use a token whose contrast is tested.
+- **Files:** `src/components/landing/Nav.astro`
+
+## 2026-10-18 · 1.4 revision · Text over the dot-matrix was unreadable
+- **What happened:** in Day the middle of ARNAV vanished into the dark shirt dots, and the role line sat on the neck; on mobile the role line ran off both edges.
+- **Root cause:** I designed the overlap from the Night look only, where parchment on dim amber still reads.
+- **Fix:** dots behind the name and role line dim to 20%, feathered over 28 px (`clearAlpha`); the role line wraps on narrow screens.
+- **Prevention rule:** For text over imagery, check both themes and 375 px before showing it; give the text a clear zone, not just a colour.
+- **Files:** `src/lib/dotmatrix.ts`, `src/lib/hero.ts`, `src/components/landing/Hero.astro`
+
+## 2026-10-18 · 1.4 revision · Two-resolution dot grid left a seam
+- **What happened:** a light ring outlined the face; letting the grids overlap turned it into a dark ring.
+- **Root cause:** a finer face grid and a coarse body grid meet on an ellipse; cells on the boundary either leave a gap or double up, and squares make either visible.
+- **Fix:** one uniform 4 px grid (5 px on phones); the face stays legible and there is no boundary.
+- **Prevention rule:** Don't stitch two sampling resolutions without blending; try the single finer grid first and measure its cost.
+- **Files:** `src/lib/dotmatrix.ts`, `tests/unit/lib/dotmatrix.test.ts`
+
+## 2026-10-18 · 1.4 revision · Scripted edits: regex ate an import, and a stray line aborted a multi-file update (REPEAT) — REPEATED AGAIN in revision 3
+- **What happened:** (1) A regex meant to rewrite the dotmatrix import also swallowed the `vitest` import above it, which broke typecheck. (2) A doc-update script had a leftover throwaway replacement at the end. It threw after SPEC.md and CLAUDE.md were written but before plan.md was.
+- **Root cause:** the non-greedy `import \{[\s\S]*?\}` started at the first `import {` in the file. The script wrote each file as it went, so a late failure left a partial update. This repeats the 1.2 "regex bulk edit corrupted a test" entry.
+- **Fix:** restored the import; redid plan.md alone; checked `git diff --stat` for all four docs.
+- **Prevention rule (strengthened):** Anchor regex edits to the exact line (or use Edit), and in a multi-file script validate every replacement before writing any file. After a scripted edit, diff the result before running anything.
+- **Revision 3 repeat:** a three-file script wrote dotmatrix.ts and hero.ts, then threw on Hero.astro, whose markup Prettier had re-wrapped. **Rule now:** one file per script, or run every check first and only then write; prefer the Edit tool for Astro/HTML, which Prettier reflows.
+- **Files:** `tests/unit/lib/dotmatrix.test.ts`, `docs/plan.md`
+
+## 2026-10-18 · 1.4 · Boot e2e tests raced the real clock
+- **What happened:** 1 of 5 full e2e runs failed on `toHaveAttribute('data-boot', 'on')`; the other runs passed.
+- **Root cause:** the tests asserted a state that only lasts ~2.6 s, on real timers. With 3 workers under load, page load sometimes outlasted the boot, so the state was gone before the first assertion. The screenshot test also waited on the 400 ms `out` state. Passing locally made the timing look safe.
+- **Fix:** boot, skip, failsafe and axe-during-boot tests use `page.clock.install()` + `runFor`; the screenshot test waits for `data-boot !== 'on'`. Verified 35/35 with `--repeat-each=5`.
+- **Prevention rule:** Assert time-limited UI states on Playwright's fake clock, and stress any timer test with `--repeat-each=5` before trusting it.
+- **Files:** `tests/e2e/landing.spec.ts`
+
+## 2026-10-18 · 1.4 · At-rest screenshots caught the name mid-reveal
+- **What happened:** the 1440 home screenshot showed only a half-faded "A" of ARNAV, which looked like a broken hero.
+- **Root cause:** the screenshot loop waited only for fonts; the new letter reveal was still running. The 1.2 rule covered the opposite case (capture animations mid-run on purpose).
+- **Fix:** the loop waits until every finite animation has finished (infinite loops like the marquee keep running).
+- **Prevention rule:** Before an at-rest screenshot, wait for `document.getAnimations()` to settle; capture mid-animation only in dedicated frame tests.
+- **Files:** `tests/e2e/design-system.spec.ts`
+
+## 2026-10-18 · 1.4 · Nav bar inherited an inset from the base rule
+- **What happened:** the sticky nav's bottom border stopped 16 px short of the right edge at every width.
+- **Root cause:** `.shell-bar--nav` set `top` and `left` but kept `.shell-bar`'s `right: var(--space-4)`, which was meant for the floating gear. I didn't look at the page edges in the first screenshots.
+- **Fix:** `right: 0` on the nav variant; checked in a crop of the 1440 shot.
+- **Prevention rule:** When a modifier repurposes a fixed element, set all its insets explicitly, and check full-bleed edges in the screenshots.
+- **REPEAT (1.4 revision):** the hero quadrants list kept its base `width: 100%` when it became `position: absolute` with insets, so the right-hand quadrants ran off screen. **Strengthened rule:** when an element switches to absolute/fixed with insets, reset `width`/`height` to `auto` in the same rule, and check every edge of every breakpoint in the screenshots.
+- **Files:** `src/layouts/Base.astro`, `src/components/landing/Hero.astro`
+
+## 2026-10-18 · 1.4 · Smaller wrong turns (caught before review)
+- Portrait mask ellipse too large: the grey backdrop kept hard corners. Fixed to `ellipse 50% 50% at 50% 50%`. Check a mask against both themes before signing off.
+- Boot timing constants guessed (3.2 s vs SPEC ~2.5 s); a unit test on the real `site.boot` caught it. Derive durations from content and test them against the SPEC number.
+- Marquee hover test timed out: Playwright waits for a moving element to be stable. Hover the static container that owns the `:hover` rule.
+- **Files:** `src/components/landing/Hero.astro`, `src/lib/boot.ts`, `tests/e2e/landing.spec.ts`
+
 ## 2026-10-18 · 1.3 · Mutation check "passed" because the mutation never applied
 - **What happened:** after breaking `projects.json` for the mutation check, build and tests both passed.
 - **Root cause:** I used `sed -i '' '0,/re/s//…/'`. `0,/re/` is GNU sed syntax; macOS BSD sed silently matched nothing, so the file was never changed. The green result looked like a real finding.

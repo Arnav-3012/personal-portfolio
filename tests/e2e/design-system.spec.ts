@@ -7,6 +7,8 @@ const html = (page: Page) => page.locator('html');
 const storeSettings = (page: Page, value: object) =>
   page.addInitScript(
     ([key, json]) => {
+      // The ARNAV-OS boot has its own tests (landing.spec.ts); skip it here.
+      sessionStorage.setItem('arnav:boot:v1', 'seen');
       // Only seed once so the test can observe its own writes after reload.
       if (!sessionStorage.getItem('seeded')) {
         localStorage.setItem(key, json);
@@ -25,7 +27,7 @@ test.describe('theme', () => {
     await page.goto('/design/');
     await expect(html(page)).toHaveAttribute('data-theme', 'day');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe('rgb(246, 244, 239)');
+    expect(bg).toBe('rgb(244, 238, 227)');
   });
 
   test('Auto follows the OS colour scheme, live', async ({ page }) => {
@@ -193,6 +195,14 @@ test.describe('accessibility and screenshots', () => {
           ] as const) {
             await page.goto(path);
             await page.evaluate(() => document.fonts.ready);
+            // Let finite reveals (name letters) finish; infinite loops (marquee, pulse) keep running.
+            await page.waitForFunction(() =>
+              document
+                .getAnimations()
+                .every(
+                  (a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity,
+                ),
+            );
             await page.screenshot({
               path: `test-results/screens/${name}-${width}-${theme}-${motion}.png`,
               fullPage: true,

@@ -20,6 +20,20 @@
     "source": "assets/incoming/resume/arnav-resume-2026-10.pdf",
     "file": "arnav-chaturvedi-resume-2026-10.pdf"
   },
+  "portrait": {
+    "alt": "Arnav Chaturvedi in side profile, facing right"
+  },
+  "boot": {
+    "tokens": ["rag", "agents", "vision", "chai", "ship"],
+    "output": "ARNAV",
+    "log": [
+      "[ OK ] rag.sys",
+      "[ OK ] agents.drv",
+      "[ OK ] vision.mod",
+      "[ !! ] chai.sys … low",
+      "[ OK ] arnav-os ready"
+    ]
+  },
   "currentlyBuilding": "edith",
   "education": {
     "school": "NMIMS University (MPSTME)",

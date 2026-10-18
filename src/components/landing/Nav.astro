@@ -1,0 +1,241 @@
+---
+// Sticky nav (SPEC row 1) as a segmented HUD bar: bordered cells, uppercase wide-tracked mono labels (after
+// Warp's editorial labels; colours from tokens), an amber marker on the section in view, the freelance status
+// and a live Mumbai clock. Rendered into Base.astro's header (the one page-level banner) beside the settings
+// gear. Below 960 px the links and Resume move into a menu sheet (native <dialog>: focus trap, Esc, focus
+// return). The workshop button waits for Phase 2; Resume renders only once the PDF is in public/.
+import Icon from '../Icon.astro';
+import FreelancePill from '../FreelancePill.astro';
+import { experience, projects, site } from '../../lib/content';
+import { quadrants, resumeHref } from '../../lib/landing';
+
+const links = quadrants(site, projects, experience);
+const resume = resumeHref(site.resume.file);
+---
+
+<a class="cell nav__mono" href="#main">
+  <span aria-hidden="true">{site.monogram}</span>
+  <span class="visually-hidden">{site.name}, top of page</span>
+</a>
+
+<nav class="cell nav__links" aria-label="Primary">
+  <ul>
+    {links.map((l) => (
+      <li>
+        <a href={`#${l.id}`} data-nav-link>
+          <span class="nav__n" aria-hidden="true">
+            {l.n}
+          </span>
+          {l.title}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<div class="cell nav__status">
+  <FreelancePill variant="nav" />
+</div>
+
+<time class="cell nav__clock" data-clock data-tz={site.location.timezone}></time>
+
+{resume && (
+  <a class="cell nav__resume" href={resume}>
+    Resume
+  </a>
+)}
+
+<button class="icon-button nav__menu" type="button" aria-haspopup="dialog" data-menu-open>
+  <Icon name="menu" />
+  <span class="visually-hidden">Menu</span>
+</button>
+
+<dialog class="menu-sheet" aria-labelledby="menu-title" data-menu>
+  <div class="menu-sheet__header">
+    <p id="menu-title" class="hud">
+      Menu
+    </p>
+    <button class="icon-button" type="button" data-menu-close>
+      <Icon name="x" />
+      <span class="visually-hidden">Close menu</span>
+    </button>
+  </div>
+  <ul class="menu-sheet__links">
+    {links.map((l) => (
+      <li>
+        <a href={`#${l.id}`}>
+          <span class="hud menu-sheet__n">
+            {l.n} · {l.meta}
+          </span>
+          {l.title}
+        </a>
+      </li>
+    ))}
+  </ul>
+  <div class="menu-sheet__actions">
+    <FreelancePill variant="chip" />
+    {resume && (
+      <a class="button button--ghost" href={resume}>
+        <Icon name="file-text" /> Resume
+      </a>
+    )}
+  </div>
+</dialog>
+
+<style>
+  /* Each cell is separated by a hairline, like panels of an instrument. */
+  .cell {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    padding: 0 var(--space-4);
+    border-right: var(--border);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--type-hud);
+    letter-spacing: var(--track-hud);
+    text-transform: uppercase;
+    color: var(--text-2);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav__mono {
+    justify-content: center;
+    min-width: 56px;
+    padding: 0;
+    color: var(--time);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--type-small);
+    letter-spacing: 0;
+  }
+  .nav__links {
+    display: none;
+    padding: 0 var(--space-2);
+    margin-right: auto;
+  }
+  .nav__links ul {
+    display: flex;
+    gap: var(--space-1);
+    padding: 0;
+    list-style: none;
+  }
+  .nav__links a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .nav__n {
+    color: var(--time);
+  }
+  .nav__links a:hover,
+  .nav__links a[aria-current] {
+    color: var(--text);
+  }
+  /* Amber marker under the section in view */
+  .nav__links a::after {
+    content: '';
+    position: absolute;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: 6px;
+    height: 1px;
+    background: var(--time);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms var(--ease-out);
+  }
+  .nav__links a[aria-current]::after,
+  .nav__links a:hover::after {
+    transform: scaleX(1);
+  }
+  .nav__status {
+    margin-left: auto;
+    border-left: var(--border);
+    padding: 0 var(--space-3);
+  }
+  .nav__clock {
+    display: none;
+    min-width: 20ch;
+    justify-content: center;
+    color: var(--text);
+  }
+  .nav__resume {
+    display: none;
+    color: var(--text);
+  }
+  .nav__resume:hover {
+    color: var(--time);
+  }
+  .nav__menu {
+    order: 10;
+  }
+  @media (min-width: 600px) {
+    .nav__clock {
+      display: flex;
+    }
+  }
+  @media (min-width: 960px) {
+    .nav__links {
+      display: flex;
+    }
+    .nav__status {
+      margin-left: 0;
+    }
+    .nav__resume {
+      display: flex;
+    }
+    .nav__menu {
+      display: none;
+    }
+  }
+
+  .menu-sheet {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: var(--space-2) var(--space-4) var(--space-6);
+    border: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .menu-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+  }
+  .menu-sheet__links {
+    display: grid;
+    padding: var(--space-6) 0;
+    list-style: none;
+  }
+  .menu-sheet__links a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) 0;
+    border-bottom: var(--border);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-display);
+    line-height: var(--lh-display);
+    text-decoration: none;
+  }
+  .menu-sheet__n {
+    color: var(--time);
+  }
+  .menu-sheet__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

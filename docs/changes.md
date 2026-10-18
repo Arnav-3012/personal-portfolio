@@ -4,6 +4,24 @@ Newest first. Files changed per task.
 
 ---
 
+## 2026-10-18 · 1.4 Landing, part A
+
+**Added**
+- `src/components/landing/Boot.astro`, `Nav.astro`, `Hero.astro`, `ProofStrip.astro`; `src/components/FreelancePill.astro`
+- `src/lib/boot.ts`, `transformer.ts`, `dotmatrix.ts`, `hero.ts`, `nav.ts`, `landing.ts`
+- `src/assets/portrait/portrait.jpg`
+- `tests/e2e/landing.spec.ts`; `tests/unit/lib/landing.test.ts`, `transformer.test.ts`, `dotmatrix.test.ts`
+
+**Changed**
+- `src/styles/tokens.css`: warm amber palette (Night + Day)
+- `src/layouts/Base.astro`: header becomes the segmented nav bar; boot pre-paint flag + failsafe
+- `src/pages/index.astro`: landing (boot, nav, hero, proof strip, 1.5 stubs)
+- `src/components/Icon.astro`: menu, arrow-up-right, file-text
+- `src/lib/content.ts`, `content/site.json`: `portrait.alt`, `boot`
+- `lighthouserc.json`: LCP, CLS and script-size budgets
+- `tests/e2e/design-system.spec.ts`, `smoke.spec.ts`: skip the boot; wait for reveals before screenshots; new Day bg
+- `CLAUDE.md` (hero rule), `docs/SPEC.md`, `docs/plan.md` (1.4 ticked; Phase 2 carry-over), `docs/mistakes.md`, `docs/logs.md`
+
 ## 2026-10-18 · 1.3 Content
 
 **Added**

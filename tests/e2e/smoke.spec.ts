@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 test('home page loads with no accessibility violations', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('arnav:boot:v1', 'seen'));
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });

@@ -7,15 +7,15 @@
 :root[data-theme='night'] {
   color-scheme: dark;
 
-  --bg: #0e1013;
-  --surface: #171a1f;
-  --line: #2a2f37;
-  --text: #edeff2;
-  --text-2: #8a93a0;
+  --bg: #14110d;
+  --surface: #1c1813;
+  --line: #3a3128;
+  --text: #f3ede2;
+  --text-2: #a89c8a;
   --holo: #4fd8ff;
-  --action: #ff4b3e;
-  --on-action: #0e1013;
-  --time: #f2a33a;
+  --action: #ff5a3c;
+  --on-action: #14110d;
+  --time: #e8a24a;
   --board: #1f3b2d;
   --ok: #3ddc84;
 }
@@ -23,15 +23,15 @@
 :root[data-theme='day'] {
   color-scheme: light;
 
-  --bg: #f6f4ef;
-  --surface: #ffffff;
-  --line: #dad7d0;
-  --text: #14161a;
-  --text-2: #565c66;
+  --bg: #f4eee3;
+  --surface: #fffdf8;
+  --line: #dcd2c2;
+  --text: #1a1510;
+  --text-2: #5e5346;
   --holo: #00739e;
-  --action: #c8281c;
+  --action: #b8321c;
   --on-action: #ffffff;
-  --time: #8f5300;
+  --time: #8a4b00;
   --ok: #177a42;
 }
 

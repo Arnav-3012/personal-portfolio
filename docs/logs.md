@@ -4,6 +4,56 @@ Newest first. Each entry: what was done, how it was verified, open items.
 
 ---
 
+## 2026-10-18 · 1.4 Landing, part A
+
+**Done** (three review rounds with Arnav; final state below)
+- **Palette:** warm amber terminal after Warp (awesome-design-md). Night: warm void `#14110D`, parchment `#F3EDE2`, amber `#E8A24A` as the 2D signature. Day: paper `#F4EEE3`, umber ink. Red stays for action, green for live, cyan for 3D. All pairs re-measured in SPEC.
+- **ARNAV-OS boot:** a transformer forward pass on canvas (`src/lib/transformer.ts`):
+  - input tokens with embedding bars;
+  - 4 blocks of neuron rows with signal pulses;
+  - attention arcs and a per-block head heatmap;
+  - a rising activation glow driven by real progress (fonts 40% + portrait 60%);
+  - a top-5 softmax that decodes ARNAV letter by letter;
+  - letters fly into the hero name.
+  Once per session, skip on any key, off with reduced motion, 4.5 s inline failsafe (`src/lib/boot.ts`).
+- **Nav:** segmented HUD bar: 01–04 links with an amber marker on the section in view, freelance status, live IST clock, Resume (renders only when the PDF is in `public/`), settings. Hides on scroll down; mobile menu sheet.
+- **Hero:**
+  - Arnav centre stage as an ordered-dither dot-matrix (`src/lib/dotmatrix.ts`): 4×4 Bayer, contrast stretch, Night lights the bright and Day inks the dark, backdrop removed, torso fades below the chin.
+  - ARNAV in CSS dot lettering across the lower third, with dots dimmed behind the text.
+  - Corner quadrants with labels derived from content.
+  - Chips and social links.
+  - Hover: push + a fading trail that reveals the cut-out photo.
+  - The `<img>` stays as the LCP image and no-JS fallback.
+- **Proof strip:** CSS marquee, pauses on hover/focus, 2-column grid on mobile, static with reduced motion.
+- **Content:** `site.json` gains `portrait.alt` and `boot { tokens, output, log }` (zod).
+- **Portrait master:** `src/assets/portrait/portrait.jpg` (1600×2000, from the upscaled original), with AVIF/WebP variants built by Astro.
+- **Lighthouse CI:** now asserts the SPEC budgets (LCP, CLS, script size).
+- **Docs:** CLAUDE.md hero rule, SPEC (palette, rows 0–2, loading row, content model), plan.md.
+
+**Verified**
+| Check | Result | Evidence |
+|---|---|---|
+| typecheck, lint, format | pass | 0 errors; check-no-hex 27 files clean; Prettier clean |
+| `pnpm test` | 84/84 | new: boot gating + real progress, transformer layout/timing/softmax, dither (Bayer, Day vs Night density, stretch), push, trail field (splat, advection, dissolves), quadrants, IST clock, content schema |
+| `pnpm e2e` | 54/54 | boot once/skip/failsafe/reduced on a fake clock; canvas paints; hover fills a face patch with the photo, which then returns to dots, in both themes; centre layout at 375/768/1440; nav hide/focus/clock/section marker; menu Esc and focus return; axe 0 in both themes, during the boot and with the menu open |
+| Boot stress | 35/35 | `--repeat-each=5` after moving timer tests to the fake clock |
+| `pnpm links` | pass | 21 links, 0 broken |
+| Lighthouse (mobile) | pass | 99/100/100/100, LCP 1808 ms (portrait is the LCP element), CLS 0, JS 11.7 KB |
+| Screenshots | reviewed | 375/768/1440 × Day/Night × full/reduced; boot frames; hover trail in both themes |
+| Mutation | pass | `freelance.open: false` → "Currently booked" in nav, hero and menu; restored |
+| Arnav | confirmed "done" 2026-10-18 | reviewed in the browser in both themes |
+
+**Deviations from the approved plans**
+- Workshop button, brain hotspot and mobile "best on desktop" note moved to Phase 2 (Arnav).
+- Hero redesigned from portrait-left/name-right to centre stage (Arnav; the CLAUDE.md rule was rewritten).
+- Dot-matrix: the planned finer face grid was replaced by one grid, then by ordered dither. The circle lens was replaced by push + trail reveal after studying the reference site's technique (read-only, no code copied).
+- Icon row became labelled text links with an arrow (no brand logos in the icon set).
+
+**Open items**
+- Resume PDF without the phone number (the button stays hidden until it is in `public/`).
+- LCP has about 190 ms of headroom: 1.5 must not add weight above the fold.
+- Hover frame time was not measured; check on a mid-range laptop at 1.10.
+
 ## 2026-10-18 · 1.3 Content
 
 **Done**

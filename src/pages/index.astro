@@ -1,25 +1,63 @@
 ---
 import Base from '../layouts/Base.astro';
+import Boot from '../components/landing/Boot.astro';
+import Nav from '../components/landing/Nav.astro';
+import Hero from '../components/landing/Hero.astro';
+import ProofStrip from '../components/landing/ProofStrip.astro';
+import { site } from '../lib/content';
+
+// Nav targets that task 1.5 fills in; stubs keep every anchor resolving until then.
+const upcoming = [
+  ['work', 'Selected work'],
+  ['experience', 'Experience'],
+  ['about', 'About'],
+  ['freelance', 'Open to freelance'],
+  ['contact', 'Contact'],
+] as const;
 ---
 
-<Base title="Under construction">
-  <main id="main" class="page">
-    <p class="hud">[ OK ] design.sys</p>
-    <h1>Under construction</h1>
-    <p class="small">
-      The landing page arrives in tasks 1.4 and 1.5. API check:{' '}
-      <a href="/api/health">/api/health</a>
-    </p>
+<Base title={`${site.name} · ${site.roleLine}`} boot>
+  <Nav slot="nav" />
+  <Boot />
+  <main id="main">
+    <Hero />
+    <ProofStrip />
+    {upcoming.map(([id, title]) => (
+      <section id={id} class="stub" aria-labelledby={`${id}-title`}>
+        <h2 id={`${id}-title`} class="display">
+          {title}
+        </h2>
+        <p class="small">Arrives in task 1.5.</p>
+      </section>
+    ))}
   </main>
 </Base>
 
+<script>
+  import { initBoot } from '../lib/boot';
+  import { initNav } from '../lib/nav';
+  import { initHero } from '../lib/hero';
+
+  initBoot();
+  initNav();
+  initHero();
+</script>
+
 <style>
-  .page {
+  .stub {
     display: grid;
-    gap: var(--space-5);
-    padding: var(--space-10) var(--space-5);
+    gap: var(--space-3);
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding: var(--section-gap) var(--space-4) 0;
+    scroll-margin-top: 60px;
   }
-  .hud {
-    color: var(--ok);
+  .stub:last-child {
+    padding-bottom: var(--section-gap);
+  }
+  @media (min-width: 768px) {
+    .stub {
+      padding-inline: var(--space-6);
+    }
   }
 </style>
