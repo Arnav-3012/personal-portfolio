@@ -23,3 +23,4 @@ Newest first. Files changed per task.
 
 **Changed**
 - `CLAUDE.md`: test stack now names `@cloudflare/vitest-plugin` (vitest-pool-workers is deprecated).
+- `docs/plan.md`: 1.1 ticked after Arnav confirmed "done".

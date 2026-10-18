@@ -37,8 +37,11 @@ Newest first. Each entry: what was done, how it was verified, open items.
 - Playwright's dev server uses `wrangler dev --local` so e2e runs without a Cloudflare login.
 - `pnpm-workspace.yaml` added: pnpm 12 blocks install scripts; only `esbuild` and `workerd` are allowed.
 
+**Account prerequisites (one time, done by Arnav)**
+- Node 24 on PATH, `pnpm wrangler login`.
+- Registered a workers.dev subdomain. Remote bindings (Workers AI) in `wrangler dev` fail without one ("You need to register a workers.dev subdomain"). Wrangler's onboarding link (`/workers/onboarding`) 404s in the current dashboard. Use the API instead: `PUT /accounts/{id}/workers/subdomain` with `{"subdomain":"<name>"}` and the token from `wrangler auth token`. `arnav` was taken.
+- After that, Arnav confirmed plain `pnpm wrangler dev` serves `/api/health` with AI remote. Task confirmed "done" 2026-10-18.
+
 **Open items**
-- Arnav: add Node 24 to PATH and run `pnpm wrangler login` so plain `pnpm wrangler dev` works with the AI binding.
 - 1.8: create the Vectorize index (`edith-kb`, 768 dims, cosine) and set `"remote": true`.
 - 1.10: verify `arnavworkmail3012@gmail.com` (or another inbox) as an Email Routing destination.
-- plan.md 1.1 checkbox left unticked until Arnav confirms "done" (decision gate step 6).
