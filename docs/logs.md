@@ -56,3 +56,4 @@ Newest first. Each entry: what was done, how it was verified, open items.
 - Avatar set completed: `avatar-05-face-closeup.png`, `avatar-06-a-pose.png` added; the earlier full-body "05" and the 3 selfies left out.
 - Marvel rule narrowed (Arnav's call): visuals/scenes/UI copy stay Marvel-free; factual bio mentions in `profile.md` and EDITH answers allowed. CLAUDE.md + SPEC updated.
 - Added `content/cricket.json` (why-cricket text, clips, photos, poster) and `content/discipline.json` (8 rules, 5 reels with posters; sub-line and lesson TODO). Reel posters extracted with ffmpeg. Absolute Wear stack filled. poster-02 approved as is. Verified: all content JSON parses.
+- Domain recorded: `arnavc.in` (CLAUDE.md, SPEC accounts checklist, plan 1.10). Accounts/keys to be requested from Arnav at the end of the task that needs them.

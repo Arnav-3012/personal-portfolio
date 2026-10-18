@@ -38,3 +38,4 @@ Newest first. Files changed per task.
 - `content/profile.md` (added); `docs/SPEC.md`: profile.md ticked
 - `CLAUDE.md`, `docs/SPEC.md`: Marvel rule narrowed to visuals, scenes and UI copy
 - `content/cricket.json`, `content/discipline.json` (added); `content/experience.json`, `CLAUDE.md`, `docs/SPEC.md` (updated)
+- `CLAUDE.md`, `docs/SPEC.md`, `docs/plan.md`: domain `arnavc.in`

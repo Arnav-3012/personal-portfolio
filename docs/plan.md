@@ -13,7 +13,7 @@ Phases follow SPEC "Build phases". Only Phase 1 is broken into tasks; later phas
 - [ ] **1.7 API: live data** — cron → GitHub (REST + GraphQL contributions), Open-Meteo → KV; endpoints the landing reads.
 - [ ] **1.8 EDITH-lite** — `scripts/kb-build.ts` (chunk `content/` + README summaries → Vectorize), `/api/chat` SSE with Workers AI, tool calls (`scrollTo`, `openProject`, `openResume`, `enterWorkshop`, `startFreelanceForm`), guardrails, per-IP rate limit, daily cap fallback, floating widget UI.
 - [ ] **1.9 Admin** — `/admin` behind Cloudflare Access: inbox, freelance switch, "currently building" (KV).
-- [ ] **1.10 Deploy** — domain on Cloudflare, Worker custom domains, Email Routing verified, Turnstile keys, Web Analytics, Workers Builds from GitHub.
+- [ ] **1.10 Deploy** — domain (`arnavc.in`) on Cloudflare, Worker custom domains, Email Routing verified, Turnstile keys, Web Analytics, Workers Builds from GitHub.
 
 ## Phase 2 · Workshop — break down after Phase 1 gate
 ## Phase 3 · Worlds — break down after Phase 2 gate

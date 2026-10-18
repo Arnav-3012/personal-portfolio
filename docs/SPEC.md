@@ -617,7 +617,7 @@ Everything below is supplied at build time; the build starts with placeholders s
 
 **Accounts and keys**
 
-- [ ] Custom domain name + registrar login (to point nameservers to Cloudflare)
+- [ ] Custom domain name + registrar login (to point nameservers to Cloudflare): domain is `arnavc.in`; registrar login at 1.10
 - [x] Cloudflare account (free): done in 1.1 (wrangler login + workers.dev subdomain)
 - [ ] GitHub fine-grained token, read-only on public repos
 - [ ] Spotify developer app + refresh token (optional; widget hides without it)

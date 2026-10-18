@@ -1,6 +1,6 @@
 # Arnav's Portfolio — Claude Code rules
 
-Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop (the reward). Hosted on Cloudflare's free plan on Arnav's custom domain.
+Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop (the reward). Hosted on Cloudflare's free plan on Arnav's custom domain, `arnavc.in`.
 
 **Source of truth:** `docs/SPEC.md`. Before any task, read the SPEC sections it touches. If the SPEC and a request conflict, stop and ask.
 
