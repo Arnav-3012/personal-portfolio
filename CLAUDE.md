@@ -15,7 +15,7 @@ Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop
 
 ## Hard rules
 - No Blender. 3D = procedural geometry + shaders in code, CC0/CC-BY models (Poly Haven, Kenney, Quaternius, Poly Pizza), Meshy/Tripo for hero props and the avatar.
-- No Marvel names, logos, suits, characters or posters. No Virat Kohli images or likeness. Original designs only.
+- No Marvel names, logos, suits, characters or posters in visuals, scenes or UI copy. No Virat Kohli images or likeness. Original designs only. Exception: factual mentions in Arnav's bio (`content/profile.md`) and EDITH's answers about him are fine (e.g. "inspired by Iron Man", "Spider-Man fan").
 - No BEINN brand and no guitar anywhere on the site.
 - Hero layout: portrait on the LEFT, name and text on the RIGHT (Arnav faces right, toward the text). Never mirror the portrait. Source image: `assets/incoming/portrait/portrait-original.png` (1122 × 1402; upscaled version to come). If the hair cutout looks jagged, keep the grey background and fade it into `--bg` with a radial mask.
 - All content comes from `content/*` files. Never hardcode bio, roles, projects or stats in components.
