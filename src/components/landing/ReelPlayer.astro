@@ -1,80 +1,12 @@
 ---
-// Full-screen reel player (SPEC "75 Hard": click a card → full-screen player with sound, swipe or arrows for
-// next). One native <dialog> (focus trap, Esc, inert page for free) and one <video> whose src is set only when
-// a reel opens, so the five clips never preload together. Wiring: src/lib/reels.ts. The loader is the
-// SPEC's "day N / 75" counter driven by the real buffered amount.
-import Icon from '../Icon.astro';
+// Full-screen reel player styles (SPEC "75 Hard": click a card → full-screen player with sound, swipe or arrows
+// for next). The dialog itself is built by src/lib/reels.ts (playerMarkup) when the page loads: it only works
+// with JavaScript, and keeping it out of the HTML keeps the document under the ~14 KB first-flight budget
+// (mistakes.md, 1.5cd). Because that markup is created in the browser, these styles are global; every class is
+// prefixed `player`.
 ---
 
-<dialog class="player" aria-label="Reel player" data-player>
-  <div class="player__frame" data-player-frame>
-    <div class="player__stage" data-player-stage>
-      <video
-        class="player__video"
-        data-player-video
-        playsinline
-        preload="auto"
-        aria-label="Reel video"
-      />
-      <div class="player__load" data-player-load hidden>
-        <p class="hud" data-player-load-label>
-          loading reel · day 1 / 75
-        </p>
-        <span class="player__bar" aria-hidden="true"></span>
-      </div>
-    </div>
-
-    <p class="hud player__status" data-player-status aria-live="polite"></p>
-
-    <div class="player__controls">
-      <button class="icon-button" type="button" data-player-prev aria-label="Previous reel">
-        <Icon name="chevron-left" />
-      </button>
-      <button
-        class="icon-button"
-        type="button"
-        data-player-play
-        aria-label="Pause"
-        data-state="playing"
-      >
-        <span class="player__ico player__ico--pause">
-          <Icon name="pause" />
-        </span>
-        <span class="player__ico player__ico--play">
-          <Icon name="play" />
-        </span>
-      </button>
-      <button class="icon-button" type="button" data-player-next aria-label="Next reel">
-        <Icon name="chevron-right" />
-      </button>
-      <button
-        class="icon-button"
-        type="button"
-        data-player-mute
-        aria-label="Mute"
-        aria-pressed="false"
-        data-state="sound"
-      >
-        <span class="player__ico player__ico--sound">
-          <Icon name="volume-2" />
-        </span>
-        <span class="player__ico player__ico--muted">
-          <Icon name="volume-x" />
-        </span>
-      </button>
-      <button
-        class="icon-button player__close"
-        type="button"
-        data-player-close
-        aria-label="Close player"
-      >
-        <Icon name="x" />
-      </button>
-    </div>
-  </div>
-</dialog>
-
-<style>
+<style is:global>
   .player {
     width: 100%;
     max-width: none;
@@ -169,7 +101,7 @@ import Icon from '../Icon.astro';
   [data-state='muted'] .player__ico--muted {
     display: inline-flex;
   }
-  :global(html:has(.player[open])) {
+  html:has(.player[open]) {
     overflow: hidden;
   }
 </style>

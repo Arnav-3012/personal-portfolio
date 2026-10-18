@@ -8,6 +8,7 @@ import {
   cardLayout,
   loadingDay,
   orbitPose,
+  playerMarkup,
   pinProgress,
   poseTransform,
   proximityGain,
@@ -265,5 +266,44 @@ describe('bufferedRatio and loadingDay', () => {
     expect(loadingDay(0.55)).toBe(42);
     expect(loadingDay(1)).toBe(TOTAL_DAYS);
     expect(loadingDay(2)).toBe(TOTAL_DAYS);
+  });
+});
+
+describe('playerMarkup', () => {
+  // The hooks initReels reads with get('…') and the frame it closes on; a typo here throws on page load.
+  const hooks = [
+    'frame',
+    'stage',
+    'video',
+    'load',
+    'load-label',
+    'status',
+    'play',
+    'mute',
+    'prev',
+    'next',
+    'close',
+  ];
+
+  it('carries every data-player hook the wiring needs, once', () => {
+    const html = playerMarkup();
+    for (const hook of hooks)
+      expect(html.match(new RegExp(`data-player-${hook}(?=[\\s>])`, 'g')), hook).toHaveLength(1);
+    expect(html.match(/<dialog /g)).toHaveLength(1);
+  });
+
+  it('keeps the video, buttons and status accessible', () => {
+    const html = playerMarkup();
+    expect(html).toContain('aria-label="Reel player"');
+    expect(html).toContain('aria-label="Reel video"');
+    for (const label of ['Previous reel', 'Next reel', 'Pause', 'Mute', 'Close player'])
+      expect(html).toContain(`aria-label="${label}"`);
+    expect(html).toContain('aria-live="polite"');
+  });
+
+  it('draws seven decorative icons that screen readers skip', () => {
+    const html = playerMarkup();
+    expect(html.match(/<svg /g)).toHaveLength(7);
+    expect(html.match(/aria-hidden="true" focusable="false"/g)).toHaveLength(7);
   });
 });

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/check-html-budget.ts",
     "preview": "pnpm build && wrangler dev",
     "typecheck": "astro check && tsc -p worker",
     "lint": "eslint . && node scripts/check-no-hex.ts",

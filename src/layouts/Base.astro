@@ -14,12 +14,15 @@ interface Props {
   noindex?: boolean;
   /** Plays the ARNAV-OS boot (landing only). */
   boot?: boolean;
+  /** Loads the era font (Fraunces italic, retro-TV titles only). Off by default: its @font-face block is HTML bytes. */
+  era?: boolean;
 }
 const {
   title,
   description = `${site.name}: ${site.roleLine}.`,
   noindex = false,
   boot = false,
+  era = false,
 } = Astro.props;
 const hasNav = Astro.slots.has('nav');
 ---
@@ -40,6 +43,7 @@ const hasNav = Astro.slots.has('nav');
     >
       (() => {
         const d = document.documentElement;
+        d.dataset.js = '';
         let s = {};
         try {
           s = JSON.parse(localStorage.getItem(key) || '{}') || {};
@@ -78,7 +82,7 @@ const hasNav = Astro.slots.has('nav');
     <Font cssVariable="--font-display" preload={[{ weight: 700 }]} />
     <Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
     <Font cssVariable="--font-mono" />
-    <Font cssVariable="--font-era" />
+    {era && <Font cssVariable="--font-era" />}
   </head>
   <body>
     <a class="skip-link" href="#main">

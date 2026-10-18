@@ -1,0 +1,266 @@
+---
+// About and Skills (SPEC row 7). The nav's "03 About" lands here: a short intro from profile.md, then skills
+// grouped by layer (skills.json) with the evidence behind each one, then the stack dock (site.dock). The dock
+// grows tiles toward the pointer (src/lib/dock.ts); touch and reduced motion get the static row.
+import profileMd from '../../../content/profile.md?raw';
+import { experience, projects, site, SKILL_LEVELS, skills } from '../../lib/content';
+import { byLevel, evidenceLinks, LEVEL_LABEL, markdownSection } from '../../lib/skills';
+
+const intro = markdownSection(profileMd, 'Who I am');
+const philosophy = markdownSection(profileMd, 'My philosophy')[0];
+---
+
+<section id="about" class="l-section about" aria-labelledby="about-title">
+  <header class="l-section__head">
+    <p class="hud l-section__eyebrow">03 · About</p>
+    <h2 id="about-title" class="display">
+      About
+    </h2>
+  </header>
+
+  <div class="about__intro">
+    <div class="about__text">
+      {intro.map((p) => (
+        <p>{p}</p>
+      ))}
+    </div>
+    {philosophy && (
+      <figure class="about__quote">
+        <blockquote>
+          <p>{philosophy}</p>
+        </blockquote>
+        <figcaption class="hud">My philosophy</figcaption>
+      </figure>
+    )}
+  </div>
+
+  <div class="about__skills">
+    <div class="about__skills-head">
+      <h3>Skills, by layer</h3>
+      <ul class="about__legend hud" aria-label="Level key">
+        {SKILL_LEVELS.map((level) => (
+          <li>
+            <span class="about__mark" data-level={level} aria-hidden="true"></span>
+            {LEVEL_LABEL[level]}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="about__layers">
+      {skills.map((layer) => (
+        <article class="layer" aria-labelledby={`layer-${layer.id}`}>
+          <h4 id={`layer-${layer.id}`} class="layer__title hud">
+            {layer.layer}
+          </h4>
+          <ul class="layer__list">
+            {byLevel(layer.skills).map((skill) => (
+              <li class="skill">
+                <span class="about__mark" data-level={skill.level} aria-hidden="true"></span>
+                <span class="skill__name">
+                  {skill.name}
+                  <span class="visually-hidden"> ({LEVEL_LABEL[skill.level]})</span>
+                </span>
+                {skill.level === 'core' && (
+                  <span class="skill__proof">
+                    {evidenceLinks(skill.evidence, projects, experience).map((link) => (
+                      <a class="hud" href={link.href}>
+                        {link.label}
+                      </a>
+                    ))}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <div class="dock">
+    <p class="hud dock__label">The daily stack</p>
+    <ul class="dock__row" data-dock aria-label="Daily stack">
+      {site.dock.map((name) => (
+        <li class="dock__tile hud" data-dock-item>
+          {name}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style is:global>
+  .about__intro {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .about__text {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .about__text p {
+    max-width: 62ch;
+  }
+  .about__quote {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-5);
+    border: var(--border);
+    border-left: 2px solid var(--time);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  /* Body font (already loaded): a below-fold italic from the era font would add a 23 KB download that
+     competes with the hero image for bandwidth, since browsers fetch a font as soon as any text uses it. */
+  .about__quote blockquote p {
+    font-weight: 600;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: var(--lh-heading);
+  }
+  .about__quote figcaption {
+    color: var(--text-2);
+  }
+
+  .about__skills {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+  }
+  .about__skills-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-5);
+  }
+  .about__legend {
+    display: flex;
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+    color: var(--text-2);
+  }
+  .about__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* Level marker: filled = core, half = working, outline = learning */
+  .about__mark {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--time);
+    border-radius: var(--radius-pill);
+  }
+  .about__mark[data-level='core'] {
+    background: var(--time);
+  }
+  .about__mark[data-level='working'] {
+    background: linear-gradient(90deg, var(--time) 50%, transparent 50%);
+  }
+
+  .about__layers {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .layer {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+    padding: var(--space-5);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .layer__title {
+    color: var(--time);
+    font-weight: 500;
+  }
+  .layer__list {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+  .skill {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-items: center;
+  }
+  .skill__name {
+    font-weight: 600;
+  }
+  .skill__proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+    grid-column: 2;
+  }
+  /* 24 px tall hit area (WCAG 2.2 target size) around the 12 px mono label */
+  .skill__proof a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    color: var(--text-2);
+    text-underline-offset: 4px;
+  }
+  .skill__proof a:hover {
+    color: var(--text);
+  }
+
+  /* Dock */
+  .dock {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: center;
+    margin-top: var(--space-8);
+  }
+  .dock__label {
+    color: var(--text-2);
+  }
+  .dock__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-5) var(--space-3);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    list-style: none;
+  }
+  .dock__tile {
+    display: grid;
+    place-items: center;
+    min-width: 72px;
+    height: 44px;
+    padding: 0 var(--space-3);
+    border: var(--border);
+    border-radius: var(--radius-chip);
+    background: var(--bg);
+    color: var(--text);
+    transform: scale(var(--s, 1));
+    transform-origin: 50% 100%;
+    transition: transform 90ms var(--ease-out);
+  }
+
+  @media (min-width: 768px) {
+    .about__layers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .about__intro {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+  }
+</style>

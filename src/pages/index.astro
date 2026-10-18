@@ -8,12 +8,13 @@ import SelectedWork from '../components/landing/SelectedWork.astro';
 import AllProjects from '../components/landing/AllProjects.astro';
 import Experience from '../components/landing/Experience.astro';
 import Hard75 from '../components/landing/Hard75.astro';
+import Skills from '../components/landing/Skills.astro';
+import BeyondCode from '../components/landing/BeyondCode.astro';
 import ReelPlayer from '../components/landing/ReelPlayer.astro';
 import { site } from '../lib/content';
 
-// Nav targets that tasks 1.5c–1.5d fill in; stubs keep every anchor resolving until then.
+// Nav targets that task 1.5d fills in; stubs keep every anchor resolving until then.
 const upcoming = [
-  ['about', 'About'],
   ['freelance', 'Open to freelance'],
   ['contact', 'Contact'],
 ] as const;
@@ -29,6 +30,7 @@ const upcoming = [
     <AllProjects />
     <Experience />
     <Hard75 />
+    <Skills />
     {upcoming.map(([id, title]) => (
       <section id={id} class="stub" aria-labelledby={`${id}-title`}>
         <h2 id={`${id}-title`} class="display">
@@ -37,6 +39,7 @@ const upcoming = [
         <p class="small">Arrives in task 1.5c–1.5d.</p>
       </section>
     ))}
+    <BeyondCode />
   </main>
   <ReelPlayer />
 </Base>
@@ -48,6 +51,8 @@ const upcoming = [
   import { initWork } from '../lib/work';
   import { initExperience } from '../lib/experience';
   import { initReels } from '../lib/reels';
+  import { initDock } from '../lib/dock';
+  import { initTilt } from '../lib/tilt';
 
   initBoot();
   initNav();
@@ -55,6 +60,8 @@ const upcoming = [
   initWork();
   initExperience();
   initReels();
+  initDock();
+  initTilt();
 </script>
 
 <style>

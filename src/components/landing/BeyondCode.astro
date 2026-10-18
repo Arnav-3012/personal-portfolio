@@ -1,0 +1,118 @@
+---
+// Beyond code (SPEC row 10): the cricket and 75 Hard teaser tiles. Both come from content (cricket.json,
+// discipline.json, projects.json) via beyondTiles; each tile is one link, with a small pointer tilt on fine
+// pointers (src/lib/tilt.ts). The tiles lead into the 3D room once Phase 2 exists.
+import Icon from '../Icon.astro';
+import { cricket, discipline, experience, projects } from '../../lib/content';
+import { beyondTiles } from '../../lib/landing';
+
+const tiles = beyondTiles(cricket, discipline, projects, experience);
+---
+
+<section id="beyond" class="l-section beyond" aria-labelledby="beyond-title">
+  <header class="l-section__head">
+    <p class="hud l-section__eyebrow">Beyond code</p>
+    <h2 id="beyond-title" class="display">
+      Beyond code
+    </h2>
+  </header>
+
+  <ul class="beyond__tiles">
+    {tiles.map((tile) => (
+      <li class="tile" data-tilt data-tile={tile.id}>
+        <div class="tile__image">
+          <img
+            src={tile.image.src}
+            alt={tile.image.alt}
+            style={`object-position: ${tile.image.position}`}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div class="tile__body">
+          <h3 class="tile__title">{tile.title}</h3>
+          <p class="tile__text">{tile.text}</p>
+          <a class="tile__link hud" href={tile.href}>
+            {tile.cta}
+            <Icon name="arrow-up-right" size={16} />
+          </a>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style is:global>
+  .beyond__tiles {
+    display: grid;
+    gap: var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+  .tile {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:
+      transform 200ms var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+  .tile:hover,
+  .tile:focus-within {
+    border-color: var(--time);
+  }
+  .tile__image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--line);
+  }
+  .tile__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+  }
+  .tile__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-heading);
+    line-height: var(--lh-heading);
+  }
+  .tile__text {
+    color: var(--text-2);
+  }
+  .tile__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: auto;
+    align-self: flex-start;
+    color: var(--time);
+    text-decoration: none;
+  }
+  /* The whole tile is the click target */
+  .tile__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  @media (min-width: 768px) {
+    .beyond__tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  :root[data-motion='reduced'] .tile {
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+</style>

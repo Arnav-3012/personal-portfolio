@@ -117,6 +117,13 @@ export const timelineSchema = z.array(
 
 export const cricketSchema = z.strictObject({
   whyCricket: text,
+  // The one photo that ships with the landing's Beyond code tile (public/media/cricket/).
+  // `position` is the CSS object-position that keeps the subject in frame when the tile crops the photo.
+  teaser: z.strictObject({
+    file: publicMedia,
+    alt: text,
+    position: z.string().regex(/^\d{1,3}% \d{1,3}%$/, 'e.g. "50% 75%"'),
+  }),
   clips: z.array(z.strictObject({ file: media, caption: text })),
   photos: z.array(z.strictObject({ file: media, caption: text, alt: text })),
   posters: z.array(media),

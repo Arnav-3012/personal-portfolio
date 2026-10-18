@@ -1,5 +1,6 @@
 // 75 Hard reels (SPEC "75 Hard", 2D section): floating cards, a full-screen player and a proximity audio bed.
-// The maths is pure and unit-tested; initReels wires the DOM that Hard75.astro and ReelPlayer.astro render.
+// The maths is pure and unit-tested; initReels wires the DOM that Hard75.astro renders and builds the player dialog (playerMarkup).
+import { iconSvg } from './icons';
 import { audio } from './audio';
 import type { Discipline } from './content';
 import { settings } from './settings';
@@ -172,14 +173,47 @@ export function bufferedRatio(ranges: Ranges, time: number, duration: number): n
 export const loadingDay = (ratio: number): number =>
   Math.min(TOTAL_DAYS, Math.max(1, Math.ceil(ratio * TOTAL_DAYS)));
 
+/**
+ * The full-screen player: one native <dialog> (focus trap, Esc, inert page for free) and one <video> whose src
+ * is set only when a reel opens. Created by initReels, not server-rendered, to keep the HTML small.
+ */
+export const playerMarkup =
+  (): string => `<dialog class="player" aria-label="Reel player" data-player>
+  <div class="player__frame" data-player-frame>
+    <div class="player__stage" data-player-stage>
+      <video class="player__video" data-player-video playsinline preload="auto" aria-label="Reel video"></video>
+      <div class="player__load" data-player-load hidden>
+        <p class="hud" data-player-load-label>loading reel · day 1 / 75</p>
+        <span class="player__bar" aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="hud player__status" data-player-status aria-live="polite"></p>
+    <div class="player__controls">
+      <button class="icon-button" type="button" data-player-prev aria-label="Previous reel">${iconSvg('chevron-left')}</button>
+      <button class="icon-button" type="button" data-player-play aria-label="Pause" data-state="playing">
+        <span class="player__ico player__ico--pause">${iconSvg('pause')}</span>
+        <span class="player__ico player__ico--play">${iconSvg('play')}</span>
+      </button>
+      <button class="icon-button" type="button" data-player-next aria-label="Next reel">${iconSvg('chevron-right')}</button>
+      <button class="icon-button" type="button" data-player-mute aria-label="Mute" aria-pressed="false" data-state="sound">
+        <span class="player__ico player__ico--sound">${iconSvg('volume-2')}</span>
+        <span class="player__ico player__ico--muted">${iconSvg('volume-x')}</span>
+      </button>
+      <button class="icon-button player__close" type="button" data-player-close aria-label="Close player">${iconSvg('x')}</button>
+    </div>
+  </div>
+</dialog>`;
+
 const q = <T extends Element>(root: ParentNode, selector: string): T | null =>
   root.querySelector<T>(selector);
 
 /** Wires the 75 Hard section: parallax, cursor glow, hover play, the player, and the proximity bed. */
 export function initReels(doc: Document = document): void {
   const section = q<HTMLElement>(doc, '[data-hard]');
+  if (!section) return;
+  if (!q(doc, '[data-player]')) doc.body.insertAdjacentHTML('beforeend', playerMarkup());
   const dialog = q<HTMLDialogElement>(doc, '[data-player]');
-  if (!section || !dialog) return;
+  if (!dialog) return;
   const cards = [...section.querySelectorAll<HTMLAnchorElement>('[data-reel-open]')];
   if (cards.length === 0) return;
 
