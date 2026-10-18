@@ -131,6 +131,7 @@ One long page that holds everything a recruiter or client needs: resume, LinkedI
 - Navigates the page through tool calls: `scrollTo(section)`, `openResume()`, `openProject(id)`, `enterWorkshop()`, `startFreelanceForm()`.
 - Opening chips: "What does Arnav build?", "Show me FireWatch", "Is he available for freelance?", "Take me to the 3D workshop".
 - Rate-limited per visitor; says plainly when it doesn't know and offers the contact form.
+- Spoken replies (opt-in, see EDITH tab → Spoken replies): a speaker button in the panel header, off by default. While she speaks, a waveform ring surrounds the EDITH icon (a static ring with reduced motion) and a Stop button appears. Text is always shown.
 
 **Responsive:** below 768 px the split sections stack, the portrait sits above the name, the marquee becomes a 2-column grid, and the workshop button (Phase 2) opens a short "best on desktop" note with a "try anyway" option.
 
@@ -272,6 +273,7 @@ A real-time hologram of Arnav stands on the holotable and answers questions abou
 - Top-right: Experience · Resume · LinkedIn links.
 - Centre-right: the avatar, life-size-ish, the workshop dimmed behind.
 - Bottom: wide chat bar ("Ask about my experience, projects, or skills…") with a red send button; three chips under it: "What are you building?", "Tell me about FireWatch", "Are you open to freelance?".
+- Chat header: the spoken-replies speaker button (off by default; see Spoken replies below).
 - Answers stream into a glass panel left of the avatar, each with source chips (e.g. "Experience · Credit Intelligence").
 
 **Avatar pipeline**
@@ -282,7 +284,19 @@ A real-time hologram of Arnav stands on the holotable and answers questions abou
 4. Compress with the gltf-transform CLI (Draco + KTX2), target ≤ 4 MB. One terminal command, run by Claude Code.
 5. Hologram shader: cyan fresnel rim, scanlines, slight flicker, point-cloud assemble on entry (1.2 s).
 
-**States:** idle → (user typing) looks at the chat bar → thinking (while waiting for the first token) → talking gesture (while streaming) → idle. Wave plays once per session.
+**States:** idle → (user typing) looks at the chat bar → thinking (while waiting for the first token) → speaking (while audio plays) → idle. With spoken replies off, the talking gesture plays while text streams instead. Wave plays once per session. In the speaking state the mouth opens with the audio loudness, read by a Web Audio `AnalyserNode`, and the hologram glow pulses with it. There is no phoneme lip sync.
+
+**Spoken replies (opt-in)**
+
+Text stays primary: every reply is always shown as text. Visitors only type; there is no microphone or speech input anywhere on the site.
+
+- **Control:** a speaker button in the chat header, off by default, that follows the Settings sound toggle through `AudioManager`. Nothing plays automatically.
+- **Pipeline:** `POST /api/voice/tts` calls Workers AI `@cf/myshell-ai/melotts` (`lang: en`) and returns MP3. The client splits the `/api/chat` SSE text into sentences and requests each one as it completes, so speech starts before the reply finishes. Audio plays through `AudioManager` on a `voice` channel.
+- **Cache:** audio for repeated stock lines (greeting, refusals, fallback message) is cached in KV by a hash of the text, so those lines cost no Neurons.
+- **Limits:** same per-IP rate limit as chat; at most 600 characters per TTS request (longer text is rejected). Voice has its own daily allowance tracked in KV, starting at 1,000 of the 10,000 free Neurons, so it can never starve text chat. MeloTTS costs about 19 Neurons per audio minute (18.63 on the pricing page), so 1,000 Neurons is about 53 minutes of speech a day. The KV counter is approximate (KV is eventually consistent) and is written once per request, not per sentence.
+- **Voice:** MeloTTS on Workers AI takes only `prompt` and `lang`, with no accent or speaker option, so there is one English voice. The decision gate confirms that with samples.
+- **Fallbacks:** if the allowance is used up or TTS fails, use the browser's `speechSynthesis`. If that isn't available either, stay text-only and show one toast.
+- **Accessibility:** the speaker button has a label, keyboard access and `aria-pressed`. A Stop button shows while she speaks. Speech stops when the tab is hidden or the chat closes.
 
 **Agent (shared with EDITH-lite on the 2D page)**
 
@@ -290,7 +304,8 @@ A real-time hologram of Arnav stands on the holotable and answers questions abou
 - Generation: a Workers AI instruct model, streamed via SSE from a Worker.
 - Tools the agent can call: `scrollTo`, `openProject`, `openResume`, `enterWorkshop`, `startFreelanceForm`.
 - Guardrails: answers only about Arnav and the site; refuses instructions hidden in user input; never gives phone, address or private details; says "I don't know" and offers the contact form when retrieval is empty.
-- Limits: per-IP rate limit (e.g. 20 messages/hour) and a daily cap that falls back to a friendly "EDITH is resting, use the contact form" message.
+- Reply format: each reply is TTS-ready. The spoken text is plain sentences; markdown and links travel in a separate field.
+- Limits: per-IP rate limit (e.g. 20 messages/hour) and a daily cap that falls back to a friendly "EDITH is resting, use the contact form" message. Spoken replies have their own allowance (see Spoken replies).
 
 ## Cricket World
 
@@ -436,6 +451,7 @@ GitHub, weather, Spotify and email are live; LinkedIn and Instagram are links, b
 | Resume | `resume.pdf` in static assets, versioned filename | On deploy | Nav button, holotable, EDITH, footer |
 | Weather (Mumbai) | Open-Meteo API (free, no key), cached in KV | Every 30 min | Holotable widget, window rain |
 | Spotify now playing | Spotify Web API with Arnav's refresh token stored as a Worker secret | Every 60 s while open, cached | Holotable widget |
+| Spoken replies (TTS) | Workers AI `@cf/myshell-ai/melotts` through `POST /api/voice/tts`; stock lines cached in KV; own daily Neuron allowance in KV | Per sentence, only when the visitor turns it on | EDITH-lite, EDITH tab |
 | Email | Cloudflare Email Routing "send email" binding to Arnav's verified address | Per message | Notebook, freelance form, contact form |
 | Bot protection | Cloudflare Turnstile on every form and on EDITH's first message | — | All inputs |
 | Analytics | Cloudflare Web Analytics (cookie-free) + custom events into D1 (workshop entered, world opened, game played) | — | Private `/admin` page |
@@ -452,7 +468,7 @@ The whole site runs on Cloudflare's free plan, on Arnav's own domain: one Worker
 
 - **Frontend:** Astro (static, fast, good SEO for the 2D landing) with React islands; the workshop is a separate `/workshop` route that lazy-loads React Three Fiber, drei, postprocessing, GSAP and Lenis.
 - **API:** Hono running in the same Worker (`/api/*`).
-- **Data:** D1 (notes, messages, leaderboard, events), KV (GitHub, weather, Spotify caches, "currently building", freelance flag), Vectorize (EDITH knowledge base), Workers AI (chat + embeddings).
+- **Data:** D1 (notes, messages, leaderboard, events), KV (GitHub, weather, Spotify caches, "currently building", freelance flag), Vectorize (EDITH knowledge base), Workers AI (chat + embeddings + optional text-to-speech).
 - **Media:** clips encoded to stay under 25 MiB per file so they ship as free static assets.
 
 &#91;embedded content: Architecture · one Worker, five bindings\]
@@ -469,6 +485,7 @@ The browser only ever talks to one origin; the Worker reaches every Cloudflare s
 | D1 | 5M rows read, 100,000 written per day, 5 GB | Forms, notes, leaderboard, events |
 | Vectorize | 30M queried, 5M stored vector dimensions per month | A few hundred chunks |
 | Workers AI | 10,000 Neurons per day, reset 00:00 UTC | EDITH chat + embeddings, with a daily cap and fallback |
+| Workers AI, voice share | Same 10,000 Neurons; MeloTTS ≈ 19 Neurons per audio minute | Voice allowance 1,000 Neurons/day (≈ 53 audio minutes) tracked in KV; stock lines cached; then browser `speechSynthesis` |
 | Email sending | Free to verified addresses | Forms → Arnav's inbox |
 
 **Custom domain setup (one time)**
@@ -482,7 +499,7 @@ The browser only ever talks to one origin; the Worker reaches every Cloudflare s
 
 **Deploy flow:** GitHub repo → Workers Builds on every push to `main` → preview URL per branch. Secrets (GitHub token, Spotify refresh token, Turnstile secret) live in Wrangler secrets, never in the repo.
 
-Sources: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) · [Workers limits](https://developers.cloudflare.com/workers/platform/limits) · [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/) · [Vectorize pricing](https://developers.cloudflare.com/vectorize/platform/pricing/) · [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)
+Sources: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) · [Workers limits](https://developers.cloudflare.com/workers/platform/limits) · [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/) · [Vectorize pricing](https://developers.cloudflare.com/vectorize/platform/pricing/) · [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/) · [MeloTTS model](https://developers.cloudflare.com/workers-ai/models/melotts/)
 
 ## Loading states and alerts
 

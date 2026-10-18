@@ -22,6 +22,7 @@ Check each box only with evidence (screenshot, Lighthouse report, command output
 - [ ] Each world ≤ 6 MB, loads on entry
 - [ ] Project World, EDITH site and monitor wall read from `projects.json`
 - [ ] Avatar chat streams with its states
+- [ ] Spoken replies are off by default, start within 1.5 s of the first sentence, and work on desktop Chrome, Safari and Android Chrome; the allowance fallback is tested; text is always shown
 
 ## Phase 4 · Story + play
 - [ ] Every room object live; chalkboard moderation via `/admin`; game leaderboard
