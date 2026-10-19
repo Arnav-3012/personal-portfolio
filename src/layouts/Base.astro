@@ -101,9 +101,11 @@ const hasNav = Astro.slots.has('nav');
     <script>
       import { initTheme } from '../lib/theme';
       import { audio } from '../lib/audio';
+      import { initRouteLoader } from '../lib/route-loader';
 
       initTheme();
       audio();
+      initRouteLoader();
     </script>
   </body>
 </html>
