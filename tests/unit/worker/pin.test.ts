@@ -101,7 +101,11 @@ describe('/admin with a PIN', () => {
       });
     expect((await post({ origin: 'null', 'sec-fetch-site': 'same-origin' })).status).toBe(303);
     expect((await post({ origin: 'null', 'sec-fetch-site': 'cross-site' })).status).toBe(403);
-    expect((await post({})).status).toBe(403);
+    // A browser or extension that strips both headers is not evidence of another site.
+    expect((await post({})).status).toBe(303);
+    const refused = await post({ origin: 'https://evil.example' });
+    expect(refused.status).toBe(403);
+    expect(await refused.text()).toContain('origin: https://evil.example');
   });
 
   it('refuses a login from another site', async () => {

@@ -514,3 +514,10 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Fix:** accept `Sec-Fetch-Site: same-origin` (a page cannot forge it) or a matching `Origin`; test the exact headers a browser sends.
 - **Prevention rule:** for same-origin checks use `Sec-Fetch-Site` first. Test auth flows with the headers a real browser sends under the page's own Referrer-Policy, not hand-made ones.
 - **Files:** `worker/admin.ts`, `tests/unit/worker/pin.test.ts`
+
+## 2026-10-19 · admin PIN · a strict origin check still refused a real browser
+- **What happened:** after the first fix the login still answered "Not allowed." in Arnav's browser, though a curl with a standard browser's headers (`Origin: null`, `Sec-Fetch-Site: same-origin`) got through on the live site.
+- **Root cause:** not found from here; the likely cause is a header-stripping browser setting or extension. The check refused a request for lacking proof of origin instead of for showing evidence of another site.
+- **Fix:** the login refuses only a request that says it came from another site (`Sec-Fetch-Site: cross-site`, or a different non-null `Origin`); silence is allowed, since a forged login gains nothing without the PIN and the session cookie is SameSite=Strict. The refusal now prints the headers it saw.
+- **Prevention rule:** probe the live site with curl before assuming the deploy or the fix is wrong; make a gate refuse on evidence of attack, not on absence of proof, when the attack it guards against has no impact; make refusals say what they saw.
+- **Files:** `worker/admin.ts`, `tests/unit/worker/pin.test.ts`

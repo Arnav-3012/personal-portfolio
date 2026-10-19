@@ -36,13 +36,20 @@ const reply = (status: number, body: Record<string, unknown>): Response =>
 export const admin = new Hono<{ Bindings: Env }>();
 
 /**
- * Whether a form post comes from this site's own page. Browsers set Sec-Fetch-Site and a page cannot forge it; `Origin` is
- * also accepted when it matches. (These pages send no referrer, and under that policy a browser sends `Origin: null`
- * for a same-site form post, so Origin alone would refuse Arnav's own login.)
+ * Whether a form post is known to come from another site. Browsers set Sec-Fetch-Site (a page cannot forge it) and, under
+ * the admin pages' no-referrer policy, send `Origin: null` for a same-site form post. Some browsers, extensions and
+ * privacy tools strip these headers, so only evidence of another site refuses the request; silence does not. That is
+ * safe here: signing in needs the PIN (a forged login gains nothing), and the session cookie is SameSite=Strict.
  */
-const fromThisSite = (c: Context<{ Bindings: Env }>): boolean =>
-  c.req.header('sec-fetch-site') === 'same-origin' ||
-  c.req.header('origin') === new URL(c.req.url).origin;
+const crossSite = (c: Context<{ Bindings: Env }>): boolean => {
+  const fetchSite = c.req.header('sec-fetch-site');
+  if (fetchSite) return fetchSite === 'cross-site';
+  const origin = c.req.header('origin');
+  return Boolean(origin && origin !== 'null' && origin !== new URL(c.req.url).origin);
+};
+/** What the request said about where it came from, for the refusal message (the visitor's own browser's headers). */
+const provenance = (c: Context<{ Bindings: Env }>): string =>
+  `sec-fetch-site: ${c.req.header('sec-fetch-site') ?? 'none'}, origin: ${c.req.header('origin') ?? 'none'}`;
 
 // The PIN sign-in. These routes sit before the gate below: they are how a visitor gets through it.
 const page = (status: number, html: string, extra: Record<string, string> = {}): Response =>
@@ -68,7 +75,7 @@ admin.post('/login', async (c) => {
   if (!pinConfigured(pin))
     return new Response('Admin is not configured.', { status: 503, headers });
   const url = new URL(c.req.url);
-  if (!fromThisSite(c)) return page(403, loginHtml('Not allowed.'));
+  if (crossSite(c)) return page(403, loginHtml(`Not allowed (${provenance(c)}).`));
   const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
   if (await locked(c.env.KV, ip))
     return page(429, loginHtml('Too many tries. Wait a while and try again.'), {
@@ -95,7 +102,8 @@ admin.post('/login', async (c) => {
 });
 
 admin.post('/logout', (c) => {
-  if (!fromThisSite(c)) return new Response('Not allowed.', { status: 403, headers });
+  if (crossSite(c))
+    return new Response(`Not allowed (${provenance(c)}).`, { status: 403, headers });
   return new Response(null, {
     status: 303,
     headers: {
