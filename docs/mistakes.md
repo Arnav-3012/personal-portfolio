@@ -521,3 +521,10 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Fix:** the login refuses only a request that says it came from another site (`Sec-Fetch-Site: cross-site`, or a different non-null `Origin`); silence is allowed, since a forged login gains nothing without the PIN and the session cookie is SameSite=Strict. The refusal now prints the headers it saw.
 - **Prevention rule:** probe the live site with curl before assuming the deploy or the fix is wrong; make a gate refuse on evidence of attack, not on absence of proof, when the attack it guards against has no impact; make refusals say what they saw.
 - **Files:** `worker/admin.ts`, `tests/unit/worker/pin.test.ts`
+
+## 2026-10-19 · deploy · adding `routes` silently switched workers.dev off
+- **What happened:** https://arnav-portfolio.arnav-3012.workers.dev answered 404; the dashboard showed workers.dev "Disabled". Arnav submits with that link.
+- **Root cause:** with `routes` in `wrangler.jsonc` and no `workers_dev`, Wrangler defaults it to false and turns the address off on deploy.
+- **Fix:** `"workers_dev": true` in `wrangler.jsonc`.
+- **Prevention rule:** after any change to `routes` or domains, probe every public address (workers.dev, apex, www) with curl before saying the deploy is fine.
+- **Files:** `wrangler.jsonc`

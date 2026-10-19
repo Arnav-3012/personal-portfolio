@@ -58,7 +58,14 @@
   // arnavc.in is active in Cloudflare. www.arnavc.in is attached in the dashboard (Workers & Pages > arnav-portfolio >
   // Settings > Domains & Routes > Add > Custom domain), not here: a DNS record already exists for it, and a config
   // deploy fails part-way if that record conflicts.
-  "routes": [{ "pattern": "arnavc.in", "custom_domain": true }],
+  // workers_dev must be stated: once `routes` exists Wrangler turns the workers.dev address off by default, and that is the
+  // link Arnav submits with. www.arnavc.in is created by the deploy itself (it needs no DNS record of its own beforehand:
+  // the old www CNAME had to be deleted first, 2026-10-19).
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "arnavc.in", "custom_domain": true },
+    { "pattern": "www.arnavc.in", "custom_domain": true },
+  ],
   "observability": {
     "enabled": true,
   },

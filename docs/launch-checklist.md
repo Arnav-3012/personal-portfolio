@@ -21,7 +21,8 @@ Evidence: the Deployments tab shows commit `79b3ab4` ("feat(admin): PIN sign-inâ
 ## 3. Web Analytics
 Dashboard, Analytics & Logs, Web Analytics, Add a site, `arnavc.in`, then use automatic setup if it is offered. If it only gives a beacon snippet, send Claude the token: it goes in as a script loaded after the first paint, so it does not cost LCP.
 
-## 4. `www.arnavc.in`
+## 4. `www.arnavc.in`: in progress (the config now creates it on the next deploy)
+The old `www` CNAME was deleted; `wrangler.jsonc` lists `www.arnavc.in` as a custom domain, so the next deploy attaches it. Also `workers_dev: true` is now stated, because the workers.dev address had been switched off by the `routes` entry (it answered 404).
 1. Dashboard, `arnavc.in`, DNS, Records: delete the existing `www` record if there is one (a record in the way makes the next step fail).
 2. Workers & Pages, `arnav-portfolio`, Settings, Domains & Routes, Add, Custom domain, `www.arnavc.in`.
 3. Tell Claude when it works so `www.arnavc.in` can be added to the `routes` in `wrangler.jsonc` (so a deploy keeps it).
