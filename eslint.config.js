@@ -10,6 +10,7 @@ import tseslint from 'typescript-eslint';
 export default defineConfig(
   globalIgnores([
     'dist/',
+    'public/draco/',
     '.astro/',
     '.wrangler/',
     'worker-configuration.d.ts',
@@ -23,6 +24,12 @@ export default defineConfig(
   {
     files: ['**/*.{jsx,tsx}'],
     extends: [jsxA11y.configs.recommended, reactHooks.configs.flat.recommended],
+  },
+  {
+    // React Three Fiber scenes mutate three.js objects (materials, lights, uniforms) from per-frame callbacks by design;
+    // the compiler rule meant for React state cannot tell the two apart.
+    files: ['src/components/workshop/**/*.tsx'],
+    rules: { 'react-hooks/immutability': 'off' },
   },
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   prettier,

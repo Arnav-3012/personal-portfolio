@@ -39,17 +39,38 @@
   "workshop": {
     "navLabel": "Workshop",
     "title": "The Workshop",
-    "status": "3D room opening soon",
-    "lead": "A room where every object opens a part of my story. It is still being built. Until it opens, each object has a home on the main site, listed below.",
+    "status": "3D room · first look",
+    "lead": "A room where every object opens a part of my story. The room is open as a first look and the objects arrive one by one. Until then, each object has a home on the main site, listed below.",
     "note": "The workshop is best on a desktop.",
     "tryAnyway": "Try anyway",
-    "tryAnywayReply": "The room is not open yet, so there is nothing to try. The list below takes you to the same things.",
+    "tryAnywayReply": "Opening the room on this device.",
     "zonesLabel": "Every object, and where it lives now",
     "handNote": "psst... press my brain",
+    "hoverNote": "hover here for secret",
+    "tapNote": "tap here for secret",
     "sequence": {
       "locking": "Locking coordinates",
       "status": "Entering the workshop",
       "skip": "Skip"
+    },
+    "room": {
+      "loading": "Loading neural pathways",
+      "backToSite": "Back to the site",
+      "unavailable": "3D is not available on this device. Every object is listed below.",
+      "listLabel": "Objects in the room",
+      "overview": "Overview",
+      "hint": "Click an object or pick one from the list. Esc steps back.",
+      "openOnSite": "See it on the main site",
+      "lowPower": "Switched to lighter 3D for this device.",
+      "day": "Day",
+      "night": "Night",
+      "rain": "Rain",
+      "clockLabel": "Mumbai",
+      "walk": "Walk around",
+      "keepWalking": "Keep walking",
+      "stopWalking": "Stop walking",
+      "walkHint": "WASD to walk, move the mouse to look, E to open, Esc frees the mouse, Esc again stops.",
+      "openPrompt": "Open"
     },
     "zones": [
       {

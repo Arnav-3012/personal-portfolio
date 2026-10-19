@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BRAIN, NEAR_PX, wrapNote } from '../../../src/lib/workshop-entry';
+import { BRAIN, NEAR_PX, HINT_DELAY_MS, wrapNote } from '../../../src/lib/workshop-entry';
 
 describe('wrapNote', () => {
   it('breaks a short note into lines at word boundaries', () => {
@@ -24,5 +24,16 @@ describe('brain placement', () => {
     expect(BRAIN.y).toBeLessThan(0.45);
     expect(BRAIN.x + BRAIN.size / 2).toBeLessThanOrEqual(1);
     expect(NEAR_PX).toBeGreaterThan(0);
+  });
+});
+
+describe('finding the door', () => {
+  it('draws the hint soon after the page settles, but not at the same instant', () => {
+    expect(HINT_DELAY_MS).toBeGreaterThanOrEqual(500);
+    expect(HINT_DELAY_MS).toBeLessThanOrEqual(3000);
+  });
+  it('fits the hint in the pencil note: short lines, no word split', () => {
+    expect(wrapNote('hover here for secret')).toEqual(['hover here', 'for secret']);
+    expect(wrapNote('tap here for secret')).toEqual(['tap here for', 'secret']);
   });
 });

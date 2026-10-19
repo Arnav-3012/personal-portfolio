@@ -84,7 +84,9 @@ const noPrefetch = (page: Page) =>
       return el;
     } as typeof Document.prototype.createElement;
   });
-const added = (log: ReturnType<typeof watch>) => log.filter((e) => e.kind === 'added');
+// The room's own loader ("Loading neural pathways") is a different thing from the page-transition loader these tests are about.
+const added = (log: ReturnType<typeof watch>) =>
+  log.filter((e) => e.kind === 'added' && !/neural/i.test(String(e.label ?? '')));
 
 test.describe('page loads', () => {
   test('a slow page shows the minimal loader while it is on its way, and it is gone on arrival', async ({
@@ -105,7 +107,8 @@ test.describe('page loads', () => {
     expect(first?.dots).toBe(25);
     // It showed during the wait (after the short grace period), not after the page had already arrived.
     expect(first?.at ?? 0).toBeLessThan(nav?.at ?? 0);
-    await expect(page.locator('.ld')).toHaveCount(0);
+    // (The room's own loader may be up by now; the page-transition loader must be gone.)
+    await expect(page.locator('.ld').filter({ hasNotText: /neural/i })).toHaveCount(0);
   });
 
   test('it covers the whole screen in the page colour, so the wait is never a blank flash or a half page', async ({

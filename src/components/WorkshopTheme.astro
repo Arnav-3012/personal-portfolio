@@ -1,0 +1,21 @@
+---
+// Workshop only (Base `workshop`): Auto theme is Mumbai's day (06:00 to 18:00 IST, UTC+5:30) or night, not the OS
+// setting. Runs before first paint, after Base's own script has set the OS-based theme; an explicit Day or Night saved in
+// Settings wins. Mirrors src/lib/workshop/mumbai-time.ts. Kept out of Base's script so the landing HTML does not grow.
+import { SETTINGS_KEY } from '../lib/settings';
+---
+
+<script is:inline define:vars={{ key: SETTINGS_KEY }}>
+  (() => {
+    let s = {};
+    try {
+      s = JSON.parse(localStorage.getItem(key) || '{}') || {};
+    } catch {
+      // Storage blocked: Auto applies.
+    }
+    if (s.theme === 'day' || s.theme === 'night') return;
+    const t = new Date();
+    const ist = (t.getUTCHours() * 60 + t.getUTCMinutes() + 330) % 1440;
+    document.documentElement.dataset.theme = ist >= 360 && ist < 1080 ? 'day' : 'night';
+  })();
+</script>

@@ -9,6 +9,8 @@ export function GET(): Response {
     lat,
     lon,
     handNote: site.workshop.handNote,
+    hoverNote: site.workshop.hoverNote,
+    tapNote: site.workshop.tapNote,
     ...site.workshop.sequence,
   });
 }

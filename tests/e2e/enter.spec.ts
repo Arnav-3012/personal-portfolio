@@ -234,7 +234,9 @@ test.describe('the entry sequence', () => {
     );
     await expect
       .poll(() => page.evaluate(() => getComputedStyle(document.body, '::before').opacity), {
-        timeout: 4000,
+        // The veil itself takes 1.2 s; the rest is the room starting up, which keeps a software-rendered page busy for several
+        // seconds before this check gets a turn.
+        timeout: 20_000,
       })
       .toBe('0');
   });

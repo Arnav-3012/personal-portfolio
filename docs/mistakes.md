@@ -528,3 +528,60 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Fix:** `"workers_dev": true` in `wrangler.jsonc`.
 - **Prevention rule:** after any change to `routes` or domains, probe every public address (workers.dev, apex, www) with curl before saying the deploy is fine.
 - **Files:** `wrangler.jsonc`
+
+## 2026-10-19 · 2.4 (3D room) · The look was wrong three times before it was right
+- **What happened:** the first room (graphite loft, steel beams, a red toolbox, a pegboard, industrial lamps, a cement-tile rug) was judged "too bad" and "too much"; the second (warm student workshop) still read as a mechanical workshop. Arnav wanted a minimal beige-and-black room, soft light, a fur rug and tech things (MacBook, Mac mini), nothing rusty.
+- **Root cause:** I took "Iron Man workshop plus student room" literally and filled it with props, instead of asking for the mood and then building the quietest version of it. I also designed from the SPEC's tokens and my own reading, and looked at references only after the first screenshot was rejected.
+- **Fix:** web research on minimal and Japandi rooms plus the Claude and Apple design references, then a warm-minimal palette in tokens (oat, pale oak, matte black, cream fur), two paper pendants, an arc floor lamp, and a tech desk. Props were cut to what is relevant to Arnav.
+- **Prevention rule:** for any new look, research references and show one screenshot of the direction before adding detail; fewer, better-lit objects beat more objects.
+- **Files:** `src/styles/tokens.css`, `src/components/workshop/*`
+
+## 2026-10-19 · 2.4 · Faces in the same plane (z-fighting) on the door and window frames, and a door leaf inside the wall
+- **What happened:** Arnav's screenshot showed jagged stair-steps on the door frame and leaf, and a bare white doorway.
+- **Root cause:** frame boxes were built flush with the wall opening (same plane as the plaster's faces), the open leaf's hinge was placed inside the 30 cm wall, and nothing existed behind the door but the sky.
+- **Fix:** frames reach 12 mm into the opening, the leaf hinges on the wall's outer face, and a short lit corridor sits behind the door.
+- **Prevention rule:** never place two surfaces in the same plane; overlap by a few millimetres or inset. Check every camera shot, not only the overview, before showing a room.
+- **Files:** `src/components/workshop/Shell.tsx`
+
+## 2026-10-19 · 2.4 · Leaf-only plant models floated and sorted badly
+- **What happened:** the CC0 plant models (fern, anthurium, calathea) came as cut-out leaves without stems or pots, so they hung in mid-air with alpha sorting artefacts.
+- **Root cause:** I picked models by name and size without opening them.
+- **Fix:** plants are drawn in code (stems, merged curved leaves, plain pots); only the chair and vase remain from Poly Haven.
+- **Prevention rule:** look at a downloaded model in the scene before keeping it; botany-category assets are not potted plants.
+- **Files:** `src/components/workshop/Plants.tsx`, `scripts/room-assets.ts`
+
+## 2026-10-19 · 2.4b · A third-person walker when Arnav wanted first person; and walking tied to frame rate
+- **What happened:** the approved plan had a visible character and a follow camera; Arnav said "no need to see the character, first person, just hands and legs a bit". Separately, the movement step was capped at 50 ms per frame, so on a slow device a held key covered almost no distance (an e2e test moved 0.11 m in 2.5 s).
+- **Root cause:** I read "walkable character" as a visible avatar. The cap was meant to stop tunnelling but made speed depend on frame rate.
+- **Fix:** eye-height camera with mouse look, hands in the view, legs and trainers visible when looking down; slow frames are split into 1/30 s sub-steps.
+- **Prevention rule:** when the user says "character", ask or state first-person vs third-person in the plan's first line; never cap dt without sub-stepping.
+- **Files:** `src/components/workshop/Walker.tsx`, `Hands.tsx`, `Avatar.tsx`, `Rig.tsx`
+
+## 2026-10-19 · 2.4 · Smaller wrong turns (caught by tests and screenshots)
+- macOS `sed -i` needs an empty suffix argument; inside an `&&` chain its failure silently skipped the next command (twice). Use Python for edits.
+- A translucent light-shaft wedge from the window read as a flat triangle: removed.
+- Hotspot rings were hard-edged: now feathered shader glows at about a third of the strength until hovered.
+- A vertical-only drag did not count as a drag (only x was measured), so looking down never triggered: the distance now uses both axes.
+- ESLint linted the vendor Draco wrapper in `public/draco/`: ignored. Landing HTML grew 153 B when the Mumbai-time script was in `Base.astro`: moved to a workshop-only component.
+- The room had 173 GL draw calls per frame (over the 150 budget): small pieces no longer cast shadows and bloom uses fewer levels.
+
+## 2026-10-19 · 2.4 · Flashes and judder while moving
+- **What went wrong:** the auto quality drop changed pixel ratio, post stack, tone mapping and the key light together, so the picture jumped; a point light over glossy glass made a moving white hotspot; the camera was updated a frame before the walker; the shadow pass ran every frame for a room that never moves.
+- **Root cause:** I treated "lower quality" as one switch and checked looks only in still screenshots, never in motion.
+- **Fix:** resolution-only steps first, tier swap last; static shadows; walker before camera; softer glass and metal; eased stride shared by camera, legs and arms.
+- **Prevention rule:** any runtime quality change must keep the image identical apart from sharpness; judge lights from a frame sequence while moving (sample brightness per frame), not one screenshot; never put a point light close above a glossy surface.
+- **Files:** `Room.tsx`, `Lighting.tsx`, `Walker.tsx`, `Rig.tsx`, `Hands.tsx`, `Shell.tsx`, `quality.ts`
+
+## 2026-10-20 · 2.4 · White flashes while walking (third attempt)
+- **What went wrong:** Arnav reported the flashes three times; I fixed plausible causes (quality tier jump, a glossy-glass hotspot, hotspot glow) by reasoning and screenshots, and the flash was still there.
+- **Root cause:** the lights re-rendered whenever the room component did, and drei's Environment redrew its map each time (a 2-frame brighter picture). Nothing I tried by reasoning pointed at it.
+- **Fix:** memoised the static scene parts, built the environment once, isolated the effects stack.
+- **Prevention rule:** for a visual glitch that happens in motion, measure it before fixing: record per-frame brightness while doing the action, keep the pixels of the bad frames, log React renders and match them by timestamp, then switch suspects off one at a time. Never ship a "fix" for a flicker that was not reproduced as a number first. Components that take no props and belong to a canvas scene should be memoised when their parent holds changing state.
+- **Files:** `Room.tsx`, `Lighting.tsx`, `Markers.tsx`
+
+## 2026-10-20 · 2.4 · The room's imports slowed the landing page
+- **What went wrong:** the landing page's LCP went from 1,959 to 2,104 ms (budget 2,000) with no change to the landing page itself.
+- **Root cause:** the lazy room imported `lib/theme` and `lib/workshop/mumbai-time`, which the landing's first script also uses, so the bundler made them shared files the landing had to fetch before its first script ran. Two extra requests were worth about 150 ms.
+- **Fix:** room-only copies of the two tiny helpers, with a test that the copy matches.
+- **Prevention rule:** a lazy chunk must not import modules that the landing's critical scripts also import. After any change that touches shared libs, compare the `from"./..."` imports of `dist/_astro/Base...js` and `index...js` with the previous build, and run Lighthouse on `/` before closing a task, not only the room.
+- **Files:** `src/lib/workshop/typing.ts`, `room-clock.ts`, `Room.tsx`, `Walker.tsx`, `Shell.tsx`

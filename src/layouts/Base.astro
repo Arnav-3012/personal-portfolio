@@ -4,6 +4,7 @@ import '../styles/global.css';
 import SettingsPanel from '../components/SettingsPanel.astro';
 import Toaster from '../components/Toaster.astro';
 import ProgressBar from '../components/ProgressBar.astro';
+import WorkshopTheme from '../components/WorkshopTheme.astro';
 import { SETTINGS_KEY } from '../lib/settings';
 import { BOOT_KEY, FAILSAFE_MS } from '../lib/boot';
 import { site } from '../lib/content';
@@ -14,6 +15,8 @@ interface Props {
   noindex?: boolean;
   /** Plays the ARNAV-OS boot (landing only). */
   boot?: boolean;
+  /** The 3D workshop: Auto theme follows Mumbai time instead of the OS setting (SPEC "Theme switching"). */
+  workshop?: boolean;
   /** Loads the era font (Fraunces italic, retro-TV titles only). Off by default: its @font-face block is HTML bytes. */
   era?: boolean;
 }
@@ -22,13 +25,14 @@ const {
   description = `${site.name}: ${site.roleLine}.`,
   noindex = false,
   boot = false,
+  workshop = false,
   era = false,
 } = Astro.props;
 const hasNav = Astro.slots.has('nav');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-auto={workshop ? 'mumbai' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -79,6 +83,7 @@ const hasNav = Astro.slots.has('nav');
         }
       })();
     </script>
+    {workshop && <WorkshopTheme />}
     <Font cssVariable="--font-display" preload={[{ weight: 700 }]} />
     <Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
     <Font cssVariable="--font-mono" />

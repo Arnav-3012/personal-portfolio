@@ -1,7 +1,8 @@
 ---
-// /workshop (Phase 2a): the entry to the 3D room. The room itself is Phase 2b, so for now this is the HUD zone list the
-// SPEC requires anyway (every object reachable by keyboard and screen reader), each linking to the 2D section that
-// holds the same thing, with an honest "opening soon" status. Copy and zones come from content/site.json.
+// /workshop: the 3D room (Phase 2b, task 2.4) over a server-rendered HUD zone list. The list is the page without
+// JavaScript, on devices without WebGL and while a phone has not said "try anyway"; with the room running it is replaced
+// by the HUD's own list (src/components/workshop/Hud.tsx). The room's code (three.js and all) is imported only when the
+// room is allowed to start, so the landing page and this page's first paint carry none of it. Copy comes from content/site.json.
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../lib/content';
@@ -9,7 +10,7 @@ import { site } from '../lib/content';
 const w = site.workshop;
 ---
 
-<Base title={`${w.title} · ${site.name}`} description={w.lead}>
+<Base title={`${w.title} · ${site.name}`} description={w.lead} workshop>
   {/* Runs while the page is parsed, before the first paint: marks an arrival from the entry sequence (see enter-sequence.ts). */}
   <script is:inline>
     try {
@@ -21,7 +22,19 @@ const w = site.workshop;
       // Storage blocked: the page opens without the arrival fade.
     }
   </script>
+  {/* Desktop with JavaScript: hide the list from the first paint, so it does not flash before the room's loader. A failsafe restores it. */}
+  <script is:inline>
+    (() => {
+      const d = document.documentElement;
+      if (innerWidth < 768) return;
+      d.dataset.room = 'loading';
+      setTimeout(() => {
+        if (d.dataset.room === 'loading') delete d.dataset.room;
+      }, 20000);
+    })();
+  </script>
   <main id="main" class="ws">
+    <div id="room-root"></div>
     <a class="ws__back hud" href="/">
       <Icon name="chevron-left" size={16} /> Back to the site
     </a>
@@ -34,6 +47,10 @@ const w = site.workshop;
       <h1 class="display">{w.title}</h1>
       <p class="ws__lead">{w.lead}</p>
     </header>
+
+    <p class="small ws__reply" data-room-fail role="status" hidden>
+      {w.room.unavailable}
+    </p>
 
     <aside class="ws__note" data-mobile-note aria-label="Device note">
       <p>{w.note}</p>
@@ -67,14 +84,78 @@ const w = site.workshop;
   </main>
 </Base>
 
+<script
+  is:inline
+  type="application/json"
+  id="room-data"
+  set:html={JSON.stringify({ room: { ...w.room, title: w.title }, zones: w.zones })}
+/>
 <script>
-  // "Try anyway" on a phone: there is no room to open yet, so say so plainly.
+  import { mountLoader } from '../lib/loader';
+
+  // Starts the room: desktop at once, a phone once the visitor says "try anyway". Anything that goes wrong (no WebGL, a
+  // failed import, an error in the scene) puts the HUD zone list back with a plain note.
+  const doc = document.documentElement;
+  const dataEl = document.getElementById('room-data');
+  const root = document.getElementById('room-root');
   const button = document.querySelector<HTMLButtonElement>('[data-try]');
   const reply = document.querySelector<HTMLElement>('[data-try-reply]');
+  const failNote = document.querySelector<HTMLElement>('[data-room-fail]');
+  let started = false;
+
+  const hasWebGl = (): boolean => {
+    try {
+      const canvas = document.createElement('canvas');
+      return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  };
+
+  async function start(): Promise<void> {
+    if (started || !dataEl?.textContent || !root) return;
+    started = true;
+    const data = JSON.parse(dataEl.textContent) as {
+      room: { loading: string };
+      zones: unknown[];
+    };
+    const fail = (shown?: ReturnType<typeof mountLoader>): void => {
+      shown?.remove();
+      doc.dataset['room'] = 'off';
+      if (failNote) failNote.hidden = false;
+    };
+    if (!hasWebGl()) return fail();
+    doc.dataset['room'] = 'loading';
+    const loader = mountLoader({ label: `${data.room.loading} · 0%`, progress: 0 });
+    const label = loader.el.querySelector('.ld__label');
+    try {
+      const { mountRoom } = await import('../components/workshop/mount');
+      mountRoom(root, data as Parameters<typeof mountRoom>[1], {
+        onProgress(ratio) {
+          loader.set(ratio);
+          if (label) label.textContent = `${data.room.loading} · ${Math.round(ratio * 100)}%`;
+        },
+        onReady() {
+          doc.dataset['room'] = 'on';
+          loader.remove();
+        },
+        onFail: () => fail(loader),
+      });
+    } catch {
+      fail(loader);
+    }
+  }
+
+  // "Try anyway" on a phone opens the room on this device.
   button?.addEventListener('click', () => {
     if (reply) reply.hidden = false;
     button.hidden = true;
+    void start();
   });
+  // Arriving from the entry sequence, the page rises out of the page colour over 1.2 s. Starting the room (which keeps the
+  // main thread busy while it builds its textures) in the middle of that would make the rise stutter, so it waits for it.
+  const arriving = document.documentElement.hasAttribute('data-arrive');
+  if (innerWidth >= 768) setTimeout(() => void start(), arriving ? 1300 : 0);
 </script>
 
 <style>
@@ -97,6 +178,32 @@ const w = site.workshop;
       opacity: 0;
       visibility: hidden;
     }
+  }
+  /* While the room loads the list stays out of sight; with the room on, only the room is shown. */
+  :global(html[data-room='loading'] .ws > :not(#room-root)) {
+    visibility: hidden;
+  }
+  /* The page's heading stays available to screen readers throughout the load (the room brings its own once it is on). */
+  :global(html[data-room='loading'] .ws__head h1) {
+    visibility: visible;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  :global(html[data-room='on'] .ws > :not(#room-root)) {
+    display: none;
+  }
+  :global(html[data-room='on']),
+  :global(html[data-room='on'] body) {
+    overflow: hidden;
+  }
+  :global(html[data-room='on'] .ws) {
+    display: block;
+    width: 100%;
+    padding: 0;
   }
   .ws {
     display: grid;

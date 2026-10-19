@@ -199,3 +199,18 @@ Newest first. Files changed per task.
 
 ## 2026-10-19 · /admin PIN sign-in
 - New: `worker/pin.ts`, `tests/unit/worker/pin.test.ts`. Changed: `worker/admin.ts`, `worker/secrets.d.ts`.
+
+## 2026-10-19 · 2.4 The 3D room and walk mode (in review)
+- New: `src/components/workshop/` (Room, Shell, Lighting, Outside, Props, Details, Plants, Markers, Rig, Walker, Avatar, Hands, Hud, mount, context, geometry, uniforms, room.css), `src/lib/workshop/` (layout, mumbai-time, camera-ease, quality, palette, textures, posters, screens, movement, collision), `src/components/WorkshopTheme.astro`, `scripts/room-assets.ts`, `public/media/room/*.glb` (2), `public/draco/`, `tests/unit/lib/workshop.test.ts`, `tests/unit/lib/workshop-walk.test.ts`, `tests/e2e/room.spec.ts`.
+- Changed: `src/pages/workshop.astro` (loads the room on desktop or "Try anyway"), `src/layouts/Base.astro` (`workshop` prop), `src/lib/theme.ts` (Mumbai Auto, `Shift+D` while walking, SSR-safe typing check), `src/styles/tokens.css` (`--room-*`, palette probes), `src/lib/content.ts` and `content/site.json` (room copy), `content/credits.json`, `eslint.config.js`, `.prettierignore`, `package.json` (three, r3f, drei, postprocessing, `room:assets`), `tests/e2e/workshop.spec.ts` (list tests run with WebGL off), `docs/plan.md`.
+
+## 2026-10-19 · 2.4 smoothness, hands and holotable
+- New: `src/components/workshop/HoloTable.tsx`.
+- Changed: `Room.tsx` (resolution steps, MSAA 2), `Lighting.tsx` (static shadows, softer holo light), `Walker.tsx` and `Rig.tsx` (order, smoothed time, shared stride), `Hands.tsx` (arms at the sides), `Avatar.tsx`, `context.ts` (`phase`), `Shell.tsx` (round pedestal removed, softer glass, throttled clock), `Props.tsx` (metal roughness), `src/lib/workshop/layout.ts` (rectangular table, obstacle, shot), `quality.ts` (pixel ratio caps, `RESOLUTION_STEPS`), `tests/unit/lib/workshop-walk.test.ts`.
+
+## 2026-10-19 · 2.4 hint ladder, walk transition, door console
+- Changed: `src/lib/workshop-entry.ts`, `content/site.json`, `src/lib/content.ts`, `src/pages/workshop.json.ts`, `src/components/workshop/Rig.tsx`, `Walker.tsx`, `Room.tsx`, `context.ts`, `Details.tsx`, `src/lib/workshop/layout.ts`, `tests/unit/lib/workshop-entry.test.ts`, `tests/e2e/workshop.spec.ts`.
+
+## 2026-10-20 · 2.4 closed
+- New: `src/lib/workshop/typing.ts`, `src/lib/workshop/room-clock.ts`.
+- Changed: `src/pages/workshop.astro` (heading kept for screen readers while loading; the room waits for the arrival veil), `src/lib/workshop-entry.ts` (note kept on screen), `Room.tsx`, `Lighting.tsx`, `Markers.tsx`, `Walker.tsx`, `Shell.tsx`, `tests/e2e/loader.spec.ts`, `enter.spec.ts`, `forms-api.spec.ts`, `tests/unit/lib/workshop.test.ts`, `docs/plan.md`.

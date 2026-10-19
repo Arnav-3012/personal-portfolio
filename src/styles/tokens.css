@@ -4,7 +4,8 @@
  */
 
 :root,
-:root[data-theme='night'] {
+:root[data-theme='night'],
+[data-palette='night'] {
   color-scheme: dark;
 
   /* Graphite: a neutral near-black with no hue of its own, so the amber, red, cyan and green accents each read as
@@ -24,9 +25,36 @@
   --bead-hi: #ffffff;
   --bead-lo: #7d828b;
   --bead-cast: rgba(0, 0, 0, 0.55);
+
+  /* The 3D workshop (src/lib/workshop/palette.ts reads both sets through a [data-palette] probe, so the room can
+     cross-fade between them). A warm-minimal studio: oat plaster, pale oak, matte black, cream fur and linen, lit softly;
+     outside, a moonlit sky (night) or soft sun (day). */
+  --room-floor: #aa8b63;
+  --room-wall: #d8cfc0;
+  --room-wall-low: #c8bdac;
+  --room-ceiling: #e3ddd0;
+  --room-steel: #1f1e1c;
+  --room-wood: #b69265;
+  --room-fabric: #e6dcc9;
+  --room-fur: #ece5d6;
+  --room-leaf: #4c6b47;
+  --room-skin: #c98f69;
+  --room-metal: #c8cacd;
+  --room-screen: #0d0e11;
+  --room-paper: #efe7d6;
+  --room-ink: #1d1b1e;
+  --room-glow: #ffe5c2;
+  --room-sky-top: #0a1026;
+  --room-sky-horizon: #2b3160;
+  --room-haze: #3b3a66;
+  --room-key: #a9c0ff;
+  --room-city: #181c2c;
+  --room-city-lit: #ffcf86;
+  --room-moon: #e6ecff;
 }
 
-:root[data-theme='day'] {
+:root[data-theme='day'],
+[data-palette='day'] {
   color-scheme: light;
 
   /* Ivory: a faintly warm neutral paper with neutral near-black ink (the earlier beige paper and brown-black ink made
@@ -44,6 +72,30 @@
   --bead-hi: #8a8d96;
   --bead-lo: #050506;
   --bead-cast: rgba(23, 23, 26, 0.28);
+
+  /* Day: the same room in soft sun over a hazy Mumbai skyline. */
+  --room-floor: #c4a477;
+  --room-wall: #e2d5bd;
+  --room-wall-low: #d5c8b2;
+  --room-ceiling: #f1ebdd;
+  --room-steel: #2a2927;
+  --room-wood: #c9a678;
+  --room-fabric: #efe7d8;
+  --room-fur: #e8dfcc;
+  --room-leaf: #5c8556;
+  --room-skin: #cf9670;
+  --room-metal: #d5d7da;
+  --room-screen: #15161a;
+  --room-paper: #f3ecdc;
+  --room-ink: #232124;
+  --room-glow: #ffdca8;
+  --room-sky-top: #3f86cf;
+  --room-sky-horizon: #bcd9ee;
+  --room-haze: #cfdfea;
+  --room-key: #ffd9a2;
+  --room-city: #8da0b4;
+  --room-city-lit: #fff3d6;
+  --room-moon: #fff1c9;
 }
 
 :root {

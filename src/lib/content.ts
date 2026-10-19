@@ -63,8 +63,31 @@ export const siteSchema = z.strictObject({
     zonesLabel: text.max(60),
     // The pencil note and arrow that appear beside the head when the pointer nears the brain.
     handNote: text.max(32),
+    // The same pencil note, offered once to a visitor who has not found the brain: by pointer, or by finger.
+    hoverNote: text.max(32),
+    tapNote: text.max(32),
     // The entry sequence (brain → globe → Mumbai): its readouts and the skip button.
     sequence: z.strictObject({ locking: text.max(30), status: text.max(40), skip: text.max(16) }),
+    // The 3D room's own copy (HUD, loader, fallback). Zone titles and blurbs are below.
+    room: z.strictObject({
+      loading: text.max(40),
+      backToSite: text.max(24),
+      unavailable: text.max(120),
+      listLabel: text.max(40),
+      overview: text.max(24),
+      hint: text.max(120),
+      openOnSite: text.max(40),
+      lowPower: text.max(80),
+      day: text.max(12),
+      night: text.max(12),
+      rain: text.max(12),
+      clockLabel: text.max(16),
+      walk: text.max(24),
+      keepWalking: text.max(24),
+      stopWalking: text.max(24),
+      walkHint: text.max(120),
+      openPrompt: text.max(16),
+    }),
     zones: z
       .array(
         z.strictObject({

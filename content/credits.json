@@ -22,5 +22,13 @@
     "author": "Typeco",
     "licence": "SIL Open Font License 1.1",
     "url": "https://fonts.google.com/specimen/Reenie+Beanie"
+  },
+  {
+    "id": "room-models",
+    "what": "Armchair and vase in the 3D workshop (compressed by scripts/room-assets.ts)",
+    "source": "Poly Haven: modern_arm_chair_01, ceramic_vase_02",
+    "author": "Poly Haven contributors",
+    "licence": "CC0 1.0 (public domain dedication)",
+    "url": "https://polyhaven.com/models"
   }
 ]

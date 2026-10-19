@@ -20,15 +20,21 @@
     "links": "linkinator ./dist --recurse --config .linkinator.config.json",
     "lhci": "lhci autorun",
     "cf-typegen": "wrangler types",
-    "kb:build": "node scripts/kb-build.ts"
+    "kb:build": "node scripts/kb-build.ts",
+    "room:assets": "node scripts/room-assets.ts"
   },
   "dependencies": {
     "@astrojs/react": "7.1.0",
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/postprocessing": "3.2.0",
     "astro": "7.4.0",
     "hono": "4.13.13",
     "lenis": "^1.3.27",
+    "postprocessing": "6.39.5",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
@@ -40,6 +46,7 @@
     "@types/node": "^24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-astro": "3.2.1",

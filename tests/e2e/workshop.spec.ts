@@ -22,6 +22,21 @@ const open = async (page: Page, path: string, theme: 'day' | 'night' = 'night') 
   }, theme);
   await page.goto(path);
 };
+/** Opens a page with WebGL switched off, so /workshop shows its list (the fallback), not the 3D room. */
+const openFallback = async (page: Page, path: string, theme: 'day' | 'night' = 'night') => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string,
+      ...rest: unknown[]
+    ) {
+      if (/webgl/i.test(type)) return null;
+      return (original as (...a: unknown[]) => unknown).call(this, type, ...rest);
+    } as typeof original;
+  });
+  await open(page, path, theme);
+};
 const settled = (page: Page) =>
   page.evaluate(() =>
     Promise.all(
@@ -67,13 +82,45 @@ test.describe('entering the workshop', () => {
     await expect(door).toBeAttached({ timeout: 9000 });
     await expect(door).toHaveAttribute('aria-label', /workshop/i);
   });
+
+  test('the secret is hinted on every visit: a pencil note points at the brain until someone hovers, then the old note takes over, and the hint returns', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await open(page, '/');
+    // No pulsing dot; the note itself stays up while nobody has gone near.
+    await expect(page.locator('.hero__stage .ws-beacon')).toHaveCount(0);
+    await expect(page.locator('.hero__stage.ws-nudge .ws-note--nudge')).toBeAttached({
+      timeout: 12_000,
+    });
+    await page.waitForTimeout(3000);
+    await expect(page.locator('.hero__stage.ws-nudge')).toBeAttached();
+    // Hovering the head gives way to the brain and its own note.
+    const box = await page.locator('.hero__stage').boundingBox();
+    if (!box) throw new Error('no stage');
+    await page.mouse.move(box.x + box.width * 0.49, box.y + box.height * 0.3, { steps: 8 });
+    await expect(page.locator('.hero__stage.ws-near')).toBeAttached();
+    await expect(page.locator('.hero__stage .ws-note--nudge')).toHaveCount(0);
+    // Moving away brings the hint back.
+    await page.mouse.move(box.x + 20, box.y + box.height - 20, { steps: 8 });
+    await expect(page.locator('.hero__stage.ws-nudge .ws-note--nudge')).toBeAttached({
+      timeout: 8000,
+    });
+    // And a later visit, in the same browser, shows it again.
+    const again = await page.context().newPage();
+    await again.setViewportSize({ width: 1440, height: 900 });
+    await open(again, '/');
+    await expect(again.locator('.hero__stage.ws-nudge .ws-note--nudge')).toBeAttached({
+      timeout: 12_000,
+    });
+  });
 });
 
 test.describe('/workshop', () => {
   test('lists every zone from content, each link landing on a section that exists', async ({
     page,
   }) => {
-    await open(page, '/workshop');
+    await openFallback(page, '/workshop');
     await expect(page.locator('.zone')).toHaveCount(w.zones.length);
     for (const z of w.zones)
       await expect(page.getByRole('link', { name: new RegExp(z.title) })).toBeVisible();
@@ -86,7 +133,7 @@ test.describe('/workshop', () => {
   });
 
   test('every zone is reachable by keyboard', async ({ page }) => {
-    await open(page, '/workshop');
+    await openFallback(page, '/workshop');
     const seen = new Set<string>();
     for (let i = 0; i < w.zones.length + 6; i++) {
       await page.keyboard.press('Tab');
@@ -102,7 +149,7 @@ test.describe('/workshop', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 760 });
-    await open(page, '/workshop');
+    await openFallback(page, '/workshop');
     await expect(page.getByText(w.note)).toBeVisible();
     await page.getByRole('button', { name: w.tryAnyway }).click();
     await expect(page.getByText(w.tryAnywayReply)).toBeVisible();
@@ -113,7 +160,7 @@ test.describe('/workshop', () => {
 
   for (const theme of ['night', 'day'] as const)
     test(`passes axe (${theme})`, async ({ page }) => {
-      await open(page, '/workshop', theme);
+      await openFallback(page, '/workshop', theme);
       await settled(page);
       const results = await new AxeBuilder({ page }).analyze();
       expect(results.violations).toEqual([]);
@@ -121,7 +168,7 @@ test.describe('/workshop', () => {
 
   test('reduced motion: the list shows at once', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await open(page, '/workshop');
+    await openFallback(page, '/workshop');
     expect(
       await page
         .locator('.ws__zones li')

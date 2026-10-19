@@ -58,15 +58,15 @@ test.describe('POST /api/forms/<kind>', () => {
     expect(text.status()).toBe(415);
   });
 
-  test('limits one connection to five messages an hour, and other connections are unaffected', async ({
+  test('limits one connection to seven messages an hour, and other connections are unaffected', async ({
     request,
   }) => {
     const ip = '203.0.113.200';
-    for (let i = 0; i < 5; i++)
+    for (let i = 0; i < 7; i++)
       expect((await post(request, { ...valid, turnstile: TOKEN }, ip)).status()).toBe(200);
-    const sixth = await post(request, { ...valid, turnstile: TOKEN }, ip);
-    expect(sixth.status()).toBe(429);
-    expect(sixth.headers()['retry-after']).toBe('3600');
+    const eighth = await post(request, { ...valid, turnstile: TOKEN }, ip);
+    expect(eighth.status()).toBe(429);
+    expect(eighth.headers()['retry-after']).toBe('3600');
     expect((await post(request, { ...valid, turnstile: TOKEN }, '203.0.113.201')).status()).toBe(
       200,
     );

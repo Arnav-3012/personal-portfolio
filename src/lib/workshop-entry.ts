@@ -6,12 +6,21 @@
 // JavaScript after the LCP paint so it adds nothing to the landing HTML; the nav also links to /workshop. Brain: CC0
 // outline in public/media/brain.svg; note font: Reenie Beanie (OFL), fetched on the first hover. Both credited in
 // content/credits.json.
+//
+// Finding the door (Arnav, 2026-10-19: "how do we ensure people know to hover there"; then "not the pulsing dot, the same
+// sketchbook note saying hover here for the secret, pointing there"; then "every time we visit"). The brain is a secret, so on
+// every visit, from the first paint, a pencil note in the same hand says "hover here for secret" with an arrow to the skull.
+// The moment the pointer goes near, that note gives way to the brain and "psst... press my brain", and it comes back when the
+// pointer leaves. Touch has no hover: the brain itself breathes and the note says "tap here for secret" (not on narrow
+// phones, where there is no room). The nav's Workshop link is the route that never depends on any of this.
 
 /** Where the brain sits on the stage, as fractions of its width and height: over the skull. */
 export const BRAIN = { x: 0.49, y: 0.3, size: 0.5 } as const;
 export const BRAIN_URL = '/media/brain.svg';
 /** How far past the brain's own box the pointer may be, in pixels, for it to pop up. */
 export const NEAR_PX = 40;
+/** How long after the page settles the hint note starts to draw itself, in milliseconds. */
+export const HINT_DELAY_MS = 1200;
 
 /** Splits a short note into lines of about `max` characters at word breaks. */
 export function wrapNote(text: string, max = 13): string[] {
@@ -31,14 +40,19 @@ const CSS = `@font-face{font-family:'Reenie Beanie';src:url(/media/fonts/reenie-
 .ws-brain__art{display:block;width:100%;height:100%;background:var(--time);-webkit-mask:url(${BRAIN_URL}) center/contain no-repeat;mask:url(${BRAIN_URL}) center/contain no-repeat;transform:scaleX(-1)}
 .ws-near .ws-brain,.ws-brain:focus-visible{opacity:.95;transform:translate(-50%,-50%) scale(1);animation:ws-brain 3.2s ease-in-out infinite}
 @keyframes ws-brain{50%{filter:drop-shadow(0 0 1.5px var(--bg)) drop-shadow(0 0 24px color-mix(in srgb,var(--time) 70%,transparent))}}
-.ws-note{position:absolute;z-index:1;left:-36.5%;top:6%;width:62%;aspect-ratio:2/1;transform:translateY(var(--ws-dy,0px));pointer-events:none;overflow:visible;color:color-mix(in srgb,var(--text) 84%,transparent);translate:-14px 0;transition:translate 900ms var(--ease-out)}
+.ws-note{position:absolute;z-index:1;left:-36.5%;top:6%;width:62%;aspect-ratio:2/1;transform:translateY(var(--ws-dy,0px));margin-left:var(--ws-dx,0px);pointer-events:none;overflow:visible;color:color-mix(in srgb,var(--text) 84%,transparent);translate:-14px 0;transition:translate 900ms var(--ease-out)}
 .ws-note text{font:400 40px/1 'Reenie Beanie',cursive;fill:currentColor;clip-path:inset(0 100% 0 0);transition:clip-path 420ms var(--ease-out)}
 .ws-note .ws-line{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 360ms var(--ease-out)}
 .ws-note .ws-line--2{stroke-width:1.4;opacity:.55}
-.ws-near .ws-note.is-live{translate:0 0}
-.ws-near .ws-note.is-live text{clip-path:inset(0 0 0 0);transition:clip-path 1300ms cubic-bezier(.45,0,.2,1) 160ms}
-.ws-near .ws-note.is-live .ws-line{stroke-dashoffset:0;transition:stroke-dashoffset 1000ms cubic-bezier(.65,0,.35,1) 800ms}
-@media (hover:none){.ws-brain{opacity:.5;transform:translate(-50%,-50%) scale(.85)}.ws-note{display:none}}
+.ws-near .ws-note:not(.ws-note--nudge).is-live,.ws-nudge .ws-note--nudge.is-live{translate:0 0}
+.ws-near .ws-note:not(.ws-note--nudge).is-live text{clip-path:inset(0 0 0 0);transition:clip-path 1300ms cubic-bezier(.45,0,.2,1) 480ms}
+.ws-nudge .ws-note--nudge.is-live text{clip-path:inset(0 0 0 0);transition:clip-path 1300ms cubic-bezier(.45,0,.2,1) 160ms}
+.ws-near .ws-note:not(.ws-note--nudge).is-live .ws-line{stroke-dashoffset:0;transition:stroke-dashoffset 1000ms cubic-bezier(.65,0,.35,1) 1000ms}
+.ws-nudge .ws-note--nudge.is-live .ws-line{stroke-dashoffset:0;transition:stroke-dashoffset 1000ms cubic-bezier(.65,0,.35,1) 800ms}
+.ws-note--nudge{color:color-mix(in srgb,var(--text) 70%,transparent)}
+@keyframes ws-breathe{50%{opacity:.95}}
+@media (hover:none){.ws-brain{opacity:.5;transform:translate(-50%,-50%) scale(.85);animation:ws-breathe 3.6s ease-in-out infinite}}
+@media (hover:none) and (prefers-reduced-motion:reduce){.ws-brain{animation:none}}
 @media (max-width:640px){.ws-note{display:none}}`;
 
 interface Content {
@@ -49,6 +63,8 @@ interface Content {
   status: string;
   skip: string;
   handNote: string;
+  hoverNote?: string;
+  tapNote?: string;
 }
 let content: Promise<Content | null> | undefined;
 const loadContent = (): Promise<Content | null> =>
@@ -138,6 +154,7 @@ export function startWorkshopEntry(doc: Document = document): void {
   stage.append(brain);
 
   const reduced = (): boolean => doc.documentElement.dataset['motion'] === 'reduced';
+  const touch = matchMedia('(hover: none)').matches;
 
   // The first time the visitor shows interest: warm the sequence, fetch the copy, and draw the pencil note.
   let warmed = false;
@@ -165,18 +182,25 @@ export function startWorkshopEntry(doc: Document = document): void {
 
   /** On a short or narrow screen the stage is small and the note's words land on the "Work" corner: slide the note down until they clear it. */
   const clearWork = (): void => {
-    const note = stage.querySelector<SVGSVGElement>('.ws-note');
-    const words = note?.querySelector('text');
     const work = doc.querySelector('.hero a[href="#work"]');
-    if (!note || !words || !work) return;
-    note.style.setProperty('--ws-dy', '0px');
-    const t = words.getBoundingClientRect();
-    const k = work.getBoundingClientRect();
-    const hit = t.left < k.right + 12 && t.right > k.left && t.bottom > k.top;
-    const dy = hit
-      ? Math.min(k.bottom + 10 - t.top, stage.getBoundingClientRect().height * 0.22)
-      : 0;
-    note.style.setProperty('--ws-dy', `${Math.max(0, Math.round(dy))}px`);
+    if (!work) return;
+    // Both notes (the hint and the brain's own) sit in the same place, so each is moved clear of the heading.
+    for (const note of stage.querySelectorAll<SVGSVGElement>('.ws-note')) {
+      const words = note.querySelector('text');
+      if (!words) continue;
+      note.style.setProperty('--ws-dy', '0px');
+      note.style.setProperty('--ws-dx', '0px');
+      // On a narrow screen the note's left side would run off the edge: slide it right, up to a little way.
+      const edge = words.getBoundingClientRect().left;
+      note.style.setProperty('--ws-dx', `${edge < 12 ? Math.min(90, Math.ceil(12 - edge)) : 0}px`);
+      const t = words.getBoundingClientRect();
+      const k = work.getBoundingClientRect();
+      const hit = t.left < k.right + 12 && t.right > k.left && t.bottom > k.top;
+      const dy = hit
+        ? Math.min(k.bottom + 10 - t.top, stage.getBoundingClientRect().height * 0.22)
+        : 0;
+      note.style.setProperty('--ws-dy', `${Math.max(0, Math.round(dy))}px`);
+    }
   };
   addEventListener('resize', clearWork, { passive: true });
 
@@ -190,14 +214,51 @@ export function startWorkshopEntry(doc: Document = document): void {
     );
   };
 
+  // The hint: the same pencil note, saying where to hover, drawn a moment after the page settles and kept there until the pointer
+  // goes near (then it gives way to the brain and its own note). A browser that has found the brain once is not shown it again.
+  let hintNote: SVGSVGElement | undefined;
+  // The hint retracts (its words and arrow un-draw) and is then removed; the brain's own note draws in as it goes.
+  const retireHint = (): void => {
+    stage.classList.remove('ws-nudge');
+    const old = hintNote;
+    hintNote = undefined;
+    if (old) setTimeout(() => old.remove(), 700);
+  };
+  const showHint = (): void => {
+    if (near || hintNote) return;
+    // Wait for the pencil font too: the note is measured against the "Work" heading, and the fallback font is a different size.
+    const font = doc.fonts?.load("40px 'Reenie Beanie'").catch(() => []) ?? Promise.resolve([]);
+    void Promise.all([loadContent(), font]).then(([c]) => {
+      const text = touch ? c?.tapNote : c?.hoverNote;
+      if (!text || near || hintNote) return;
+      for (const stale of stage.querySelectorAll('.ws-note--nudge')) stale.remove();
+      const note = buildNote(text);
+      note.classList.add('ws-note--nudge');
+      hintNote = note;
+      stage.append(note);
+      clearWork();
+      void note.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        note.classList.add('is-live');
+        stage.classList.add('ws-nudge');
+        clearWork();
+      });
+    });
+  };
+  setTimeout(showHint, HINT_DELAY_MS);
+
   let near = false;
   const setNear = (value: boolean): void => {
     if (value === near) return;
     near = value;
     stage.classList.toggle('ws-near', value);
     if (value) {
+      retireHint();
       warm();
       clearWork();
+    } else {
+      // The pointer has gone: the hint comes back once the brain's note has retracted.
+      setTimeout(showHint, 900);
     }
   };
   let frame = 0;
