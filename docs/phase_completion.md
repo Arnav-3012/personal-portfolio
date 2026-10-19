@@ -9,7 +9,7 @@ Check each box only with evidence (screenshot, Lighthouse report, command output
 - [x] Both themes pass contrast; `D` key and settings panel work; reduced motion respected — axe in Night and Day on every section and widget (379 e2e tests), reduced-motion paths tested
 - [x] Every landing section reads from `content/` — content schema validated at build; `content.test.ts`
 - [x] Contact, freelance and notebook forms reach the inbox; Turnstile blocks bots — Arnav confirmed mail arriving at arnavc.work@gmail.com after the destination fix (2026-10-19); worker tests cover Turnstile, rate limit (7 per connection per hour)
-- [ ] EDITH-lite answers from the knowledge base, navigates the page, refuses off-topic and injection attempts, rate limit works
+- [x] EDITH-lite answers from the knowledge base, navigates the page, refuses off-topic and injection attempts, rate limit works — worker and e2e tests pass; Arnav confirmed EDITH answering on the live site (2026-10-19)
 - [ ] `/admin` reachable only by Arnav
 
 ## Phase 2 · Workshop
