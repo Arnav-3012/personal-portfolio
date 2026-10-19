@@ -10,7 +10,7 @@ Check each box only with evidence (screenshot, Lighthouse report, command output
 - [x] Every landing section reads from `content/` — content schema validated at build; `content.test.ts`
 - [x] Contact, freelance and notebook forms reach the inbox; Turnstile blocks bots — Arnav confirmed mail arriving at arnavc.work@gmail.com after the destination fix (2026-10-19); worker tests cover Turnstile, rate limit (7 per connection per hour)
 - [x] EDITH-lite answers from the knowledge base, navigates the page, refuses off-topic and injection attempts, rate limit works — worker and e2e tests pass; Arnav confirmed EDITH answering on the live site (2026-10-19)
-- [ ] `/admin` reachable only by Arnav
+- [x] `/admin` reachable only by Arnav — PIN sign-in (`worker/pin.ts`): a signed HttpOnly session cookie, lockouts, Cloudflare Access app removed; Arnav confirmed the PIN screen and the inbox work on https://arnavc.in/admin (2026-10-19)
 
 ## Phase 2 · Workshop
 - [ ] Brain dive works on desktop and phone

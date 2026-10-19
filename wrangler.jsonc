@@ -59,13 +59,9 @@
   // Settings > Domains & Routes > Add > Custom domain), not here: a DNS record already exists for it, and a config
   // deploy fails part-way if that record conflicts.
   // workers_dev must be stated: once `routes` exists Wrangler turns the workers.dev address off by default, and that is the
-  // link Arnav submits with. www.arnavc.in is created by the deploy itself (it needs no DNS record of its own beforehand:
-  // the old www CNAME had to be deleted first, 2026-10-19).
+  // link Arnav submits with. Only the apex is attached on purpose: Arnav does not need www.arnavc.in (2026-10-19).
   "workers_dev": true,
-  "routes": [
-    { "pattern": "arnavc.in", "custom_domain": true },
-    { "pattern": "www.arnavc.in", "custom_domain": true },
-  ],
+  "routes": [{ "pattern": "arnavc.in", "custom_domain": true }],
   "observability": {
     "enabled": true,
   },
