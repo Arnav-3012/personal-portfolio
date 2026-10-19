@@ -11,14 +11,14 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Serves the built site through the real Worker. --local disables remote bindings (AI, Vectorize) so e2e needs no Cloudflare login.
   // Every run starts from a fresh local D1 + KV (so the form rate limit never carries over): the migration is applied,
-  // the GitHub cache is seeded from a fixture, and Cloudflare's always-pass Turnstile test secret is set.
+  // the GitHub cache is seeded from a fixture, Cloudflare's always-pass Turnstile test secret is set, and ADMIN_DEV=1 lets /admin in on localhost (it is never set in wrangler.jsonc).
   webServer: {
     command: [
       `rm -rf ${STATE}`,
       'pnpm build',
       `pnpm wrangler d1 migrations apply DB --local --persist-to ${STATE}`,
       `pnpm wrangler kv key put github --path tests/e2e/fixtures/github.json --binding KV --local --persist-to ${STATE}`,
-      `pnpm wrangler dev --local --port ${PORT} --persist-to ${STATE} --var TURNSTILE_SECRET:1x0000000000000000000000000000000AA`,
+      `pnpm wrangler dev --local --port ${PORT} --local-upstream localhost:${PORT} --persist-to ${STATE} --var TURNSTILE_SECRET:1x0000000000000000000000000000000AA --var ADMIN_DEV:1`,
     ].join(' && '),
     url: `http://localhost:${PORT}/api/health`,
     // Never reuse: wrangler can orphan workerd on :8787, and a reused server serves a stale ./dist.

@@ -28,40 +28,40 @@ Three paths: **recruiter** (landing → resume, LinkedIn, projects), **client** 
 
 ## Design system
 
-Two themes, Night and Day, share one token set: each accent belongs to one layer, so colour tells the visitor where they are. Contrast is measured against each theme's background (WCAG 2.x). The table below is Night; Day overrides follow it.
+Two themes, Night and Day, share one token set (Night is a neutral graphite, so the accents stay distinct; Day is a faintly warm ivory): each accent belongs to one layer, so colour tells the visitor where they are. Contrast is measured against each theme's background (WCAG 2.x). The table below is Night; Day overrides follow it.
 
 **Colour tokens**
 
 | Token | Hex | Role | Contrast on bg |
 | --- | --- | --- | --- |
-| `--bg` Warm void | `#14110D` | Page and room shadow | — |
-| `--surface` Ember | `#1C1813` | Cards, panels, nav | — |
-| `--line` Umber line | `#3A3128` | Borders, dividers | — |
-| `--text` Parchment | `#F3EDE2` | Primary text | 16.2:1 |
-| `--text-2` Warm stone | `#A89C8A` | Secondary text, captions | 7.0:1 |
+| `--bg` Graphite void | `#0F1012` | Page and room shadow | — |
+| `--surface` Graphite panel | `#17181B` | Cards, panels, nav | — |
+| `--line` Graphite line | `#2D3036` | Borders, dividers | — |
+| `--text` Cloud | `#F2F3F5` | Primary text | 17.1:1 |
+| `--text-2` Mist | `#A3A8B0` | Secondary text, captions | 8.0:1 |
 | `--holo` Arc Cyan | `#4FD8FF` | Hologram layer only (holotable, EDITH, HUD) | 11.4:1 |
 | `--action` Signal Red | `#FF5A3C` | Primary buttons, links, armor accents | 6.1:1 |
-| `--time` Tungsten amber | `#E8A24A` | 2D signature: dot-matrix portrait, HUD labels, nav marker, "open to freelance"; Retro TV, timeline | 8.7:1 |
+| `--time` Tungsten amber | `#E8A24A` | 2D signature: dot-matrix portrait, HUD labels, nav marker, "open to freelance"; Retro TV, timeline | 8.8:1 |
 | `--board` Board Green | `#1F3B2D` | Chalkboard surface (chalk on it 10.6:1) | — |
 | `--ok` Live Green | `#3DDC84` | Live dot, GitHub "online" | 10.7:1 |
-| `--on-action` | `#14110D` | Text on `--action` buttons (white on Signal Red is only 3.3:1) | 6.1:1 on `--action` |
+| `--on-action` | `#0F1012` | Text on `--action` buttons (white on Signal Red is only 3.3:1) | 6.1:1 on `--action` |
 
 Rules: one accent per screen region; never cyan and tungsten in the same panel; no purple-pink "AI gradient".
 
 **Day theme overrides** (same token names; everything not listed is shared)
 
-| Token | Night | Day | Day contrast on `#F4EEE3` |
+| Token | Night | Day | Day contrast on `#F5F4F0` |
 | --- | --- | --- | --- |
-| `--bg` | `#14110D` | `#F4EEE3` paper | — |
-| `--surface` | `#1C1813` | `#FFFDF8` | — |
-| `--line` | `#3A3128` | `#DCD2C2` | — |
-| `--text` | `#F3EDE2` | `#1A1510` | 15.7:1 |
-| `--text-2` | `#A89C8A` | `#5E5346` | 6.5:1 |
+| `--bg` | `#0F1012` | `#F5F4F0` ivory | — |
+| `--surface` | `#17181B` | `#FDFDFB` | — |
+| `--line` | `#2D3036` | `#DEDCD5` | — |
+| `--text` | `#F2F3F5` | `#17171A` | 16.3:1 |
+| `--text-2` | `#A3A8B0` | `#5A5C62` | 6.1:1 |
 | `--holo` | `#4FD8FF` | `#00739E` | 4.8:1 |
 | `--action` | `#FF5A3C` | `#B8321C` | 5.2:1 |
-| `--time` | `#E8A24A` | `#8A4B00` | 5.9:1 |
+| `--time` | `#E8A24A` | `#A15700` | 4.9:1 |
 | `--ok` | `#3DDC84` | `#177A42` | 4.9:1 (Night green is 1.6:1 on paper) |
-| `--on-action` | `#14110D` | `#FFFFFF` | 6.0:1 on Day `--action` |
+| `--on-action` | `#0F1012` | `#FFFFFF` | 6.0:1 on Day `--action` |
 
 **Theme switching**
 

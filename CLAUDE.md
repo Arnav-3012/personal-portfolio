@@ -23,7 +23,7 @@ Personal portfolio: a fast 2D website (the product) plus an optional 3D workshop
 - Theme: Auto (Mumbai time for 3D, OS setting for 2D) / Day / Night. `D` toggles (not while typing; `Shift+D` in free-roam). Settings panel persists to localStorage inside try/catch.
 - Every 3D feature has a 2D equivalent. Respect `prefers-reduced-motion`. Visible focus rings. Text contrast ≥ 4.5:1 in both themes.
 - Performance budgets in SPEC "Performance" are acceptance criteria, not goals.
-- Landing HTML stays under 14.2 KB gzipped (`scripts/check-html-budget.ts` runs in `pnpm build`): Lighthouse's mobile model adds a ~150 ms round trip past ~14.6 KB, which alone broke the LCP budget in 1.5cd. Build interaction-only markup (dialogs, widgets) in JavaScript; don't load a font the landing doesn't use.
+- Landing HTML stays under 14.2 KB gzipped (`scripts/check-html-budget.ts` runs in `pnpm build`): Lighthouse's mobile model adds a ~150 ms round trip past ~14.6 KB, which alone broke the LCP budget in 1.5cd. Build interaction-only markup (dialogs, widgets) in JavaScript; don't load a font the landing doesn't use. Styles for UI loaded on interaction go in with `?inline` (a plain CSS import from a page script is inlined into the HTML). Never put control or separator characters (U+2028/2029) in a regex literal.
 - Secrets only via `wrangler secret put`. Never commit `.env` or `.dev.vars`.
 - Free-plan limits from SPEC "Architecture" must hold: cache external APIs in KV, rate-limit EDITH, daily AI cap with graceful fallback.
 

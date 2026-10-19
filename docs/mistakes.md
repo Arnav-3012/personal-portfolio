@@ -4,6 +4,80 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 
 ---
 
+## 2026-10-19 · 2.3 (entry sequence) · Smaller wrong turns (caught by tests and screenshots)
+- **Public file nearly over the HTML budget:** adding Arnav's resume made the Resume links render in four places and pushed the landing HTML to 14,292 B (budget 14,200). Fix: the long `file-text` icon, unique and repeated, was replaced by the small arrow icon the page already uses (14,197 B). **Rule:** a file that switches on markup (the resume) must be added with a build, not assumed neutral; the budget has about 3 bytes left, so any new landing markup must be built in JavaScript.
+- **Test races, three times:** pressing Escape before the overlay had loaded, and pressing the skull right after "back" before the hotspot had re-initialised. The product was fine; the tests now wait for `.ent` and for the brain link. **Rule:** after any navigation or click that starts lazy work, wait for the thing the next step needs.
+- **Day globe too faded:** the first Day render used the Night alpha values, so thin dots on paper looked washed out. Day now has a tinted sphere body, a dark limb, bolder dots and a stronger graticule. **Rule:** check every colour-dependent drawing in both themes by screenshot before saying it works.
+- **Label on busy dots:** the Mumbai label and readout sat directly on white dots; both got a translucent plate.
+- **Generated file reformatted:** re-running the bake script rewrote `land-mask.ts` unformatted and failed `format:check`; it is now in `.prettierignore`.
+- **Third-party asset sources:** SVG Repo answered with a bot check (HTTP 429). I did not work around it; Wikimedia Commons' API gave licence metadata per file, so the brain comes from there (CC0).
+- **Files:** `src/lib/enter-sequence.ts`, `tests/e2e/enter.spec.ts`, `src/components/landing/Hero.astro`, `src/components/landing/Nav.astro`, `.prettierignore`
+
+## 2026-10-19 · 2.1+2.2 (motion pass, workshop entry) · Smaller wrong turns (caught by targeted tests and screenshots)
+- **Unit tests used the real token:** the Worker tests load `.dev.vars`, so after I added the self-fill to `/api/github` an "empty cache" test made a real GitHub call with Arnav's token. The data tests now stub `fetch` and clear the retry markers first. **Rule:** any test that can reach the network must stub it, because the test environment holds real secrets.
+- **`hidden` beaten by `display`:** the "Try anyway" button stayed visible after being hidden because `.button` sets `display`. The page now scopes `[hidden] { display: none }`.
+- **Reduced motion and animation delay:** staggered list items sat at opacity 0 during their delay even with reduced motion, because only the duration was shortened. Reduced motion now sets `animation: none`.
+- **Selector starting with a digit:** `#75-hard` is not a valid selector; tests use `[id="75-hard"]`.
+- **macOS `sed -i`:** it needs an empty suffix argument, and the failed call silently left a test unchanged. Edits go through Python.
+- **Rows clipped on entry:** rows sliding in from the left lost their first letters to the scroll box. They slide in from the right.
+- **Local production commands:** `wrangler deploy` is blocked from this session, and a command that would handle Arnav's token was declined. The deploy and the token steps are Arnav's commands, given as a copy-paste block.
+- **Files:** `worker/data.ts`, `tests/unit/worker/data.test.ts`, `src/pages/workshop.astro`, `tests/e2e/workshop.spec.ts`, `src/styles/dynamic.css`, `src/lib/dynamic.ts`
+
+## 2026-10-18 · 1.8+1.9 · REPEAT: Unicode escapes written as raw line separators (again)
+- **What happened:** `tsc` failed on `worker/guard.ts` ("Unterminated regular expression literal"). The control-character regex I wrote through the file tool contained the real U+2028/U+2029 characters.
+- **Root cause:** the earlier rule said to write them as escapes, but I wrote the regex the same way again and relied on the typecheck to catch it. The rule did not say what to write instead.
+- **Fix:** replaced them with escapes, then removed the regex altogether: `cleanText()` in `worker/guard.ts` filters by char code, so no invisible character appears in source and ESLint's `no-control-regex` has nothing to flag.
+- **Prevention rule:** Never put control or separator characters in a regex literal; filter by char code in a small helper, and `grep -P '\x{2028}|\x{2029}'` after writing any file that mentions them. (Strengthens the 1.6+1.7 rule.)
+- **Files:** `worker/guard.ts`, `worker/admin.ts`
+
+## 2026-10-18 · 1.8+1.9 · A random branch crashed the request it was meant to tidy up after
+- **What happened:** a chat test failed one run in about fifty ("expected 'Here it is.', received ''"), and passed when rerun.
+- **Root cause:** I pruned old `chat_events` rows on 2% of requests with `c.executionCtx.waitUntil(...)`. Outside a real Worker there is no execution context, so Hono throws; the throw sat inside the "limits unavailable" `try`, which answers 503. Production has a context, so only tests saw it, and only 2% of the time.
+- **Fix:** `pruneInBackground()` wraps the access, the delete's own failure is swallowed, the odds are the exported `PRUNE_ODDS`, and tests cover the prune SQL directly plus a run with `Math.random` forced to 0. The suite ran 8 times clean.
+- **Prevention rule:** Code behind `Math.random()` gets a test that forces the branch, and optional background work (`waitUntil`) must never be able to fail the request it follows.
+- **Files:** `worker/chat.ts`, `tests/unit/worker/chat.test.ts`
+
+## 2026-10-18 · 1.8+1.9 · Panel CSS pulled into the landing HTML (15,307 B against a 14,200 B budget)
+- **What happened:** `pnpm build` failed the HTML budget right after adding the chat panel.
+- **Root cause:** I put the panel styles in a CSS file imported by the lazily loaded module. Astro treats CSS reachable from a page script as page CSS and inlined 3.7 KB of it into `index.html`, although the JS itself stayed a separate chunk.
+- **Fix:** `import panelCss from '../styles/edith.css?inline'` and inject a `<style>` when the panel first opens. HTML is 14,099 B again.
+- **Prevention rule:** Styles for anything loaded on interaction go in through `?inline` (or are built in JS); after adding any import to a landing script, run `pnpm build` before writing tests.
+- **Files:** `src/lib/edith-ui.ts`, `src/styles/edith.css`
+
+## 2026-10-18 · 1.8+1.9 · Retrieval threshold chosen before measuring scores
+- **What happened:** I had planned `MIN_SCORE = 0.5` as the off-topic gate. A live probe showed bge scores are compressed: relevant questions scored 0.53 to 0.75 and off-topic ones up to 0.58, so no threshold separates them. Broad questions ("where has he worked?") also missed the role chunks.
+- **Root cause:** I assumed cosine scores spread the way they do in textbooks and did not measure first.
+- **Fix:** the threshold is only a floor (0.45) that saves Neurons; refusing off-topic questions is the system prompt's job (scripted refusal, checked live). Chunks are embedded with their source label, and overview chunks (all roles, all projects by status, core skills) answer broad questions.
+- **Prevention rule:** Probe a retrieval index with a dozen real and off-topic questions and read the scores before picking any constant that depends on them; test broad questions, not only single-fact ones.
+- **Files:** `worker/chat.ts`, `src/lib/kb-chunks.ts`, `scripts/kb-build.ts`
+
+## 2026-10-18 · 1.8+1.9 · Source chips chosen by retrieval score cited unrelated chunks
+- **What happened:** live, "where has Arnav worked?" cited "Freelance" and "Contact", and the France refusal cited "How I got here".
+- **Root cause:** I treated "retrieved" as "used". Chips came from the top matches, not from what the answer said.
+- **Fix:** `usedSources()` keeps chunks that share at least three distinctive words with the final answer (best first, at most two).
+- **Prevention rule:** Cite a source only if the answer demonstrably draws on it; check the chips on a broad question and a refusal.
+- **Files:** `worker/guard.ts`, `worker/chat.ts`
+
+## 2026-10-18 · 1.8+1.9 · Entrance fade made axe read the wrong colours
+- **What happened:** axe reported 2.5:1 contrast on the "Ask EDITH" launcher and on the panel, in two older landing axe tests that were passing before.
+- **Root cause:** the launcher faded in from `opacity: 0`, and axe measured while it was mid-fade. The text colours were fine; the scan ran at the wrong moment.
+- **Fix:** the launcher's entrance is transform-only, so contrast is correct from the first frame; the panel specs wait for finite animations to end before scanning.
+- **Prevention rule:** Entrance animations on text use transform only, never opacity from 0; axe scans wait for finite animations.
+- **Files:** `src/styles/global.css`, `tests/e2e/edith.spec.ts`
+
+## 2026-10-18 · 1.8+1.9 · Smaller wrong turns (caught before review)
+- **Output filter after streaming:** the first stream sent raw tokens and filtered only the final text, so a phone number would have been visible live. Fixed in design: tokens leave one filtered sentence at a time.
+- **Focus stolen:** after a send the panel refocused its own input, undoing "take me to the freelance form". It now refocuses only if nothing else took focus.
+- **`<header>` inside the dialog** counted as a second banner landmark (axe `landmark-no-duplicate-banner`); it is a `div`.
+- **Dialog `max-width`:** the browser default clamped the phone sheet to 360 of 375 px; `max-width: none`.
+- **Phone tool calls:** the sheet closed to show the scrolled page and the reply vanished; a toast now says how to return and the conversation is kept.
+- **Stale cache after admin edits:** `/api/live` stored its edge-cache entry in `waitUntil`, which could land after the admin's cache delete and bring the old state back (a flaky e2e in the next spec). The put is awaited.
+- **Generated types:** `wrangler types` read secret names from my local `.dev.vars` and made them required; reverted to what CI would generate (only `ADMIN_EMAILS` added).
+- **Token handling:** I tried to print the Cloudflare OAuth token to read its scopes; the permission check blocked it, rightly. `kb:build` uses Wrangler's own bindings (`getPlatformProxy`) so no token passes through me.
+- **Contrast of system colours:** `GrayText` on white is 3.94:1; muted admin text is `CanvasText` mixed with `Canvas`.
+- **Prevention rules:** one repeated pattern, "run the check that would have caught it before writing the next thing", applied: typecheck after the first guard file, build after the first landing import, a live probe before constants.
+- **Files:** `worker/chat.ts`, `worker/live.ts`, `src/lib/edith-ui.ts`, `worker-configuration.d.ts`, `worker/admin-page.ts`
+
 ## 2026-10-18 · 1.6+1.7 · REPEAT: a count typed from memory (365 cells, not 371)
 - **What happened:** the new "real endpoint feeds the section" e2e test expected 371 heatmap cells; the fixture it loads has 365. Caught when I counted the fixture, before the run, not by a failure.
 - **Root cause:** same as the 1.5cd entry: I wrote the number I "knew" (53 weeks × 7) instead of reading it. The last week holds one day, so 53 × 7 is wrong.
@@ -377,3 +451,59 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Fix:** official nodejs.org tarball (SHA-256 verified) in `~/.local/share`, then `npm i -g pnpm@12.14.0`.
 - **Prevention rule:** For a pinned Node version without sudo, use the checksum-verified nodejs.org tarball; install pnpm ≥ 12 with npm, not corepack.
 - **Files:** none in the repo
+
+## 2026-10-19 · boot redesign · HTML budget used up by scoped-style markers, and a test that read a mid-fade value
+- **What happened:** after the Beyond code redesign `dist/index.html` was 14,200 B gzipped, a 1 byte margin on a 14,200 limit. Separately, the "first visit is untouched" hero test read the photo's opacity once and got 0.83 (then 0 once the dot portrait replaced it under the boot).
+- **Root cause:** Astro adds a `data-astro-cid-*` attribute to every element of a component with a scoped `<style>`: 849 B gzipped across the landing, 268 attributes on the projects table alone. The test asserted a computed value that an animation (or the boot) legitimately changes.
+- **Fix:** AllProjects' `<style>` is `is:global` (every selector is a prefixed class), back to 14,021 B. The test now asserts the hold is absent (`animationName` is not `hero-failsafe`) instead of reading opacity.
+- **Prevention rule:** Before adding markup or styles to the landing, check `check-html-budget`; a component with many elements and class-only selectors belongs in `is:global`. Never assert a computed opacity that an animation can be changing; assert the cause (animation name, attribute).
+- **Files:** `src/components/landing/AllProjects.astro`, `tests/e2e/hero-hold.spec.ts`
+
+## 2026-10-19 · scroll/cursor · early JS request cost LCP, and a custom-domain route broke the local admin bypass
+- **What happened:** (1) Lighthouse LCP rose to 2.1 s after the boot scene became a lazy chunk fetched at start. (2) After the `arnavc.in` route was added, every /admin e2e test got 503.
+- **Root cause:** (1) Lighthouse's pessimistic graph counts requests that start before the observed LCP; the boot chunk was one. (2) `wrangler dev` reports the route's host as the request host, so the `hostname === 'localhost'` check in `verifyAccess` never matched.
+- **Fix:** (1) request the boot chunk only after the portrait has decoded and painted: 1962 ms. (2) `--local-upstream localhost:8787` in the Playwright web server command.
+- **Prevention rule:** Bisect an LCP regression by disabling one change at a time (boot-disabled control run) instead of guessing. After adding a `routes` entry, run the admin e2e specs: local dev no longer sees `localhost`.
+- **Files:** `src/lib/boot.ts`, `playwright.config.ts`
+
+## 2026-10-19 · reactor depth · gradients throw on NaN, and a 0-size canvas divided by zero
+- **What happened:** after the depth pass the boot hand-off test failed with `createLinearGradient: non-finite`. Separately, the contact axe test failed twice: it analysed the forms right after a click, mid fade-in.
+- **Root cause:** the canvas was measured at 0 × 0 before the overlay had a size, so a shadow length divided by `w * 0.3` gave NaN; `arc` silently ignores NaN but gradients throw. The axe test never waited for the 700 ms section reveal and only passed when analysis happened to be slow.
+- **Fix:** divide by `Math.max(1, w)`, re-measure the canvas on a frame while it is 0, fall back to `performance.now()` for a missing frame stamp; the axe test waits 1.2 s after submitting.
+- **Prevention rule:** every value that reaches a canvas gradient must be finite: guard divisions by a measured size. Never read colours with axe right after something scrolls into view; wait out the reveal.
+- **Files:** `src/lib/reactor.ts`, `tests/e2e/freelance-contact.spec.ts`
+
+## 2026-10-19 · toasts · 1.5 KB of toast CSS in the render-blocking stylesheet cost 150 ms of LCP
+- **What happened:** after the toast restyle Lighthouse LCP went from 1,960 ms to 2,108 ms (budget 2,000).
+- **Root cause:** the toast rules lived in `global.css`, which blocks first paint, and the restyle grew them.
+- **Fix:** the rules moved to `src/styles/toast.css`, imported `?inline` by `toast.ts` and injected with the first toast: LCP 1,956–1,969 ms.
+- **Prevention rule:** UI that only appears on interaction (toasts, dialogs, decorations) gets its CSS injected by its script, never added to `global.css`; re-run `pnpm lhci` after any change to the stylesheet.
+- **Files:** `src/styles/global.css`, `src/styles/toast.css`, `src/lib/toast.ts`
+
+## 2026-10-19 · boot · a restyle that ignored the site's own language, and an element added in its end state
+- **What happened:** (1) the boot's "reactor" was made 3D with glossy cyan glass, bevels, rays and reflections; Arnav called it cartoonish and off-theme. (2) The pencil note and the projects table both felt abrupt.
+- **Root cause:** (1) I pushed depth by adding effects from other design references instead of reading the site's tokens and hero first (graphite, one amber, dots and hairlines). (2) The note is created after the pointer is already near, so the browser drew it in its final state with no transition; the table was excluded from the smooth-scroll library, so its wheel input was handled twice.
+- **Fix:** (1) redrew every part in dots, hairlines and amber. (2) insert the note, force a frame, then add the class that plays it; remove the table from the native-scroll list.
+- **Prevention rule:** before a visual pass, list the site's own materials and use only those; "depth" there means light and spacing, not glass. An element inserted already matching its "on" selector will not animate: render it in its resting state, wait a frame, then switch it on. Anything on the page that scrolls only sideways must not intercept wheel input.
+- **Files:** `src/lib/reactor.ts`, `src/lib/workshop-entry.ts`, `src/lib/smooth.ts`
+
+## 2026-10-19 · boot · an entrance animation that restarts when its blocking attribute is removed
+- **What happened:** after the boot the hero name appeared, vanished and played its entrance again.
+- **Root cause:** `.hero__letter` had `animation: none` only while `data-boot` was `on` or `out`. Removing the attribute at the end brought the entrance animation rule back, and a changed `animation-name` restarts it from the first keyframe.
+- **Fix:** a persistent `data-booted` attribute (set when a full boot ends) keeps the letters still, and the hand-off cross-fades the letters in over the fading particles instead of cutting.
+- **Prevention rule:** never gate an animation by an attribute that is later removed; mark the end state with an attribute that stays. Also: `document.fonts.check` on a whole font stack is false when any size-adjusted fallback face is unloaded; check the first family.
+- **Files:** `src/components/landing/Hero.astro`, `src/lib/boot.ts`, `src/lib/reactor.ts`
+
+## 2026-10-19 · email · mail sent to an address that was never verified as a destination
+- **What happened:** four messages from the site were saved in D1 but none was emailed (`emailed = 0`).
+- **Root cause:** Email Routing was enabled on `arnavc.in`, but the only verified destination was `arnavc.work@gmail.com`; the Worker was sending to `arnavworkmail3012@gmail.com`, which Cloudflare refuses.
+- **Fix:** `send_email.destination_address` and `MAIL_TO` now use the verified `arnavc.work@gmail.com`.
+- **Prevention rule:** before claiming mail is set up, read the destination list from the Email Routing API and compare it with `MAIL_TO`. The Worker swallows send errors and still tells the visitor "sent", so `emailed = 0` in D1 is the only signal.
+- **Files:** `wrangler.jsonc`
+
+## 2026-10-19 · launcher / forms · early JavaScript flips LCP between 1.96 s and 2.1 s
+- **What happened:** Lighthouse LCP jumped to 2,107 ms after the sending panel was statically imported into the forms script, and then flipped between 1,955 and 2,109 ms run to run after the EDITH launcher's new code landed in the first script.
+- **Root cause:** the page sits on an edge in Lighthouse's model: roughly a kilobyte of extra early JavaScript is enough to add a ~150 ms step, and near the edge it flips randomly.
+- **Fix:** the sending panel loads on first focus of a form; the orb, ripple and nudge live in `edith-presence.ts` and load after the launcher mounts. LCP back to 1,957 ms (one cold first run after a build read 2,031).
+- **Prevention rule:** any new behaviour that is not needed for first paint goes in its own dynamically imported chunk; re-run `pnpm lhci` three times after touching the first script, and read a flip as "on the edge", not noise.
+- **Files:** `src/lib/forms.ts`, `src/lib/edith.ts`, `src/lib/edith-presence.ts`

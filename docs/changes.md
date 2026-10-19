@@ -169,3 +169,30 @@ Newest first. Files changed per task.
 - `content/cricket.json`, `content/discipline.json` (added); `content/experience.json`, `CLAUDE.md`, `docs/SPEC.md` (updated)
 - `CLAUDE.md`, `docs/SPEC.md`, `docs/plan.md`: domain `arnavc.in`
 - `README.md` (added): site overview, badges, feature status, coming-soon 3D phases, setup and scripts
+
+## 2026-10-19 · Boot redesign, depth pass, Beyond code, one page column
+- New: `src/lib/reactor.ts`, `src/lib/boot-targets.ts`, `src/lib/hero-dots.ts`, `tests/unit/lib/reactor.test.ts`.
+- Removed: `src/lib/transformer.ts`, `tests/unit/lib/transformer.test.ts`.
+- Changed: `src/lib/boot.ts`, `src/lib/dotmatrix.ts`, `src/lib/hero.ts`, `src/components/landing/Hero.astro` (bead shading, corner column), `src/components/landing/BeyondCode.astro`, `src/components/landing/AllProjects.astro` (global styles), `src/components/landing/Hard75.astro` (grid width), `src/styles/tokens.css` (bead tokens, depth note), `tests/e2e/landing.spec.ts`, `tests/e2e/hero-hold.spec.ts`, `docs/mistakes.md`, `docs/logs.md`.
+
+## 2026-10-19 · Scroll animations, smooth loading, per-section cursor
+- New: `src/lib/smooth.ts`, `src/lib/scroll-fx.ts`, `src/lib/lazy-fade.ts`, `src/lib/cursor.ts`, `tests/unit/lib/scroll-cursor.test.ts`, `tests/e2e/scrollfx.spec.ts`.
+- Changed: `src/lib/motion.ts` (loads the four after LCP), `src/lib/boot.ts` (boot scene loaded after the portrait paints), `tests/e2e/landing.spec.ts`, `tests/e2e/hero-hold.spec.ts`, `playwright.config.ts` (`--local-upstream`), `package.json` (`lenis`).
+
+## 2026-10-19 · Beyond code redesign, deeper reactor, toasts, note clearance
+- New: `src/lib/beyond-fx.ts`, `src/pages/beyond.json.ts`, `public/media/cricket/stands.jpg`.
+- Changed: `src/components/landing/BeyondCode.astro`, `content/cricket.json` (stickers, polaroid), `src/lib/content.ts` (schema), `src/lib/motion.ts`, `src/lib/reactor.ts`, `src/lib/toast.ts`, `src/styles/global.css` (toasts), `src/lib/workshop-entry.ts` (note clearance), `tests/e2e/beyond.spec.ts`, `tests/e2e/enter.spec.ts`, `tests/e2e/freelance-contact.spec.ts`.
+
+## 2026-10-19 · Boot redesign (site language), swipeable cricket story, smoother note, table scroll
+- New: `src/lib/story-swipe.ts`, `tests/unit/lib/story-swipe.test.ts`, `public/media/cricket/cover-drive.jpg`.
+- Changed: `src/lib/reactor.ts` (visuals), `src/lib/beyond-fx.ts`, `src/lib/cursor.ts` (drag glyph), `src/lib/smooth.ts`, `src/lib/workshop-entry.ts`, `content/cricket.json` (`slides`, `teaser.caption`; `polaroid` removed), `src/lib/content.ts`, `src/pages/beyond.json.ts`, `tests/e2e/beyond.spec.ts`, `tests/e2e/enter.spec.ts`, `tests/e2e/scrollfx.spec.ts`.
+
+## 2026-10-19 · Physical boot reactor, name lettering, no double name, globe ground
+- Changed: `src/lib/reactor.ts`, `src/lib/boot.ts` (`data-booted`), `src/components/landing/Hero.astro` (`letter-settle`, `data-booted`), `src/lib/enter-sequence.ts`, `tests/e2e/landing.spec.ts`.
+
+## 2026-10-19 · Sending state for the forms
+- New: `src/lib/send-state.ts`, `tests/unit/lib/send-state.test.ts`. Changed: `src/lib/forms.ts`, `tests/e2e/freelance-contact.spec.ts`, `wrangler.jsonc` (mail goes to the verified `arnavc.work@gmail.com`).
+
+## 2026-10-19 · EDITH launcher presence
+- New: `src/lib/edith-orb.ts`. Changed: `src/lib/edith.ts`, `src/styles/edith-launch.css`, `content/site.json` + `src/lib/content.ts` (`edith.nudge`), `src/lib/forms.ts` (lazy sending panel), `src/lib/reactor.ts` (zero-size guard), `tests/e2e/edith.spec.ts`.
+- Form rate limit raised from 5 to 7 messages per connection per hour (`worker/forms.ts`, Arnav's call); the daily cap stays at 200.
