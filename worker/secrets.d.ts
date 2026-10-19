@@ -9,6 +9,8 @@ interface Env {
   ACCESS_TEAM_DOMAIN?: string;
   /** The Access application's audience tag; /admin answers 503 without it. */
   ACCESS_AUD?: string;
+  /** A PIN of at least six characters for /admin (`wrangler secret put ADMIN_PIN`); /admin uses Access or this, and answers 503 with neither. */
+  ADMIN_PIN?: string;
   /** `1` skips Access, only on localhost, for local development. Never set it in wrangler.jsonc. */
   ADMIN_DEV?: string;
 }

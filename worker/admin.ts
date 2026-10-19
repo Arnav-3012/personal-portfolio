@@ -1,5 +1,5 @@
 // /admin (SPEC "Content model", Live values; "Architecture", step 6): the inbox, the freelance switch and
-// "currently building". Every route sits behind Cloudflare Access plus the JWT check in access.ts. State-changing
+// "currently building". Every route sits behind Cloudflare Access (the JWT check in access.ts) or a PIN session (pin.ts). State-changing
 // routes also require a same-origin JSON request, because the Access cookie would otherwise let another site make
 // the browser submit a form to /admin.
 import { Hono, type Context } from 'hono';
@@ -8,6 +8,18 @@ import projects from '../content/projects.json' with { type: 'json' };
 import site from '../content/site.json' with { type: 'json' };
 import { verifyAccess } from './access';
 import { adminHtml } from './admin-page';
+import {
+  SESSION_COOKIE,
+  SESSION_S,
+  loginHtml,
+  locked,
+  pinConfigured,
+  readCookie,
+  recordFailure,
+  samePin,
+  signSession,
+  verifySession,
+} from './pin';
 import { cleanText } from './guard';
 import { BUILDING_KEY, FREELANCE_KEY, NOTE_MAX, parseFreelance } from './live';
 
@@ -23,18 +35,97 @@ const reply = (status: number, body: Record<string, unknown>): Response =>
 
 export const admin = new Hono<{ Bindings: Env }>();
 
+// The PIN sign-in. These routes sit before the gate below: they are how a visitor gets through it.
+const page = (status: number, html: string, extra: Record<string, string> = {}): Response =>
+  new Response(html, {
+    status,
+    headers: {
+      ...headers,
+      'content-type': 'text/html; charset=utf-8',
+      'Content-Security-Policy':
+        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      ...extra,
+    },
+  });
+
+admin.get('/login', (c) =>
+  pinConfigured(c.env.ADMIN_PIN)
+    ? page(200, loginHtml())
+    : new Response('Admin is not configured.', { status: 503, headers }),
+);
+
+admin.post('/login', async (c) => {
+  const pin = c.env.ADMIN_PIN;
+  if (!pinConfigured(pin))
+    return new Response('Admin is not configured.', { status: 503, headers });
+  const url = new URL(c.req.url);
+  if (c.req.header('origin') !== url.origin) return page(403, loginHtml('Not allowed.'));
+  const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
+  if (await locked(c.env.KV, ip))
+    return page(429, loginHtml('Too many tries. Wait a while and try again.'), {
+      'Retry-After': '900',
+    });
+  const body = await c.req.parseBody();
+  const attempt = typeof body['pin'] === 'string' ? body['pin'] : '';
+  if (!(await samePin(pin, attempt))) {
+    await recordFailure(c.env.KV, ip);
+    // A short pause on every wrong try makes guessing slower still.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return page(401, loginHtml('Wrong PIN.'));
+  }
+  const value = await signSession(pin, Date.now() + SESSION_S * 1000);
+  const secure = url.protocol === 'https:' ? '; Secure' : '';
+  return new Response(null, {
+    status: 303,
+    headers: {
+      ...headers,
+      Location: '/admin',
+      'Set-Cookie': `${SESSION_COOKIE}=${value}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=${SESSION_S}${secure}`,
+    },
+  });
+});
+
+admin.post('/logout', (c) => {
+  if (c.req.header('origin') !== new URL(c.req.url).origin)
+    return new Response('Not allowed.', { status: 403, headers });
+  return new Response(null, {
+    status: 303,
+    headers: {
+      ...headers,
+      Location: '/admin/login',
+      'Set-Cookie': `${SESSION_COOKIE}=; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=0`,
+    },
+  });
+});
+
+// Everything else: Cloudflare Access (its signed JWT), or a PIN session. With neither set up it answers 503.
 admin.use('*', async (c, next) => {
   const access = await verifyAccess(c.req.raw, c.env);
-  if (!access.ok)
-    return new Response(
-      access.reason === 'not_configured' ? 'Admin is not configured.' : 'Not authorised.',
-      {
-        status: access.reason === 'not_configured' ? 503 : 401,
-        headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' },
-      },
-    );
-  await next();
-  return undefined;
+  if (access.ok) {
+    await next();
+    return undefined;
+  }
+  const pin = c.env.ADMIN_PIN;
+  if (pinConfigured(pin)) {
+    if (await verifySession(pin, readCookie(c.req.header('cookie'), SESSION_COOKIE))) {
+      await next();
+      return undefined;
+    }
+    // Not signed in: the page sends the visitor to the PIN screen; the API just says no.
+    if (c.req.method === 'GET' && !new URL(c.req.url).pathname.includes('/api/'))
+      return new Response(null, { status: 302, headers: { ...headers, Location: '/admin/login' } });
+    return new Response('Not authorised.', {
+      status: 401,
+      headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+  return new Response(
+    access.reason === 'not_configured' ? 'Admin is not configured.' : 'Not authorised.',
+    {
+      status: access.reason === 'not_configured' ? 503 : 401,
+      headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' },
+    },
+  );
 });
 
 // Same-origin only for the API; POSTs also need a JSON body.

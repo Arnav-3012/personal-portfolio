@@ -196,3 +196,6 @@ Newest first. Files changed per task.
 ## 2026-10-19 · EDITH launcher presence
 - New: `src/lib/edith-orb.ts`. Changed: `src/lib/edith.ts`, `src/styles/edith-launch.css`, `content/site.json` + `src/lib/content.ts` (`edith.nudge`), `src/lib/forms.ts` (lazy sending panel), `src/lib/reactor.ts` (zero-size guard), `tests/e2e/edith.spec.ts`.
 - Form rate limit raised from 5 to 7 messages per connection per hour (`worker/forms.ts`, Arnav's call); the daily cap stays at 200.
+
+## 2026-10-19 · /admin PIN sign-in
+- New: `worker/pin.ts`, `tests/unit/worker/pin.test.ts`. Changed: `worker/admin.ts`, `worker/secrets.d.ts`.
