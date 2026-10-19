@@ -443,3 +443,9 @@ Found by the QA gate: the landing page's LCP had gone to 2,104 ms. Cause: the ro
 
 Not part of 2.4 and still to do in 2.8: real-device frame rate (60/30 fps), first load <= 8 MB, the 3D brain dive.
 - Final run after the last fixes: unit 583 pass; e2e on the affected files (workshop, room, enter, loader, hero-hold, forms-api) 61 pass.
+
+## 2026-10-20 · 2.4 deployed and watched live
+- Pushed as `c0e5eea` on `origin/main`; Cloudflare Workers Builds ("Workers Builds: arnav-portfolio") reported success on that commit. No GitHub Actions in this repo: the deploy is Cloudflare's Git-connected build.
+- Live check on https://arnavc.in: `/`, `/workshop/`, `/workshop.json`, both room models, the Draco decoder and `/api/health` all 200; the landing page's script and CSS file names are identical to the local build; a real browser run on the live site showed the pencil note ("hover here for secret"), the room starting with its canvas, walk mode moving the figure, and no console errors.
+- Phase 2 gate: two of four boxes ticked with evidence (Day/night on Mumbai time with the `D` key; every hotspot reachable by keyboard). Still open: the 3D brain dive and 60/30 fps with first load under 8 MB (both in 2.8), and tasks 2.5 to 2.8.
+- Next session (Arnav): the holotable OS, the armour wall and the other props, plus his posters. A decision gate comes first.

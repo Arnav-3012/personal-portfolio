@@ -14,8 +14,8 @@ Check each box only with evidence (screenshot, Lighthouse report, command output
 
 ## Phase 2 · Workshop
 - [ ] Brain dive works on desktop and phone
-- [ ] Day/night follows Mumbai time and the `D` key
-- [ ] Every hotspot reachable from the HUD list by keyboard
+- [x] Day/night follows Mumbai time and the `D` key — Mumbai phase and clock unit tests (06:00 and 18:00 boundaries, IST offset), room e2e: `D` toggles in the tour and is movement while walking with `Shift+D` toggling, 1.2 s cross-fade; screenshots Night and Day at 375/768/1440 (2026-10-20); live on https://arnavc.in
+- [x] Every hotspot reachable from the HUD list by keyboard — e2e: every zone opens from the HUD list and Esc steps back, every zone reachable by keyboard on the server-rendered list; axe 0 in both themes with the room on (2026-10-20)
 - [ ] 60 fps desktop, 30 fps phone; first load ≤ 8 MB
 
 ## Phase 3 · Worlds
