@@ -1,0 +1,26 @@
+[
+  {
+    "id": "brain-outline",
+    "what": "Brain outline shown on the hero and in the entry sequence (mirrored, recoloured, optimised)",
+    "source": "Wikimedia Commons, File:Brain-outline-lateral.svg",
+    "author": "Unknown; edited to transparent by User:Amousey. Original from rawpixel public domain collection.",
+    "licence": "CC0 1.0 (public domain dedication)",
+    "url": "https://commons.wikimedia.org/wiki/File:Brain-outline-lateral.svg"
+  },
+  {
+    "id": "land-110m",
+    "what": "Land shapes behind the dot-matrix globe (baked into a 2° bit mask by scripts/bake-land.ts)",
+    "source": "Natural Earth 1:110m land, via the world-atlas 2.0.2 TopoJSON",
+    "author": "Natural Earth contributors",
+    "licence": "Public domain (Natural Earth terms of use); the world-atlas packaging is ISC",
+    "url": "https://www.naturalearthdata.com/about/terms-of-use/"
+  },
+  {
+    "id": "reenie-beanie",
+    "what": "Pencil handwriting for the note beside the head (self-hosted woff2, latin)",
+    "source": "Reenie Beanie by Typeco, via @fontsource/reenie-beanie 5.3.0",
+    "author": "Typeco",
+    "licence": "SIL Open Font License 1.1",
+    "url": "https://fonts.google.com/specimen/Reenie+Beanie"
+  }
+]

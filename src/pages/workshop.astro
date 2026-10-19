@@ -1,0 +1,260 @@
+---
+// /workshop (Phase 2a): the entry to the 3D room. The room itself is Phase 2b, so for now this is the HUD zone list the
+// SPEC requires anyway (every object reachable by keyboard and screen reader), each linking to the 2D section that
+// holds the same thing, with an honest "opening soon" status. Copy and zones come from content/site.json.
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../lib/content';
+
+const w = site.workshop;
+---
+
+<Base title={`${w.title} · ${site.name}`} description={w.lead}>
+  {/* Runs while the page is parsed, before the first paint: marks an arrival from the entry sequence (see enter-sequence.ts). */}
+  <script is:inline>
+    try {
+      if (sessionStorage.getItem('arnav:arrive')) {
+        sessionStorage.removeItem('arnav:arrive');
+        document.documentElement.dataset.arrive = '';
+      }
+    } catch {
+      // Storage blocked: the page opens without the arrival fade.
+    }
+  </script>
+  <main id="main" class="ws">
+    <a class="ws__back hud" href="/">
+      <Icon name="chevron-left" size={16} /> Back to the site
+    </a>
+
+    <header class="ws__head">
+      <p class="hud ws__status">
+        <span class="ws__dot" aria-hidden="true"></span>
+        {w.status}
+      </p>
+      <h1 class="display">{w.title}</h1>
+      <p class="ws__lead">{w.lead}</p>
+    </header>
+
+    <aside class="ws__note" data-mobile-note aria-label="Device note">
+      <p>{w.note}</p>
+      <button class="button button--ghost" type="button" data-try>
+        {w.tryAnyway}
+      </button>
+      <p class="small ws__reply" data-try-reply role="status" hidden>
+        {w.tryAnywayReply}
+      </p>
+    </aside>
+
+    <section aria-labelledby="zones-title">
+      <h2 id="zones-title" class="hud ws__label">
+        {w.zonesLabel}
+      </h2>
+      <ul class="ws__zones">
+        {w.zones.map((z, i) => (
+          <li style={`--i: ${i}`}>
+            <a class="zone" href={z.href}>
+              <span class="hud zone__n" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span class="zone__title">{z.title}</span>
+              <span class="small zone__blurb">{z.blurb}</span>
+              <Icon name="arrow-up-right" size={18} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Base>
+
+<script>
+  // "Try anyway" on a phone: there is no room to open yet, so say so plainly.
+  const button = document.querySelector<HTMLButtonElement>('[data-try]');
+  const reply = document.querySelector<HTMLElement>('[data-try-reply]');
+  button?.addEventListener('click', () => {
+    if (reply) reply.hidden = false;
+    button.hidden = true;
+  });
+</script>
+
+<style>
+  /* Arriving from the entry sequence: the page rises out of the page colour instead of cutting in. */
+  :global(html[data-arrive] body)::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: var(--bg);
+    pointer-events: none;
+    animation: ws-arrive 1200ms var(--ease-out) forwards;
+  }
+  @keyframes ws-arrive {
+    0%,
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+  .ws {
+    display: grid;
+    gap: var(--space-6);
+    width: min(100%, 1100px);
+    margin-inline: auto;
+    padding: calc(var(--space-9) + var(--space-3)) var(--space-4) var(--space-9);
+  }
+  .ws__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    justify-self: start;
+    min-height: 44px;
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  .ws__back:hover {
+    color: var(--time);
+  }
+  .ws__head {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .ws__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--time);
+  }
+  .ws__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--time);
+    animation: ws-pulse 2.4s var(--ease-out) infinite;
+  }
+  @keyframes ws-pulse {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--time) 55%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
+  .ws__lead {
+    max-width: 60ch;
+    color: var(--text-2);
+  }
+  /* The device note only matters on a phone */
+  .ws__note {
+    display: none;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--time) 45%, var(--line));
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .ws__note .button {
+    justify-self: start;
+  }
+  /* .button sets display, which would otherwise beat the hidden attribute */
+  .ws__note :global([hidden]) {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .ws__note {
+      display: grid;
+    }
+  }
+  .ws__label {
+    margin-bottom: var(--space-4);
+    color: var(--text-2);
+  }
+  .ws__zones {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ws__zones li {
+    animation: ws-in var(--dur-reveal) var(--ease-out) both;
+    animation-delay: calc(var(--i) * var(--stagger));
+  }
+  :global(:root[data-motion='reduced']) .ws__zones li {
+    animation: none;
+  }
+  @keyframes ws-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  .zone {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'n title icon'
+      'n blurb icon';
+    column-gap: var(--space-4);
+    row-gap: var(--space-1);
+    align-items: center;
+    padding: var(--space-4);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    overflow: hidden;
+    transition:
+      border-color var(--dur-hover) var(--ease-out),
+      transform var(--dur-hover) var(--ease-out);
+  }
+  /* A bar of the accent grows up the left edge on hover or focus */
+  .zone::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--time);
+    transform: scaleY(0);
+    transition: transform 320ms var(--ease-out);
+  }
+  .zone:hover,
+  .zone:focus-visible {
+    border-color: color-mix(in srgb, var(--time) 55%, var(--line));
+    transform: translateX(4px);
+  }
+  .zone:hover::before,
+  .zone:focus-visible::before {
+    transform: scaleY(1);
+  }
+  .zone__n {
+    grid-area: n;
+    color: var(--time);
+  }
+  .zone__title {
+    grid-area: title;
+    font-weight: 600;
+    font-size: var(--type-heading);
+    line-height: 1.25;
+  }
+  .zone__blurb {
+    grid-area: blurb;
+    color: var(--text-2);
+  }
+  .zone :global(.icon) {
+    grid-area: icon;
+    color: var(--text-2);
+  }
+  @media (min-width: 768px) {
+    .ws {
+      padding-inline: var(--space-6);
+    }
+    .ws__zones {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

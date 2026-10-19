@@ -3,7 +3,7 @@
 // Warp's editorial labels; colours from tokens), an amber marker on the section in view, the freelance status
 // and a live Mumbai clock. Rendered into Base.astro's header (the one page-level banner) beside the settings
 // gear. Below 960 px the links and Resume move into a menu sheet (native <dialog>: focus trap, Esc, focus
-// return). The workshop button waits for Phase 2; Resume renders only once the PDF is in public/.
+// return). The Workshop link opens /workshop (the 3D room arrives in Phase 2b); Resume renders only once the PDF is in public/.
 import Icon from '../Icon.astro';
 import FreelancePill from '../FreelancePill.astro';
 import { experience, projects, site } from '../../lib/content';
@@ -38,6 +38,10 @@ const resume = resumeHref(site.resume.file);
 </div>
 
 <time class="cell nav__clock" data-clock data-tz={site.location.timezone}></time>
+
+<a class="cell nav__resume" href="/workshop">
+  {site.workshop.navLabel}
+</a>
 
 {resume && (
   <a class="cell nav__resume" href={resume}>
@@ -76,7 +80,7 @@ const resume = resumeHref(site.resume.file);
     <FreelancePill variant="chip" />
     {resume && (
       <a class="button button--ghost" href={resume}>
-        <Icon name="file-text" /> Resume
+        <Icon name="arrow-up-right" /> Resume
       </a>
     )}
   </div>
