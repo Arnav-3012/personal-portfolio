@@ -92,6 +92,18 @@ describe('/admin with a PIN', () => {
     expect(inside.status).toBe(200);
   });
 
+  it("accepts the browser's own form post (Origin: null, Sec-Fetch-Site: same-origin), and refuses cross-site ones", async () => {
+    const post = (extra: Record<string, string>) =>
+      req('/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', ...extra },
+        body: `pin=${encodeURIComponent(PIN)}`,
+      });
+    expect((await post({ origin: 'null', 'sec-fetch-site': 'same-origin' })).status).toBe(303);
+    expect((await post({ origin: 'null', 'sec-fetch-site': 'cross-site' })).status).toBe(403);
+    expect((await post({})).status).toBe(403);
+  });
+
   it('refuses a login from another site', async () => {
     const res = await req('/login', {
       method: 'POST',

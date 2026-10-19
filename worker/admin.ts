@@ -35,6 +35,15 @@ const reply = (status: number, body: Record<string, unknown>): Response =>
 
 export const admin = new Hono<{ Bindings: Env }>();
 
+/**
+ * Whether a form post comes from this site's own page. Browsers set Sec-Fetch-Site and a page cannot forge it; `Origin` is
+ * also accepted when it matches. (These pages send no referrer, and under that policy a browser sends `Origin: null`
+ * for a same-site form post, so Origin alone would refuse Arnav's own login.)
+ */
+const fromThisSite = (c: Context<{ Bindings: Env }>): boolean =>
+  c.req.header('sec-fetch-site') === 'same-origin' ||
+  c.req.header('origin') === new URL(c.req.url).origin;
+
 // The PIN sign-in. These routes sit before the gate below: they are how a visitor gets through it.
 const page = (status: number, html: string, extra: Record<string, string> = {}): Response =>
   new Response(html, {
@@ -59,7 +68,7 @@ admin.post('/login', async (c) => {
   if (!pinConfigured(pin))
     return new Response('Admin is not configured.', { status: 503, headers });
   const url = new URL(c.req.url);
-  if (c.req.header('origin') !== url.origin) return page(403, loginHtml('Not allowed.'));
+  if (!fromThisSite(c)) return page(403, loginHtml('Not allowed.'));
   const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
   if (await locked(c.env.KV, ip))
     return page(429, loginHtml('Too many tries. Wait a while and try again.'), {
@@ -86,8 +95,7 @@ admin.post('/login', async (c) => {
 });
 
 admin.post('/logout', (c) => {
-  if (c.req.header('origin') !== new URL(c.req.url).origin)
-    return new Response('Not allowed.', { status: 403, headers });
+  if (!fromThisSite(c)) return new Response('Not allowed.', { status: 403, headers });
   return new Response(null, {
     status: 303,
     headers: {

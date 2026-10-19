@@ -507,3 +507,10 @@ Newest first. Read before every task. A repeat is marked REPEAT and strengthens 
 - **Fix:** the sending panel loads on first focus of a form; the orb, ripple and nudge live in `edith-presence.ts` and load after the launcher mounts. LCP back to 1,957 ms (one cold first run after a build read 2,031).
 - **Prevention rule:** any new behaviour that is not needed for first paint goes in its own dynamically imported chunk; re-run `pnpm lhci` three times after touching the first script, and read a flip as "on the edge", not noise.
 - **Files:** `src/lib/forms.ts`, `src/lib/edith.ts`, `src/lib/edith-presence.ts`
+
+## 2026-10-19 · admin PIN · the login refused the browser's own form (Origin: null)
+- **What happened:** entering the right PIN at https://arnavc.in/admin/login answered "Not allowed."
+- **Root cause:** `/admin` pages send `Referrer-Policy: no-referrer`; under it a browser sends `Origin: null` for a same-site form POST, and the login required `Origin` to equal the site's origin. The unit tests set `Origin` by hand, so they never saw a real browser's header.
+- **Fix:** accept `Sec-Fetch-Site: same-origin` (a page cannot forge it) or a matching `Origin`; test the exact headers a browser sends.
+- **Prevention rule:** for same-origin checks use `Sec-Fetch-Site` first. Test auth flows with the headers a real browser sends under the page's own Referrer-Policy, not hand-made ones.
+- **Files:** `worker/admin.ts`, `tests/unit/worker/pin.test.ts`
