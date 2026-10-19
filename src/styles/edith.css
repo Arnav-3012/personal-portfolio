@@ -1,0 +1,211 @@
+/* EDITH chat panel (src/lib/edith-ui.ts), loaded with the panel chunk. The hologram accent (--holo) marks EDITH;
+   the red send button is the one action colour in the panel. Tokens only. */
+.edith {
+  position: fixed;
+  inset: auto var(--space-4) var(--space-4) auto;
+  z-index: calc(var(--z-progress) - 3);
+  display: none;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  width: min(420px, calc(100% - var(--space-6)));
+  max-width: none;
+  max-height: min(640px, calc(100dvh - var(--space-7)));
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--holo) 45%, var(--line));
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  color: var(--text);
+  transform-origin: bottom right;
+}
+.edith[open] {
+  display: grid;
+  animation: edith-in 420ms var(--ease-out);
+}
+@keyframes edith-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+.edith::backdrop {
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.edith__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-bottom: var(--border);
+}
+.edith__title {
+  color: var(--holo);
+}
+.edith__status {
+  margin-right: auto;
+  color: var(--text-2);
+}
+/* A live dot beside the status, like the freelance pill's */
+.edith__status::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--ok);
+  vertical-align: 1px;
+}
+.edith__close {
+  width: 36px;
+  height: 36px;
+}
+
+.edith__log {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-height: 160px;
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.edith__msg {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 92%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  font-size: var(--type-small);
+  line-height: 1.5;
+  animation: edith-msg 480ms var(--ease-out);
+}
+@keyframes edith-msg {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.edith__msg--user {
+  justify-self: end;
+  border-color: color-mix(in srgb, var(--action) 45%, var(--line));
+}
+.edith__msg--bot {
+  justify-self: start;
+  border-color: color-mix(in srgb, var(--holo) 35%, var(--line));
+}
+.edith__text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+/* Thinking: three dots in a travelling wave, then the answer replaces them */
+.is-thinking .edith__text {
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: var(--type-hud);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.is-thinking .edith__text::after {
+  content: '';
+  display: inline-block;
+  width: 1.4em;
+  height: 0.3em;
+  margin-left: var(--space-2);
+  background: radial-gradient(circle, var(--holo) 40%, transparent 45%) 0 50% / 0.47em 100% repeat-x;
+  animation: edith-dots 900ms steps(3) infinite;
+}
+@keyframes edith-dots {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.edith__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.edith__source {
+  padding: 2px var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--holo) 35%, var(--line));
+  border-radius: var(--radius-chip);
+  color: var(--text-2);
+}
+.edith__source a {
+  color: inherit;
+  text-decoration: none;
+}
+.edith__source a:hover {
+  color: var(--holo);
+}
+.edith__action {
+  margin: 0;
+  color: var(--holo);
+}
+
+.edith__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  list-style: none;
+}
+.edith__chips[hidden] {
+  display: none;
+}
+.edith__chip {
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--type-small);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
+}
+.edith__chip:hover {
+  border-color: var(--holo);
+  transform: translateY(-1px);
+}
+
+.edith__form {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: var(--border);
+}
+.edith__input {
+  flex: 1;
+  min-width: 0;
+}
+.edith__send {
+  flex: none;
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+}
+.edith [data-turnstile] {
+  display: contents;
+}
+
+@media (max-width: 640px) {
+  .edith {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 85dvh;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+}

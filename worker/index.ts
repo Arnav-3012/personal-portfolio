@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
+import { admin } from './admin';
+import { chat } from './chat';
 import { runCron } from './cron';
 import { data } from './data';
 import { forms } from './forms';
+import { live } from './live';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -11,12 +14,14 @@ app.get('/api/health', (c) => {
 });
 
 app.route('/api/forms', forms);
+app.route('/api/chat', chat);
 app.route('/api', data);
+app.route('/api', live);
 
 app.all('/api/*', (c) => c.json({ ok: false, error: 'not_found' }, 404));
 
-// Admin UI lands in task 1.9, behind Cloudflare Access.
-app.all('/admin*', (c) => c.json({ ok: false, error: 'not_ready' }, 503));
+// Behind Cloudflare Access, and every route re-checks the Access JWT (worker/access.ts).
+app.route('/admin', admin);
 
 // run_worker_first only routes /api/* and /admin* here; anything else falls through to static assets.
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw));

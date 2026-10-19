@@ -1,0 +1,210 @@
+/* EDITH launcher (src/lib/edith.ts): bottom-right pill, injected with the button after the first sign of a visitor.
+   It must not live in global.css: 1.5 KB more render-blocking CSS moved LCP from 1957 to 2106 ms in Lighthouse (bisected in 1.8).
+   The panel's own styles load with the panel (src/styles/edith.css).
+   Anatomy: a glass pill; at its left a turning sphere of dots (src/lib/edith-orb.ts) in a small lit well; the label; and a
+   speech bubble above it for the one nudge. */
+.edith-launch {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: calc(var(--z-progress) - 3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-4) 0 7px;
+  border: 1px solid color-mix(in srgb, var(--holo) 42%, var(--line));
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text) 7%, transparent), transparent 55%),
+    color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text) 14%, transparent),
+    0 12px 28px -12px var(--bead-cast),
+    0 2px 6px var(--bead-cast);
+  backdrop-filter: blur(14px) saturate(150%);
+  color: var(--text);
+  cursor: pointer;
+  animation: edith-launch-in 700ms cubic-bezier(0.34, 1.35, 0.5, 1);
+  transition:
+    border-color var(--dur-hover) var(--ease-out),
+    box-shadow 260ms var(--ease-out),
+    transform 260ms var(--ease-out);
+}
+/* The sphere sits in a small lit well: a soft light from the hologram colour behind it. */
+.edith-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 28%,
+    color-mix(in srgb, var(--holo) 26%, var(--surface)),
+    color-mix(in srgb, var(--bg) 92%, var(--holo)) 72%
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--holo) 36%, transparent),
+    inset 0 -3px 6px color-mix(in srgb, var(--bg) 40%, transparent),
+    0 0 14px color-mix(in srgb, var(--holo) 28%, transparent);
+  color: var(--holo);
+  transition: box-shadow 260ms var(--ease-out);
+}
+.edith-orb__canvas {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+.edith-launch .hud {
+  letter-spacing: var(--track-hud);
+}
+.edith-launch:hover {
+  border-color: var(--holo);
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text) 18%, transparent),
+    0 18px 34px -12px var(--bead-cast),
+    0 0 0 3px color-mix(in srgb, var(--holo) 12%, transparent),
+    0 0 26px -4px color-mix(in srgb, var(--holo) 40%, transparent);
+}
+.edith-launch:hover .edith-orb {
+  box-shadow:
+    inset 0 0 0 1px var(--holo),
+    inset 0 -3px 6px color-mix(in srgb, var(--bg) 40%, transparent),
+    0 0 22px color-mix(in srgb, var(--holo) 55%, transparent);
+}
+.edith-launch:active {
+  transform: translateY(0) scale(0.97);
+}
+.edith-launch[aria-expanded='true'] {
+  visibility: hidden;
+}
+/* A slow ring breathes out from the pill until the visitor opens it. */
+.edith-launch::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid var(--holo);
+  border-radius: inherit;
+  opacity: 0;
+  animation: edith-ring 3.2s var(--ease-out) 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes edith-ring {
+  from {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+/* Transform only: text keeps full contrast from the first frame (an opacity fade is caught mid-way by axe). */
+@keyframes edith-launch-in {
+  from {
+    transform: translateY(18px) scale(0.94);
+  }
+}
+
+/* The nudge: a speech bubble over the pill. It is empty (and takes no room) until it speaks. */
+.edith-tip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  display: none;
+  width: max-content;
+  max-width: min(260px, 78vw);
+  padding: 9px 14px;
+  border: 1px solid color-mix(in srgb, var(--holo) 45%, var(--line));
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 14px 28px -12px var(--bead-cast);
+  backdrop-filter: blur(14px);
+  color: var(--text);
+  font-size: var(--type-small);
+  line-height: var(--lh-small);
+  text-align: left;
+  pointer-events: none;
+  transform-origin: 90% 100%;
+}
+.edith-launch.is-nudging .edith-tip {
+  display: block;
+  animation: edith-tip-in 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+}
+.edith-tip::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  top: 100%;
+  width: 10px;
+  height: 10px;
+  margin-top: -6px;
+  border: 1px solid color-mix(in srgb, var(--holo) 45%, var(--line));
+  border-top: 0;
+  border-left: 0;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.edith-launch.is-typing .edith-tip {
+  display: flex;
+  gap: 5px;
+  padding: 12px 14px;
+}
+.edith-launch.is-typing .edith-tip::before {
+  content: '';
+  width: 28px;
+  height: 6px;
+  background: radial-gradient(circle 2.5px, var(--holo) 96%, transparent) 0 0 / 10px 6px;
+  animation: edith-typing 900ms steps(3) infinite;
+}
+@keyframes edith-tip-in {
+  from {
+    transform: translateY(8px) scale(0.85);
+  }
+}
+@keyframes edith-typing {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+:root[data-boot='on'] .edith-launch {
+  display: none;
+}
+@media (max-width: 640px) {
+  .edith-launch .hud {
+    display: none;
+  }
+  .edith-launch {
+    width: 52px;
+    min-height: 52px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+:root[data-motion='reduced'] .edith-launch,
+:root[data-motion='reduced'] .edith-launch::after,
+:root[data-motion='reduced'] .edith-launch.is-nudging .edith-tip {
+  animation: none;
+}
+:root[data-motion='reduced'] .edith-launch {
+  transition: none;
+}
+
+/* Out of the way while the hero is on screen (desktop): hidden from view and from the tab order. */
+.edith-launch.is-away {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out),
+    visibility 0s 300ms;
+}

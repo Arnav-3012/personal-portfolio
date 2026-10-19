@@ -1,18 +1,23 @@
 import { env } from 'cloudflare:workers';
 import { vi } from 'vitest';
-import migration from '../../../migrations/0001_forms.sql?raw';
+import forms from '../../../migrations/0001_forms.sql?raw';
+import chat from '../../../migrations/0002_chat.sql?raw';
+import inbox from '../../../migrations/0003_inbox.sql?raw';
 
-/** Drops and recreates the table from the real migration file, so tests run against the shipped schema. */
+/** Drops and recreates the tables from the real migration files, so tests run against the shipped schema. */
 export async function resetDb(): Promise<void> {
   await env.DB.prepare('DROP TABLE IF EXISTS submissions').run();
-  const statements = migration
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('--'))
-    .join('\n')
-    .split(';')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  for (const statement of statements) await env.DB.prepare(statement).run();
+  await env.DB.prepare('DROP TABLE IF EXISTS chat_events').run();
+  for (const migration of [forms, chat, inbox]) {
+    const statements = migration
+      .split('\n')
+      .filter((line) => !line.trim().startsWith('--'))
+      .join('\n')
+      .split(';')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const statement of statements) await env.DB.prepare(statement).run();
+  }
 }
 
 export interface FakeEmail {
