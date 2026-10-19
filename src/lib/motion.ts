@@ -8,6 +8,7 @@ export function initMotion(): void {
     void import('./neural').then((m) => m.startNeural());
     void import('./table-fold').then((m) => m.startFold());
     void import('./reveal').then((m) => m.startReveal());
+    void import('./text-fx').then((m) => m.startTextFx());
     void import('./workshop-entry').then((m) => m.startWorkshopEntry());
     void import('./dynamic').then((m) => m.startDynamic());
     void import('./scroll-fx').then((m) => m.startScrollFx());

@@ -3,26 +3,10 @@
 //   - the all-projects table: one quiet highlight that glides between rows, a fine scan line on first view, rows that
 //     slide in, rows that re-flow with a FLIP animation when a filter changes, counts that run up
 //   - cards: a spotlight that follows the pointer
-//   - section titles: a short decode, letters resolving from noise (the transformer boot's look)
+// Section titles moved to text-fx.ts (2026-10-20): the letter-noise decode rewrote the text every frame, so widths
+// jittered and each frame cost a layout; the masked word rise there moves only transform and opacity.
 // Pure helpers are exported for tests.
 import dynamicCss from '../styles/dynamic.css?inline';
-
-export const GLYPHS = '01<>/\\{}[]+=*#%&';
-
-/**
- * One frame of the decode: characters before `progress` (0–1) of the way along show the real text, the rest random
- * glyphs. Spaces and punctuation never change, so the line keeps its shape.
- */
-export function scrambleFrame(target: string, progress: number, rand: () => number): string {
-  const settled = Math.floor(progress * target.length);
-  return [...target]
-    .map((ch, i) =>
-      i < settled || !/[A-Za-z0-9]/.test(ch)
-        ? ch
-        : (GLYPHS[Math.floor(rand() * GLYPHS.length)] ?? ch),
-    )
-    .join('');
-}
 
 /** How far a row has to be moved back to look as if it had not moved: old top minus new top. */
 export const flipDelta = (before: number, after: number): number => before - after;
@@ -165,36 +149,6 @@ function cards(doc: Document): void {
   );
 }
 
-function decode(doc: Document): IntersectionObserver {
-  const rand = Math.random;
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const el = entry.target as HTMLElement;
-        io.unobserve(el);
-        const text = el.textContent ?? '';
-        // The name stays the real words for assistive tech while the visible letters resolve.
-        el.setAttribute('aria-label', text);
-        el.style.minHeight = `${el.offsetHeight}px`;
-        const start = performance.now();
-        const step = (now: number): void => {
-          const t = Math.min(1, (now - start) / 700);
-          el.textContent = t < 1 ? scrambleFrame(text, easeOut(t), rand) : text;
-          if (t < 1) requestAnimationFrame(step);
-          else el.style.minHeight = '';
-        };
-        requestAnimationFrame(step);
-      }
-    },
-    { threshold: 0.6 },
-  );
-  for (const el of doc.querySelectorAll<HTMLElement>('h2.display'))
-    // Titles with markup inside keep their markup; only plain-text titles decode.
-    if (el.children.length === 0 && el.getBoundingClientRect().top > innerHeight) io.observe(el);
-  return io;
-}
-
 export function startDynamic(doc: Document = document): Dynamic | null {
   if (doc.documentElement.dataset['motion'] === 'reduced') return null;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -203,10 +157,8 @@ export function startDynamic(doc: Document = document): Dynamic | null {
   doc.head.append(style);
   table(doc, fine);
   if (fine) cards(doc);
-  const io = decode(doc);
   return {
     stop(): void {
-      io.disconnect();
       style.remove();
     },
   };

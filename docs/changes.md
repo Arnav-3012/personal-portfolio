@@ -214,3 +214,7 @@ Newest first. Files changed per task.
 ## 2026-10-20 · 2.4 closed
 - New: `src/lib/workshop/typing.ts`, `src/lib/workshop/room-clock.ts`.
 - Changed: `src/pages/workshop.astro` (heading kept for screen readers while loading; the room waits for the arrival veil), `src/lib/workshop-entry.ts` (note kept on screen), `Room.tsx`, `Lighting.tsx`, `Markers.tsx`, `Walker.tsx`, `Shell.tsx`, `tests/e2e/loader.spec.ts`, `enter.spec.ts`, `forms-api.spec.ts`, `tests/unit/lib/workshop.test.ts`, `docs/plan.md`.
+
+## 2026-10-20 · Text motion
+- New: `src/lib/text-fx.ts` (rewritten in the bolder pass), `tests/unit/lib/text-fx.test.ts`, `tests/e2e/text-fx.spec.ts`.
+- Changed: `src/lib/motion.ts` (starts text-fx), `src/lib/dynamic.ts` (title decode removed), `tests/unit/lib/dynamic.test.ts`, `tests/e2e/dynamic.spec.ts`, `docs/logs.md`.

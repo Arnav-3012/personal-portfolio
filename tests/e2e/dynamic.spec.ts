@@ -101,18 +101,6 @@ test.describe('projects table', () => {
     expect(stuck).toBe(0);
   });
 
-  test('a section title decodes from noise into the real words, and keeps its name for screen readers', async ({
-    page,
-  }) => {
-    await open(page);
-    await page.evaluate(() =>
-      document.querySelector('#projects-title')?.scrollIntoView({ block: 'center' }),
-    );
-    await expect(page.locator('#projects-title')).toHaveAttribute('aria-label', 'All projects');
-    await expect(page.locator('#projects-title')).toHaveText('All projects', { timeout: 3000 });
-    await expect(page.getByRole('heading', { name: 'All projects' })).toBeVisible();
-  });
-
   test('cards get a pointer spotlight', async ({ page }) => {
     await open(page);
     await page.locator('.service').first().scrollIntoViewIfNeeded();
