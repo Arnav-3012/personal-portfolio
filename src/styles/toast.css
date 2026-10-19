@@ -1,0 +1,186 @@
+/* Toasts (src/lib/toast.ts): injected when the first toast is shown, so none of it is in the render-blocking stylesheet. */
+/* Toasts: bottom-centre, top on mobile */
+.toaster {
+  position: fixed;
+  left: 50%;
+  /* Below the top bar (44px controls) so toasts never cover the nav or settings */
+  top: calc(var(--space-4) + 44px + var(--space-2));
+  z-index: var(--z-toast);
+  display: grid;
+  gap: var(--space-2);
+  width: min(calc(100% - var(--space-6)), 440px);
+  transform: translateX(-50%);
+}
+.toaster > div {
+  display: grid;
+  gap: var(--space-2);
+}
+@media (min-width: 768px) {
+  .toaster {
+    top: auto;
+    bottom: var(--space-5);
+  }
+}
+.toast {
+  --kind: var(--ok);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--kind) 28%, var(--line));
+  border-radius: var(--radius-card);
+  /* Glass with depth: a light falling from the top edge, the status colour glowing from the left, and a stack of shadows
+     (a hairline highlight inside, a tight contact shadow and a long soft one) so it sits above the page. */
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text) 7%, transparent), transparent 46%),
+    radial-gradient(
+      110% 190% at 0% 50%,
+      color-mix(in srgb, var(--kind) 20%, transparent),
+      transparent 62%
+    ),
+    color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text) 14%, transparent),
+    0 1px 2px var(--bead-cast),
+    0 14px 32px -10px var(--bead-cast),
+    0 0 0 1px color-mix(in srgb, var(--kind) 6%, transparent);
+  color: var(--text);
+  animation: toast-in 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+}
+.toast[data-kind='warn'] {
+  --kind: var(--time);
+}
+.toast[data-kind='error'] {
+  --kind: var(--action);
+}
+.toast.is-leaving {
+  animation: toast-out 200ms var(--ease-out) forwards;
+}
+/* The status gem: a small lit sphere in the status colour, with a ring that pulses once when the toast lands. */
+.toast > .icon {
+  position: relative;
+  flex: none;
+  box-sizing: content-box;
+  padding: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: radial-gradient(
+    circle at 32% 26%,
+    color-mix(in srgb, var(--kind) 52%, var(--text)),
+    var(--kind) 46%,
+    color-mix(in srgb, var(--kind) 62%, var(--bg)) 100%
+  );
+  color: var(--on-action);
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, var(--text) 55%, transparent),
+    inset 0 -2px 4px color-mix(in srgb, var(--bg) 35%, transparent),
+    0 4px 12px -2px color-mix(in srgb, var(--kind) 60%, transparent);
+  animation: toast-gem 640ms var(--ease-out) 120ms both;
+}
+.toast > .icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--kind);
+  animation: toast-ring 900ms var(--ease-out) 200ms both;
+}
+.toast__body {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.toast__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--type-small);
+  line-height: var(--lh-small);
+  letter-spacing: var(--track-display-xl);
+  color: var(--text);
+}
+.toast__message {
+  font-size: var(--type-small);
+  line-height: var(--lh-small);
+  color: var(--text-2);
+}
+.toast__close {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out);
+}
+.toast__close:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+/* Countdown: a glowing line along the bottom edge that drains over the 4 s auto-dismiss and pauses with the timer */
+.toast::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--kind), color-mix(in srgb, var(--kind) 30%, transparent));
+  box-shadow: 0 0 8px var(--kind);
+  transform-origin: left;
+  animation: toast-timer 4s linear forwards;
+}
+.toast:hover::after,
+.toast:focus-within::after {
+  animation-play-state: paused;
+}
+/* Older toasts in a stack sit back a little */
+.toaster > div > .toast:not(:last-child) {
+  transform: scale(0.97);
+  filter: saturate(0.8);
+}
+/* Transform only: an opacity fade-in makes the text momentarily fail contrast checks. */
+@keyframes toast-in {
+  from {
+    transform: translateY(18px) scale(0.92);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+@keyframes toast-gem {
+  from {
+    transform: scale(0.4) rotate(-40deg);
+  }
+}
+@keyframes toast-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+@keyframes toast-timer {
+  to {
+    transform: scaleX(0);
+  }
+}
+:root[data-motion='reduced'] .toast,
+:root[data-motion='reduced'] .toast > .icon,
+:root[data-motion='reduced'] .toast > .icon::after {
+  animation: none;
+}

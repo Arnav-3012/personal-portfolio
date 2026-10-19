@@ -269,9 +269,20 @@ function readStyle(root: HTMLElement): Style {
 
 const easeOut = (x: number): number => 1 - (1 - x) ** 3;
 
+/** One dot as it is drawn once assembled, in canvas CSS pixels (the boot's particles fly to these). */
+export interface FinalDot {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  alpha: number;
+}
+
 export interface DotMatrix {
-  /** Plays the assembly (dots fly in from scatter). */
-  assemble(): void;
+  /** Plays the assembly (dots fly in from scatter), or with `instant` shows them already assembled. */
+  assemble(instant?: boolean): void;
+  /** Every dot's final position, size, colour and opacity (including the dimming behind the name). */
+  finalDots(): FinalDot[];
   /** Pointer in canvas CSS pixels, or null when it leaves. */
   pointer(x: number | null, y: number | null): void;
   /** Re-reads the theme (D toggle / settings): tone mode and colours. */
@@ -442,9 +453,23 @@ export async function createDotMatrix(
   request();
 
   return {
-    assemble() {
-      assembleStart = animate ? performance.now() : -Infinity;
+    assemble(instant = false) {
+      assembleStart = animate && !instant ? performance.now() : -Infinity;
       request();
+    },
+    finalDots() {
+      return dots.map((d) => {
+        const x = d.u * w;
+        const y = d.v * h;
+        const dim = clearRects.length ? clearAlpha(x, y, clearRects, 28, style.clear) : 1;
+        return {
+          x,
+          y,
+          size: d.s * w * 0.82,
+          color: lut[Math.round(d.t * 32)] ?? '',
+          alpha: d.a * dim,
+        };
+      });
     },
     clear(rects) {
       clearRects = rects;

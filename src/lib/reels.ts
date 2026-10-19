@@ -66,8 +66,22 @@ const smoothstep = (t: number): number => {
 
 /** Radians per second the ring revolves while the cards are still gathered. */
 export const ORBIT_SPEED = 0.5;
+/** How quickly the drawn separation follows the scroll (per second) and how quickly a hovered card straightens. */
+export const SEPARATION_RATE = 9;
+export const HOVER_RATE = 16;
 /** How far the ring has opened (0 = gathered round the headline, 1 = at the resting spots) at scroll progress p. */
-export const separation = (p: number): number => smoothstep((p - 0.15) / 0.5);
+export const SEPARATION_START = 0.06;
+export const SEPARATION_SPAN = 0.5;
+export const separation = (p: number): number =>
+  smoothstep((p - SEPARATION_START) / SEPARATION_SPAN);
+
+/**
+ * Eases `current` towards `target` by an amount that depends on elapsed time, not on the frame rate: after `1/rate`
+ * seconds it has covered about 63% of the way. A notched mouse wheel moves the scroll position in steps; running the
+ * cards through this turns the steps into one continuous glide. With no time elapsed (the first render) it snaps.
+ */
+export const damp = (current: number, target: number, dt: number, rate: number): number =>
+  dt <= 0 ? target : current + (target - current) * (1 - Math.exp(-rate * dt));
 
 export interface Stage {
   /** Size of the pinned stage and of one card, in px. */
@@ -291,6 +305,8 @@ function wireOrbit(
   let last = 0;
   let frame = 0;
   let visible = false;
+  /** The separation the cards are drawn at: it glides towards the one the scroll position asks for. */
+  let drawnSep = separation(progress());
   const clear = (): void =>
     slots.forEach((slot) => {
       slot.style.removeProperty('transform');
@@ -298,17 +314,22 @@ function wireOrbit(
       slot.style.removeProperty('z-index');
     });
 
+  // Measured when the stage changes size, not every frame: reading sizes in the animation loop forces layout.
+  const measure = (): Stage => ({
+    w: stage.clientWidth,
+    h: stage.clientHeight,
+    cardW: slots[0]?.offsetWidth ?? 0,
+  });
+  let dims = measure();
+  new ResizeObserver(() => (dims = measure())).observe(stage);
+
   const render = (dt: number): void => {
     if (!wide.matches) return;
-    const sep = separation(progress());
+    drawnSep = damp(drawnSep, separation(progress()), dt, SEPARATION_RATE);
+    const sep = drawnSep;
     if (!held.some(Boolean) && !playerOpen()) angle += dt * ORBIT_SPEED * (1 - sep);
-    const dims: Stage = {
-      w: stage.clientWidth,
-      h: stage.clientHeight,
-      cardW: slots[0]?.offsetWidth ?? 0,
-    };
     slots.forEach((slot, i) => {
-      hover[i] = lerp(hover[i] ?? 0, held[i] ? 1 : 0, 0.2);
+      hover[i] = damp(hover[i] ?? 0, held[i] ? 1 : 0, dt, HOVER_RATE);
       // Separation also swirls the ring half a turn, so the cards leave in motion rather than sliding.
       const pose = orbitPose(i, n, angle + sep * Math.PI, sep, cardLayout(i), dims, hover[i]);
       slot.style.transform = poseTransform(pose);

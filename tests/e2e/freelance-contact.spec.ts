@@ -175,6 +175,42 @@ test.describe('open to freelance', () => {
     });
   });
 
+  test('while the message is on its way a panel shows the stage, the packet travels, and it finishes beside the confirmation', async ({
+    page,
+  }) => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    await page.route('**/api/forms/freelance', async (route) => {
+      await gate;
+      await json(200)(route);
+    });
+    await open(page);
+    const form = await fillFreelance(page);
+    await form.locator('[data-submit]').click();
+    const panel = form.locator('.send');
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('.send__read b')).toHaveText('Sending your message');
+    await expect(panel.locator('.send__meta')).toContainText('words');
+    const at = () => panel.evaluate((el) => parseFloat(el.style.getPropertyValue('--x')));
+    const early = await at();
+    await expect.poll(at).toBeGreaterThan(early + 0.02);
+    // The packet never claims to have arrived while the request is out.
+    expect(await at()).toBeLessThan(0.95);
+    release();
+    await expect(panel.locator('.send__read b')).toHaveText('Delivered');
+    await expect(toasts(page)).toHaveText(freelance.confirmation);
+    await expect(panel).toHaveCount(0, { timeout: 6000 });
+  });
+
+  test('a failed send says so in the panel too', async ({ page }) => {
+    await page.route('**/api/forms/freelance', json(500));
+    await open(page);
+    const form = await fillFreelance(page);
+    await form.locator('[data-submit]').click();
+    await expect(form.locator('.send__read b')).toHaveText("Couldn't send");
+    await expect(form.locator('.send')).toHaveClass(/is-fail/);
+  });
+
   test('the button is busy while sending and a double click sends once', async ({ page }) => {
     let requests = 0;
     let release: () => void = () => undefined;
@@ -409,6 +445,8 @@ for (const theme of ['night', 'day'] as const) {
     }
     for (const form of await page.locator('form[data-form]').all())
       await form.locator('[data-submit]').click();
+    // Submitting scrolls the forms into view, which starts the sections' 700 ms fade-in: let it finish before axe reads colours.
+    await page.waitForTimeout(1200);
     for (const id of ['#freelance', '#contact']) {
       const withErrors = await new AxeBuilder({ page }).include(id).analyze();
       expect(withErrors.violations, `${id} with errors`).toEqual([]);

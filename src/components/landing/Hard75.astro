@@ -79,7 +79,7 @@ const url = (path: string): string => `/${path}`;
   </div>
 </section>
 
-<style>
+<style is:global>
   .hard {
     position: relative;
     isolation: isolate;
@@ -99,7 +99,7 @@ const url = (path: string): string => `/${path}`;
     position: absolute;
     inset: 0;
     z-index: -2;
-    width: min(1100px, 92%);
+    width: min(1216px, calc(100% - 2 * var(--space-6)));
     aspect-ratio: 15 / 5;
     margin: auto;
     background-image:
@@ -281,8 +281,9 @@ const url = (path: string): string => `/${path}`;
 
   /* Floating layout: only with full motion on a wide screen. The stage is pinned for the whole scroll. */
   @media (min-width: 768px) {
+    /* The stage is pinned for 100vh of scrolling (200vh − the 100vh stage): the ring opens within about half of it. */
     :root[data-motion='full'] .hard {
-      height: 260vh;
+      height: 200vh;
     }
     :root[data-motion='full'] .hard__stage {
       position: sticky;
@@ -321,7 +322,9 @@ const url = (path: string): string => `/${path}`;
       top: calc(var(--t) * 1%);
       width: clamp(120px, 12.5vw, 190px);
       pointer-events: auto;
-      will-change: transform;
+      /* Moved and faded from script every frame: keep each card on its own compositor layer */
+      will-change: transform, opacity;
+      backface-visibility: hidden;
     }
   }
 </style>

@@ -7,32 +7,43 @@
 :root[data-theme='night'] {
   color-scheme: dark;
 
-  --bg: #14110d;
-  --surface: #1c1813;
-  --line: #3a3128;
-  --text: #f3ede2;
-  --text-2: #a89c8a;
+  /* Graphite: a neutral near-black with no hue of its own, so the amber, red, cyan and green accents each read as
+     themselves (the earlier warm brown shared amber's hue and made the figure blur into the ground). */
+  --bg: #0f1012;
+  --surface: #17181b;
+  --line: #2d3036;
+  --text: #f2f3f5;
+  --text-2: #a3a8b0;
   --holo: #4fd8ff;
   --action: #ff5a3c;
-  --on-action: #14110d;
+  --on-action: #0f1012;
   --time: #e8a24a;
   --board: #1f3b2d;
   --ok: #3ddc84;
+  /* Depth: the lit and shaded sides of a raised dot, and the shadow it casts. */
+  --bead-hi: #ffffff;
+  --bead-lo: #7d828b;
+  --bead-cast: rgba(0, 0, 0, 0.55);
 }
 
 :root[data-theme='day'] {
   color-scheme: light;
 
-  --bg: #f4eee3;
-  --surface: #fffdf8;
-  --line: #dcd2c2;
-  --text: #1a1510;
-  --text-2: #5e5346;
+  /* Ivory: a faintly warm neutral paper with neutral near-black ink (the earlier beige paper and brown-black ink made
+     the type and the dot-matrix portrait read brown). The amber is a brighter burnt amber, still ≥ 4.5:1 as text. */
+  --bg: #f5f4f0;
+  --surface: #fdfdfb;
+  --line: #dedcd5;
+  --text: #17171a;
+  --text-2: #5a5c62;
   --holo: #00739e;
   --action: #b8321c;
   --on-action: #ffffff;
-  --time: #8a4b00;
+  --time: #a15700;
   --ok: #177a42;
+  --bead-hi: #8a8d96;
+  --bead-lo: #050506;
+  --bead-cast: rgba(23, 23, 26, 0.28);
 }
 
 :root {
@@ -68,7 +79,7 @@
   --space-10: 128px;
   --section-gap: var(--space-8);
 
-  /* Shape: no drop shadows; depth from 1px lines */
+  /* Shape: depth comes from 1px lines and light (lit edges, shaded dots), not from heavy drop shadows */
   --radius-chip: 6px;
   --radius-card: 12px;
   --radius-pill: 999px;

@@ -16,7 +16,7 @@ const building = buildingProject(site, projects);
 const resume = resumeHref(site.resume.file);
 const quads = quadrants(site, projects, experience);
 const links = [
-  ...(resume ? [{ label: 'Resume', href: resume, icon: 'file-text' as const }] : []),
+  ...(resume ? [{ label: 'Resume', href: resume, icon: 'arrow-up-right' as const }] : []),
   { label: 'LinkedIn', href: site.socials.linkedin, icon: 'arrow-up-right' as const },
   { label: 'GitHub', href: site.socials.github, icon: 'arrow-up-right' as const },
   { label: 'Instagram', href: site.socials.instagram, icon: 'arrow-up-right' as const },
@@ -183,25 +183,92 @@ const { lat, lon, city } = site.location;
     letter-spacing: var(--track-display-xl);
     white-space: nowrap;
     color: var(--text);
+    /* Raised dots: a short extrusion down and right, and a soft cast shadow. */
+    filter: drop-shadow(1px 1.5px 0 var(--bead-lo)) drop-shadow(0 10px 14px var(--bead-cast));
   }
   .hero__letter {
     display: inline-block;
     animation: letter-in var(--dur-reveal) var(--ease-out) both;
     animation-delay: calc(var(--i) * var(--stagger));
   }
+  /* Each letter is its own box (for the boot animation), so the font's A–V kerning pair is lost and the V stands apart.
+     Measured from the font itself (canvas measureText of "AV" minus "A" and "V", Unbounded 700): −0.128em; every other
+     pair in ARNAV kerns 0. This puts back exactly what the font would have kerned. */
+  .hero__letter:last-child {
+    margin-left: -0.128em;
+  }
   /* Dot-matrix lettering: real text, filled with a dot grid that scales with the type. */
   @supports (background-clip: text) or (-webkit-background-clip: text) {
     .hero__letter {
-      background: radial-gradient(circle, var(--text) 40%, transparent 46%) 0 0 / 0.04em 0.04em;
+      background:
+        radial-gradient(circle 0.006em at 38% 36%, var(--bead-hi), transparent) 0 0 / 0.04em 0.04em,
+        radial-gradient(circle 0.0135em, var(--text) 52%, var(--bead-lo) 90%, transparent) 0 0 /
+          0.04em 0.04em;
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+    }
+  }
+  /* Repeat visits (a refresh, or back from /workshop) skip the boot, so without this the raw photo with its grey studio
+     backdrop and a few half-arrived letters show for a moment before the dots take over. Until the dot portrait is
+     ready, hold both back and pulse a small dot grid instead (the loader's motif). The first visit is untouched: the boot
+     covers it and the photo stays the LCP image. Without JavaScript nothing is held, and after 2.5 s everything shows
+     regardless, so a failed script can never leave the hero empty. */
+  :global(:root[data-js]:not([data-boot='on'])) .hero:not([data-dots]) .hero__media :global(img),
+  :global(:root[data-js]:not([data-boot='on'])) .hero:not([data-dots]) .hero__letter {
+    opacity: 0;
+    animation: hero-failsafe 0s 2.5s forwards;
+  }
+  :global(:root[data-js]:not([data-boot='on'])) .hero:not([data-dots]) .hero__stage::after {
+    content: '';
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--text-2) 2.2px, transparent 2.8px) 0 0 / 10px 10px;
+    opacity: 0.3;
+    pointer-events: none;
+    animation:
+      hero-wait 1.4s var(--ease-out) infinite alternate,
+      hero-gone 0s 2.5s forwards;
+  }
+  @keyframes hero-failsafe {
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes hero-wait {
+    to {
+      opacity: 0.75;
+    }
+  }
+  @keyframes hero-gone {
+    to {
+      opacity: 0;
     }
   }
   /* Held until the boot hands off: the decoded letters fly in as these reveal. */
   :global(:root[data-boot='on']) .hero__letter {
     animation: none;
     opacity: 0;
+  }
+  /* The boot's particles have landed exactly on the name's dots: the letters take over from them as the particles fade (the
+     same 400 ms), so there is one name, never two. */
+  :global(:root[data-boot='out']) .hero__letter {
+    animation: letter-settle 400ms linear both;
+  }
+  /* Once the boot is over the name stays as it is. Without this, removing data-boot put the entrance animation back and the
+     name played it a second time, from invisible. */
+  :global(:root[data-booted]) .hero__letter {
+    animation: none;
+    opacity: 1;
+  }
+  @keyframes letter-settle {
+    from {
+      opacity: 0;
+    }
   }
   @keyframes letter-in {
     from {
@@ -327,7 +394,9 @@ const { lat, lon, city } = site.location;
     .hero__quads {
       position: absolute;
       width: auto;
-      inset: calc(56px + var(--space-7)) var(--space-7) var(--space-7);
+      /* The corners sit on the same column as every section below (1280px max, 32px gutter), so the page has one pair of edges. */
+      inset: calc(56px + var(--space-7)) calc(max(0px, (100% - 1280px) / 2) + var(--space-6))
+        var(--space-7);
       display: block;
       pointer-events: none;
     }

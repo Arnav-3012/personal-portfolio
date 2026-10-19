@@ -1,20 +1,37 @@
 // HUD toasts (SPEC "Alerts and toasts"). The single entry point for alerts; markup lives in Toaster.astro.
 
+import toastCss from '../styles/toast.css?inline';
+
 export type ToastKind = 'ok' | 'warn' | 'error';
 
 export interface ToastOptions {
   kind: ToastKind;
   message: string;
-  /** Mono HUD label; defaults per kind. */
+  /** The short title above the message; defaults per kind. */
   label?: string;
 }
 
 export const TOAST_MS = 4000;
 const LEAVE_MS = 200;
 const MAX_VISIBLE = 3;
-const LABELS: Record<ToastKind, string> = { ok: 'OK', warn: '!!', error: 'ERR' };
+const LABELS: Record<ToastKind, string> = {
+  ok: 'Done',
+  warn: 'Heads up',
+  error: 'Something went wrong',
+};
+
+let styled = false;
+/** The toast styles are not in the page stylesheet: they are added with the first toast. */
+const ensureStyles = (): void => {
+  if (styled) return;
+  styled = true;
+  const style = document.createElement('style');
+  style.textContent = toastCss;
+  document.head.append(style);
+};
 
 export function toast({ kind, message, label = LABELS[kind] }: ToastOptions): void {
+  ensureStyles();
   // Errors interrupt (role="alert"); everything else is polite.
   const region = document.querySelector<HTMLElement>(
     `[data-toast-region="${kind === 'error' ? 'assertive' : 'polite'}"]`,
@@ -31,7 +48,7 @@ export function toast({ kind, message, label = LABELS[kind] }: ToastOptions): vo
 
   const tag = document.createElement('span');
   tag.className = 'toast__label';
-  tag.textContent = `[ ${label} ]`;
+  tag.textContent = label;
 
   const text = document.createElement('p');
   text.className = 'toast__message';

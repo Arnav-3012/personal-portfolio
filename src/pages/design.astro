@@ -115,12 +115,30 @@ const spacing = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
         <Skeleton shape="pill" width="120px" height="32px" />
       </div>
     </section>
+
+    <section aria-labelledby="loader-title">
+      <h2 id="loader-title">Loader</h2>
+      <p>
+        The one loader for any wait: a dot grid with a wave of light, a mono label and a hairline
+        bar. Indeterminate by default; with a true ratio the bar shows progress. Esc or a click
+        dismisses these demos.
+      </p>
+      <div class="demo-row">
+        <button class="button button--ghost" type="button" data-demo-loader="indeterminate">
+          Show loader
+        </button>
+        <button class="button button--ghost" type="button" data-demo-loader="progress">
+          Show loader with progress
+        </button>
+      </div>
+    </section>
   </main>
 </Base>
 
 <script>
   import { toast, type ToastKind } from '../lib/toast';
   import { doneProgress, setProgress, startProgress } from '../lib/progress';
+  import { mountLoader } from '../lib/loader';
 
   const messages: Record<ToastKind, string> = {
     ok: 'Message sent. Arnav replies within a few days.',
@@ -132,6 +150,27 @@ const spacing = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
     button.addEventListener('click', () => {
       const kind = button.dataset['demoToast'] as ToastKind;
       toast({ kind, message: messages[kind] });
+    });
+  }
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-demo-loader]')) {
+    button.addEventListener('click', () => {
+      const determinate = button.dataset['demoLoader'] === 'progress';
+      const loader = mountLoader({ label: determinate ? 'Loading the workshop' : 'Loading' });
+      let ratio = 0;
+      const tick = determinate
+        ? setInterval(() => loader.set(Math.min(1, (ratio += 0.12))), 300)
+        : undefined;
+      const close = (): void => {
+        clearInterval(tick);
+        loader.remove();
+        removeEventListener('keydown', onKey);
+      };
+      const onKey = (e: KeyboardEvent): void => {
+        if (e.key === 'Escape') close();
+      };
+      addEventListener('keydown', onKey);
+      loader.el.addEventListener('click', close);
     });
   }
 

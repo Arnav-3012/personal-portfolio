@@ -15,6 +15,9 @@ import {
   ringRadii,
   reelCaption,
   separation,
+  SEPARATION_SPAN,
+  SEPARATION_START,
+  damp,
   stepIndex,
   swipeDirection,
 } from '../../../src/lib/reels';
@@ -95,10 +98,10 @@ describe('pinProgress', () => {
 describe('separation', () => {
   it('stays gathered at the start, opens in the middle and is fully open well before the end', () => {
     expect(separation(0)).toBe(0);
-    expect(separation(0.15)).toBe(0);
-    expect(separation(0.4)).toBeGreaterThan(0.3);
-    expect(separation(0.4)).toBeLessThan(0.7);
-    expect(separation(0.65)).toBe(1);
+    expect(separation(SEPARATION_START)).toBe(0);
+    expect(separation(SEPARATION_START + SEPARATION_SPAN / 2)).toBeGreaterThan(0.4);
+    expect(separation(SEPARATION_START + SEPARATION_SPAN / 2)).toBeLessThan(0.6);
+    expect(separation(SEPARATION_START + SEPARATION_SPAN)).toBe(1);
     expect(separation(1)).toBe(1);
   });
 
@@ -305,5 +308,44 @@ describe('playerMarkup', () => {
     const html = playerMarkup();
     expect(html.match(/<svg /g)).toHaveLength(7);
     expect(html.match(/aria-hidden="true" focusable="false"/g)).toHaveLength(7);
+  });
+});
+
+describe('damp (the glide that smooths a notched wheel)', () => {
+  it('snaps on the first render and when no time has passed', () => {
+    expect(damp(0, 1, 0, 9)).toBe(1);
+    expect(damp(0.2, 0.7, -1, 9)).toBe(0.7);
+  });
+  it('moves a fixed share of the remaining distance for a given time, whatever the frame rate', () => {
+    const oneStep = damp(0, 1, 1 / 30, 9);
+    let twoSteps = 0;
+    twoSteps = damp(twoSteps, 1, 1 / 60, 9);
+    twoSteps = damp(twoSteps, 1, 1 / 60, 9);
+    expect(twoSteps).toBeCloseTo(oneStep, 10);
+  });
+  it('never overshoots, and gets closer every step', () => {
+    let v = 0;
+    let prev = 1;
+    for (let i = 0; i < 40; i++) {
+      v = damp(v, 1, 1 / 60, 9);
+      expect(v).toBeLessThanOrEqual(1);
+      expect(1 - v).toBeLessThan(prev);
+      prev = 1 - v;
+    }
+    expect(v).toBeGreaterThan(0.95);
+  });
+  it('turns a stepped input into a smooth, monotonic glide', () => {
+    // A wheel that jumps the target in notches of 0.25 every 100 ms.
+    let v = 0;
+    const out: number[] = [];
+    for (let frame = 0; frame < 60; frame++) {
+      const target = Math.min(1, Math.floor(frame / 6) * 0.25);
+      v = damp(v, target, 1 / 60, 9);
+      out.push(v);
+    }
+    const biggestJump = Math.max(...out.map((x, i) => Math.abs(x - (out[i - 1] ?? 0))));
+    // The raw input jumps 0.25 at a time; the glide never moves more than a third of that in one frame.
+    expect(biggestJump).toBeLessThan(0.25 / 3);
+    expect(out.every((x, i) => x >= (out[i - 1] ?? 0))).toBe(true);
   });
 });

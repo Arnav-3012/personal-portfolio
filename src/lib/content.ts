@@ -50,6 +50,40 @@ export const siteSchema = z.strictObject({
     log: z.array(text.max(40)).min(2).max(8),
   }),
   currentlyBuilding: id,
+  // The Workshop entry (Phase 2a): nav label, the /workshop page copy and the zone list. Each zone links to the 2D
+  // section that holds the same thing until the 3D room opens.
+  workshop: z.strictObject({
+    navLabel: text.max(16),
+    title: text.max(40),
+    status: text.max(40),
+    lead: text.max(240),
+    note: text.max(80),
+    tryAnyway: text.max(24),
+    tryAnywayReply: text.max(200),
+    zonesLabel: text.max(60),
+    // The pencil note and arrow that appear beside the head when the pointer nears the brain.
+    handNote: text.max(32),
+    // The entry sequence (brain → globe → Mumbai): its readouts and the skip button.
+    sequence: z.strictObject({ locking: text.max(30), status: text.max(40), skip: text.max(16) }),
+    zones: z
+      .array(
+        z.strictObject({
+          id,
+          title: text.max(40),
+          blurb: text.max(90),
+          href: z.string().regex(/^\/#[a-z0-9-]+$/, 'a /#section link'),
+        }),
+      )
+      .min(8),
+  }),
+  // EDITH-lite widget copy (the model never writes these): three starter questions, input hint, opening line.
+  edith: z.strictObject({
+    chips: z.array(text.max(40)).length(3),
+    placeholder: text.max(60),
+    intro: text.max(200),
+    // The line the launcher's speech bubble shows once, a few seconds in.
+    nudge: text.max(60),
+  }),
   education: z.strictObject({ school: text, degree: text, dates: text }),
   proof: z
     .array(z.strictObject({ value: text.max(12), label: text.max(20), projectId: id }))
@@ -125,10 +159,27 @@ export const cricketSchema = z.strictObject({
     file: publicMedia,
     alt: text,
     position: z.string().regex(/^\d{1,3}% \d{1,3}%$/, 'e.g. "50% 75%"'),
+    // The first story's caption (the photo itself is the tile's image).
+    caption: text,
   }),
+  // The photos after it: the tile's story frame swipes through the teaser and these (public/media/cricket/).
+  slides: z.array(z.strictObject({ file: publicMedia, alt: text, caption: text })).min(1),
   clips: z.array(z.strictObject({ file: media, caption: text })),
   photos: z.array(z.strictObject({ file: media, caption: text, alt: text })),
   posters: z.array(media),
+  // The Instagram-style stickers laid over the cricket tile (src/lib/beyond-fx.ts). `a` is the main line; `b` and `c` are
+  // the secondary lines a sticker kind uses (date: a = day, b = month, c = note; ask: a = question, b = answer; the icon
+  // stickers bat, ball, cup and jersey are drawn, and `a` just names them).
+  stickers: z
+    .array(
+      z.strictObject({
+        kind: z.enum(['date', 'ask', 'pin', 'tag', 'live', 'bat', 'ball', 'cup', 'jersey']),
+        a: text,
+        b: text.optional(),
+        c: text.optional(),
+      }),
+    )
+    .min(1),
 });
 
 export const disciplineSchema = z.strictObject({

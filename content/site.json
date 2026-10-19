@@ -18,7 +18,7 @@
     "instagram": "https://www.instagram.com/life.with.arnav"
   },
   "resume": {
-    "source": "assets/incoming/resume/arnav-resume-2026-10.pdf",
+    "source": "assets/incoming/resume/Arnav_Chaturvedi_Resume_nophone.pdf",
     "file": "arnav-chaturvedi-resume-2026-10.pdf"
   },
   "portrait": {
@@ -36,6 +36,102 @@
     ]
   },
   "currentlyBuilding": "edith",
+  "workshop": {
+    "navLabel": "Workshop",
+    "title": "The Workshop",
+    "status": "3D room opening soon",
+    "lead": "A room where every object opens a part of my story. It is still being built. Until it opens, each object has a home on the main site, listed below.",
+    "note": "The workshop is best on a desktop.",
+    "tryAnyway": "Try anyway",
+    "tryAnywayReply": "The room is not open yet, so there is nothing to try. The list below takes you to the same things.",
+    "zonesLabel": "Every object, and where it lives now",
+    "handNote": "psst... press my brain",
+    "sequence": {
+      "locking": "Locking coordinates",
+      "status": "Entering the workshop",
+      "skip": "Skip"
+    },
+    "zones": [
+      {
+        "id": "holotable",
+        "title": "Holotable",
+        "blurb": "Projects, EDITH, passion, about, resume and contact on one holographic desktop.",
+        "href": "/#work"
+      },
+      {
+        "id": "window",
+        "title": "Mumbai window",
+        "blurb": "Live Mumbai time and weather, with rain on the glass.",
+        "href": "/#about"
+      },
+      {
+        "id": "armor-wall",
+        "title": "Armor wall",
+        "blurb": "Four original suits, one per skill era, from data to agents.",
+        "href": "/#about"
+      },
+      {
+        "id": "whiteboard",
+        "title": "Experience whiteboard",
+        "blurb": "Every role so far, drawn as a marker-pen timeline.",
+        "href": "/#experience"
+      },
+      {
+        "id": "retro-tv",
+        "title": "Retro TV",
+        "blurb": "The life timeline, one channel per chapter.",
+        "href": "/#about"
+      },
+      {
+        "id": "transformer",
+        "title": "Transformer installation",
+        "blurb": "Ask what I can do, and a 3D transformer answers with skills.",
+        "href": "/#about"
+      },
+      {
+        "id": "notebook",
+        "title": "Study table and notebook",
+        "blurb": "Write a private message that lands in my inbox.",
+        "href": "/#contact"
+      },
+      {
+        "id": "chalkboard",
+        "title": "Chalkboard",
+        "blurb": "Public sticky-note reviews, moderated.",
+        "href": "/#contact"
+      },
+      {
+        "id": "server-rack",
+        "title": "Server rack",
+        "blurb": "LEDs that blink with live GitHub contributions.",
+        "href": "/#github"
+      },
+      {
+        "id": "cricket-shelf",
+        "title": "Cricket shelf",
+        "blurb": "My own bat, ball and match photos.",
+        "href": "/#beyond"
+      },
+      {
+        "id": "discipline-wall",
+        "title": "Discipline wall",
+        "blurb": "The 75 Hard calendar and reels.",
+        "href": "/#75-hard"
+      },
+      {
+        "id": "neon-sign",
+        "title": "Freelance neon sign",
+        "blurb": "Open for freelance, in tungsten neon.",
+        "href": "/#freelance"
+      }
+    ]
+  },
+  "edith": {
+    "chips": ["What are you building?", "Tell me about FireWatch", "Are you open to freelance?"],
+    "placeholder": "Ask about my work, projects or skills…",
+    "intro": "I'm EDITH. Ask me anything about Arnav's work, and I'll answer from what he's written down.",
+    "nudge": "Ask me anything about Arnav's work."
+  },
   "education": {
     "school": "NMIMS University (MPSTME)",
     "degree": "BTech in Data Science",

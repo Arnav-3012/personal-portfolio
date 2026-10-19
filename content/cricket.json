@@ -3,8 +3,62 @@
   "teaser": {
     "file": "media/cricket/batting.jpg",
     "alt": "Arnav batting in a green tee in front of yellow stumps and a brick wall",
-    "position": "50% 75%"
+    "position": "50% 75%",
+    "caption": "Mid-swing"
   },
+  "slides": [
+    {
+      "file": "media/cricket/stands.jpg",
+      "alt": "Arnav from behind in an India bib, arms spread, looking over a packed stadium",
+      "caption": "Arms wide in the stands"
+    },
+    {
+      "file": "media/cricket/cover-drive.jpg",
+      "alt": "A poster-style illustration of a batter playing a cover drive under floodlights, the ball streaking away",
+      "caption": "The cover drive, as a poster"
+    }
+  ],
+  "stickers": [
+    {
+      "kind": "date",
+      "a": "02",
+      "b": "APR",
+      "c": "2011 · India win the World Cup"
+    },
+    {
+      "kind": "ask",
+      "a": "Why cricket?",
+      "b": "It began the night India won."
+    },
+    {
+      "kind": "pin",
+      "a": "Mumbai"
+    },
+    {
+      "kind": "tag",
+      "a": "#clubcricket"
+    },
+    {
+      "kind": "live",
+      "a": "Still playing"
+    },
+    {
+      "kind": "bat",
+      "a": "Bat"
+    },
+    {
+      "kind": "ball",
+      "a": "Ball"
+    },
+    {
+      "kind": "cup",
+      "a": "World Cup"
+    },
+    {
+      "kind": "jersey",
+      "a": "Jersey"
+    }
+  ],
   "clips": [
     {
       "file": "assets/incoming/cricket/clip-01-cover-drive.mp4",

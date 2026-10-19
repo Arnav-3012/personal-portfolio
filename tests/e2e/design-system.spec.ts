@@ -27,7 +27,7 @@ test.describe('theme', () => {
     await page.goto('/design/');
     await expect(html(page)).toHaveAttribute('data-theme', 'day');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe('rgb(244, 238, 227)');
+    expect(bg).toBe('rgb(245, 244, 240)');
   });
 
   test('Auto follows the OS colour scheme, live', async ({ page }) => {

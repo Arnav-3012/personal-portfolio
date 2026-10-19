@@ -1,7 +1,8 @@
 ---
 // Beyond code (SPEC row 10): the cricket and 75 Hard teaser tiles. Both come from content (cricket.json,
 // discipline.json, projects.json) via beyondTiles; each tile is one link, with a small pointer tilt on fine
-// pointers (src/lib/tilt.ts). The tiles lead into the 3D room once Phase 2 exists.
+// pointers (src/lib/tilt.ts). Two chapters, mirrored: the cricket story frame (stickers and a pinned photo are added by
+// src/lib/beyond-fx.ts when the section is near) and the 75 Hard day deck. The tiles lead into the 3D room once Phase 2 exists.
 import Icon from '../Icon.astro';
 import { cricket, discipline, experience, projects } from '../../lib/content';
 import { beyondTiles } from '../../lib/landing';
@@ -20,18 +21,21 @@ const tiles = beyondTiles(cricket, discipline, projects, experience);
   <ul class="beyond__tiles">
     {tiles.map((tile) => (
       <li class="tile" data-tilt data-tile={tile.id}>
-        <div class="tile__image">
-          <img
-            src={tile.image.src}
-            alt={tile.image.alt}
-            style={`object-position: ${tile.image.position}`}
-            loading="lazy"
-            decoding="async"
-          />
+        <div class="tile__stage">
+          <div class="tile__image">
+            <img
+              src={tile.image.src}
+              alt={tile.image.alt}
+              style={`object-position: ${tile.image.position}`}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </div>
         <div class="tile__body">
           <h3 class="tile__title">{tile.title}</h3>
           <p class="tile__text">{tile.text}</p>
+          {tile.id === '75-hard' && <div class="tile__rail" aria-hidden="true" />}
           <a class="tile__link hud" href={tile.href}>
             {tile.cta}
             <Icon name="arrow-up-right" size={16} />
@@ -43,62 +47,119 @@ const tiles = beyondTiles(cricket, discipline, projects, experience);
 </section>
 
 <style is:global>
+  /* Two chapters, mirrored: the stage (a story frame, or a fanned deck) on one side and the words on the other. */
   .beyond__tiles {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-7);
     padding: 0;
     list-style: none;
+    counter-reset: tile;
   }
   .tile {
+    counter-increment: tile;
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr;
-    overflow: hidden;
-    border: var(--border);
-    border-radius: var(--radius-card);
-    background: var(--surface);
-    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transition:
-      transform 200ms var(--ease-out),
-      border-color var(--dur-hover) var(--ease-out);
+    gap: var(--space-5);
+    align-items: center;
+    padding-top: var(--space-5);
+    border-top: var(--border);
   }
-  .tile:hover,
-  .tile:focus-within {
-    border-color: var(--time);
+  .tile__stage {
+    position: relative;
+    width: min(100%, 440px);
+    aspect-ratio: 44 / 56;
+    margin-inline: auto;
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 240ms var(--ease-out);
   }
   .tile__image {
-    aspect-ratio: 4 / 3;
+    position: absolute;
+    left: 6%;
+    top: 2%;
+    width: 64%;
+    height: 96%;
     overflow: hidden;
-    background: var(--line);
+    border: 1px solid color-mix(in srgb, var(--text) 24%, var(--line));
+    border-radius: 26px;
+    background: var(--surface);
+    box-shadow:
+      0 30px 50px -20px var(--bead-cast),
+      0 4px 10px var(--bead-cast);
   }
   .tile__image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 1200ms var(--ease-out);
+  }
+  .tile:hover .tile__image img {
+    transform: scale(1.05);
+  }
+  .tile[data-tile='75-hard'] .tile__stage {
+    aspect-ratio: 44 / 42;
+  }
+  .beyond {
+    overflow-x: clip;
+  }
+  .tile[data-tile='75-hard'] .tile__image {
+    left: 31%;
+    width: 38%;
+    height: 68%;
+    top: 6%;
+    border-radius: 16px;
   }
   .tile__body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-5);
+    gap: var(--space-4);
+    max-width: 56ch;
+  }
+  .tile__body::before {
+    content: counter(tile, decimal-leading-zero) ' · Beyond code';
+    font-family: var(--font-mono);
+    font-size: var(--type-hud);
+    letter-spacing: var(--track-hud);
+    text-transform: uppercase;
+    color: var(--time);
   }
   .tile__title {
     font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--type-heading);
-    line-height: var(--lh-heading);
+    font-weight: 800;
+    font-size: clamp(44px, 6.4vw, 92px);
+    line-height: 0.98;
+    letter-spacing: var(--track-display-xl);
+  }
+  .tile[data-tile='75-hard'] .tile__title {
+    font-size: clamp(32px, 4.2vw, 60px);
   }
   .tile__text {
     color: var(--text-2);
+  }
+  /* 75 ticks, one for every day, every fifth taller. */
+  .tile__rail {
+    height: 22px;
+    background:
+      repeating-linear-gradient(90deg, var(--time) 0 2px, transparent 2px calc(100% / 15)) 0 0 /
+        100% 100% no-repeat,
+      repeating-linear-gradient(90deg, var(--time) 0 1px, transparent 1px calc(100% / 75)) 0 100% /
+        100% 52% no-repeat;
+    opacity: 0.85;
   }
   .tile__link {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    margin-top: auto;
     align-self: flex-start;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--time);
     color: var(--time);
     text-decoration: none;
+  }
+  .tile__link svg {
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+  .tile:hover .tile__link svg {
+    transform: translate(3px, -3px);
   }
   /* The whole tile is the click target */
   .tile__link::after {
@@ -107,12 +168,28 @@ const tiles = beyondTiles(cricket, discipline, projects, experience);
     inset: 0;
   }
 
-  @media (min-width: 768px) {
-    .beyond__tiles {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (min-width: 900px) {
+    .tile {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--space-7);
+    }
+    .tile:nth-child(even) {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+    .tile:nth-child(even) .tile__stage {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .tile:nth-child(even) .tile__body {
+      grid-column: 1;
+      grid-row: 1;
     }
   }
-  :root[data-motion='reduced'] .tile {
-    transition: border-color var(--dur-hover) var(--ease-out);
+  :root[data-motion='reduced'] .tile__stage,
+  :root[data-motion='reduced'] .tile__image img {
+    transition: none;
+  }
+  :root[data-motion='reduced'] .tile:hover .tile__image img {
+    transform: none;
   }
 </style>

@@ -8,7 +8,7 @@ import { sendMail } from './email';
 
 export const MAX_BODY_BYTES = 8 * 1024;
 /** Submissions one connection may make per hour, and everyone together per day (keeps D1 and mail far below the free limits). */
-export const HOURLY_PER_IP = 5;
+export const HOURLY_PER_IP = 7;
 export const DAILY_TOTAL = 200;
 
 /** One indexed range scan over the last day (index `submissions_created`) gives both limits: this IP's last hour and everyone's day. */
@@ -36,9 +36,9 @@ export async function hashIp(ip: string, secret: string): Promise<string> {
   return [...digest.slice(0, 16)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-type Verdict = 'pass' | 'fail' | 'unavailable';
+export type Verdict = 'pass' | 'fail' | 'unavailable';
 
-async function verifyTurnstile(secret: string, token: string, ip: string): Promise<Verdict> {
+export async function verifyTurnstile(secret: string, token: string, ip: string): Promise<Verdict> {
   try {
     const res = await fetch(SITEVERIFY, {
       method: 'POST',

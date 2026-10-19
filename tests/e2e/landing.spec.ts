@@ -26,7 +26,7 @@ const paintedPixels = (page: Page, selector: string) =>
     return n;
   });
 
-test.describe('ARNAV-OS boot (transformer)', () => {
+test.describe('ARNAV-OS boot (horizontal transformer and core)', () => {
   // Timer-driven tests run on a fake clock (rAF, performance.now and timers): under load, page load can
   // outlast the boot and a real-clock assertion on 'on' would race it (mistakes.md, 1.4).
   test('plays once per session and hands off to the hero', async ({ page }) => {
@@ -34,9 +34,18 @@ test.describe('ARNAV-OS boot (transformer)', () => {
     await page.goto('/');
     await expect(html(page)).toHaveAttribute('data-boot', 'on');
     await expect(overlay(page)).toBeVisible();
-    await page.clock.runFor(4000);
+    await page.clock.runFor(9000);
     await expect(html(page)).not.toHaveAttribute('data-boot', /.*/);
     await expect(overlay(page)).toBeHidden();
+    // The name is there once: it does not play its entrance again when the boot ends.
+    await expect(html(page)).toHaveAttribute('data-booted', '');
+    expect(
+      await page.evaluate(() =>
+        [...document.querySelectorAll('.hero__letter')].every((el) =>
+          el.getAnimations().every((a) => (a as CSSAnimation).animationName !== 'letter-in'),
+        ),
+      ),
+    ).toBe(true);
     await page.reload();
     await expect(html(page)).not.toHaveAttribute('data-boot', /.*/);
   });
@@ -44,8 +53,32 @@ test.describe('ARNAV-OS boot (transformer)', () => {
   test('draws on its canvas while running', async ({ page }) => {
     await page.clock.install();
     await page.goto('/');
-    await page.clock.runFor(600);
-    expect(await paintedPixels(page, '.boot__canvas')).toBeGreaterThan(500);
+    // The scene is a lazy chunk fetched once the portrait has painted: step the clock until it has drawn.
+    await expect
+      .poll(
+        async () => {
+          await page.clock.runFor(200);
+          return paintedPixels(page, '.boot__canvas');
+        },
+        { timeout: 10000 },
+      )
+      .toBeGreaterThan(500);
+  });
+
+  test('charges, ignites, bursts, recombines and settles into the hero, in that order', async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.goto('/');
+    await expect(overlay(page)).toHaveAttribute('data-phase', 'charge');
+    const seen = new Set<string>(['charge']);
+    for (let i = 0; i < 160; i++) {
+      await page.clock.runFor(60);
+      const phase = await overlay(page).getAttribute('data-phase');
+      if (phase) seen.add(phase);
+    }
+    expect([...seen]).toEqual(expect.arrayContaining(['charge', 'burst', 'recombine', 'settle']));
+    await expect(html(page)).not.toHaveAttribute('data-boot', /.*/);
   });
 
   test('any key skips it', async ({ page }) => {
@@ -70,7 +103,7 @@ test.describe('ARNAV-OS boot (transformer)', () => {
     await page.route('**/_astro/*.js', (route) => route.abort());
     await page.goto('/');
     await expect(html(page)).toHaveAttribute('data-boot', 'on');
-    await page.clock.runFor(4600);
+    await page.clock.runFor(8200);
     await expect(html(page)).not.toHaveAttribute('data-boot', /.*/);
   });
 

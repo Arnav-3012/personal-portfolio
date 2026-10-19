@@ -7,7 +7,12 @@ const cricket = read('cricket.json') as {
   whyCricket: string;
   teaser: { file: string; alt: string };
 };
-const discipline = read('discipline.json') as { headline: string; subLine: string };
+const discipline = read('discipline.json') as {
+  headline: string;
+  subLine: string;
+  reels: unknown[];
+};
+const stickerKinds = (cricket as unknown as { stickers: { kind: string }[] }).stickers;
 const firstTwoSentences = (cricket.whyCricket.match(/[^.!?]+[.!?]+(?:\s|$)/g) ?? [])
   .slice(0, 2)
   .join('')
@@ -65,6 +70,66 @@ test.describe('beyond code', () => {
     // Click the image corner, far from the text link: the whole tile is the target.
     await page.mouse.click(box.x + 20, box.y + 20);
     await expect(page).toHaveURL(/#75-hard$/);
+  });
+
+  test('lays the stickers and the pinned photo over the cricket frame, and fans the day cards', async ({
+    page,
+  }) => {
+    await open(page);
+    await page.locator('#beyond').scrollIntoViewIfNeeded();
+    await expect(page.locator('.tile[data-tile="cricket"] .stk')).toHaveCount(stickerKinds.length);
+    await expect(page.locator('.tile[data-tile="cricket"] .stk-polaroid')).toHaveCount(1);
+    // The four icon stickers are drawn, not photographed.
+    for (const kind of ['bat', 'ball', 'cup', 'jersey'])
+      await expect(page.locator(`.stk--${kind} svg`)).toHaveCount(1);
+    await expect(page.locator('.fan__card')).toHaveCount(discipline.reels.length);
+    // Decoration is hidden from assistive tech and never causes sideways scrolling.
+    await expect(page.locator('.stk-layer')).toHaveAttribute('aria-hidden', 'true');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+
+  test('the story frame swipes: a drag, a tap and the arrow keys change the photo', async ({
+    page,
+  }) => {
+    await open(page);
+    await page.locator('#beyond').scrollIntoViewIfNeeded();
+    const frame = page.locator('.tile[data-tile="cricket"] .tile__image[data-swipe]');
+    await expect(frame).toBeAttached();
+    const label = page.locator('.story__label');
+    await expect(label).toContainText('1/3');
+    await frame.scrollIntoViewIfNeeded();
+    const box = await frame.boundingBox();
+    if (!box) throw new Error('no frame box');
+    const y = box.y + box.height * 0.5;
+    // Drag left: the next photo.
+    await page.mouse.move(box.x + box.width * 0.75, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.25, y, { steps: 10 });
+    await page.mouse.up();
+    await expect(label).toContainText('2/3');
+    await expect(page.locator('.story__slide[aria-hidden="false"] img')).toHaveAttribute(
+      'src',
+      /stands/,
+    );
+    // Drag right: back to the first.
+    await page.mouse.move(box.x + box.width * 0.25, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.75, y, { steps: 10 });
+    await page.mouse.up();
+    await expect(label).toContainText('1/3');
+    // A tap on the right goes forward, the left third goes back; the arrow keys do the same, and it wraps round.
+    await page.mouse.click(box.x + box.width * 0.8, y);
+    await expect(label).toContainText('2/3');
+    await page.mouse.click(box.x + box.width * 0.1, y);
+    await expect(label).toContainText('1/3');
+    await frame.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(label).toContainText('3/3');
+    await page.keyboard.press('ArrowRight');
+    await expect(label).toContainText('1/3');
+    await expect(page.locator('.story__bar.is-on')).toHaveCount(1);
   });
 
   test('tilts toward the pointer and settles back', async ({ page }) => {

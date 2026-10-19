@@ -85,9 +85,13 @@ test.describe('cached data endpoints', () => {
     expect(body.weeks).toHaveLength(53);
   });
 
-  test('/api/weather is 404 not_ready until the cron has run', async ({ request }) => {
+  test('/api/weather fills itself on the first request, or says not_ready when the source is unreachable', async ({
+    request,
+  }) => {
     const res = await request.get('/api/weather');
-    expect(res.status()).toBe(404);
-    expect(await res.json()).toEqual({ ok: false, error: 'not_ready' });
+    // Open-Meteo is a live service: reachable gives the data, unreachable gives the clean not_ready answer.
+    expect([200, 404]).toContain(res.status());
+    if (res.status() === 404) expect(await res.json()).toEqual({ ok: false, error: 'not_ready' });
+    else expect(typeof (await res.json())).toBe('object');
   });
 });

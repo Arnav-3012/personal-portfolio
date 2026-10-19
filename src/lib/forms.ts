@@ -57,6 +57,11 @@ export function failureMessage(
 
 const KINDS = new Set<string>(FORM_KINDS);
 
+// The sending panel is a separate chunk: it is fetched when a visitor first touches a form, never with the page.
+let sendModule: Promise<typeof import('./send-state')> | undefined;
+const loadSend = (): Promise<typeof import('./send-state')> =>
+  (sendModule ??= import('./send-state'));
+
 function showErrors(form: HTMLFormElement, errors: Readonly<Record<string, string>>): void {
   for (const control of form.querySelectorAll<HTMLElement>('[name]')) {
     const field = control.getAttribute('name') ?? '';
@@ -82,6 +87,7 @@ export function initForms(doc: Document = document, fetchImpl: typeof fetch = fe
     // The Cloudflare script is fetched when the visitor first touches the form, never with the page.
     const challenge = slot && siteKey ? createTurnstile(slot, siteKey) : null;
     if (challenge) form.addEventListener('focusin', challenge.start, { once: true });
+    form.addEventListener('focusin', () => void loadSend(), { once: true });
 
     const finish = (result: SubmitResult): void => {
       if (button) {
@@ -128,15 +134,28 @@ export function initForms(doc: Document = document, fetchImpl: typeof fetch = fe
         button.textContent = 'Sending…';
       }
       void (async () => {
+        // The wait is 2-3 s (bot check, database, email): show where the message is rather than a bare "Sending".
+        const panel = await loadSend()
+          .then((m) =>
+            m.startSend(form, {
+              name: values['name'] ?? '',
+              words: m.wordCount(values['message'] ?? ''),
+            }),
+          )
+          .catch(() => null);
         const token = challenge ? await challenge.token() : null;
-        if (challenge && !token) return finish({ ok: false, reason: 'verification' });
-        finish(
-          await submitForm(
-            kind as FormKind,
-            token ? { ...values, turnstile: token } : values,
-            fetchImpl,
-          ),
+        if (challenge && !token) {
+          panel?.stage('fail');
+          return finish({ ok: false, reason: 'verification' });
+        }
+        panel?.stage('send');
+        const result = await submitForm(
+          kind as FormKind,
+          token ? { ...values, turnstile: token } : values,
+          fetchImpl,
         );
+        panel?.stage(result.ok ? 'done' : 'fail');
+        finish(result);
       })();
     });
   }

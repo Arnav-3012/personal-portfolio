@@ -1,6 +1,7 @@
 // Hero behaviour (SPEC row 2): builds the dot-matrix portrait, plays its assembly when the boot hands off (or
 // at once without a boot), reacts to a fine pointer, and recolours on a theme change. Reduced motion: static.
 import { createDotMatrix } from './dotmatrix';
+import { provideHeroDots } from './hero-dots';
 
 export function initHero(doc: Document = document): void {
   const hero = doc.querySelector<HTMLElement>('[data-hero]');
@@ -11,6 +12,7 @@ export function initHero(doc: Document = document): void {
   const animate = root.dataset['motion'] !== 'reduced';
 
   void createDotMatrix(canvas, img, { animate }).then((dots) => {
+    provideHeroDots(dots);
     if (!dots) return;
     hero.dataset['dots'] = 'ready';
 
@@ -40,7 +42,8 @@ export function initHero(doc: Document = document): void {
       const watch = new MutationObserver(() => {
         if (root.dataset['boot'] === 'on') return;
         watch.disconnect();
-        dots.assemble();
+        // After the boot's burst the particles have already formed the portrait: show it as it is, don't scatter it again.
+        dots.assemble(root.dataset['boot'] === 'out');
       });
       watch.observe(root, { attributes: true, attributeFilter: ['data-boot'] });
     } else dots.assemble();
