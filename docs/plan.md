@@ -18,7 +18,7 @@ Phases follow SPEC "Build phases". Only Phase 1 is broken into tasks; later phas
 - [x] **1.7 API: live data** _(batch with 1.6)_ — cron → GitHub (REST + GraphQL contributions), Open-Meteo → KV; endpoints the landing reads.
 - [x] **1.8 EDITH-lite** _(batch with 1.9: one gate, one QA, one "done"; Arnav approved 2026-10-18)_ — `scripts/kb-build.ts` (chunk `content/` + README summaries → Vectorize), `/api/chat` SSE with Workers AI, tool calls (`scrollTo`, `openProject`, `openResume`, `enterWorkshop`, `startFreelanceForm`), guardrails, per-IP rate limit, daily cap fallback, floating widget UI. Reply format is TTS-ready: the spoken text is plain sentences, with markdown/links in a separate field. No voice endpoint yet.
 - [x] **1.9 Admin** _(batch with 1.8)_ — `/admin` behind Cloudflare Access: inbox, freelance switch, "currently building" (KV).
-- [ ] **1.10 Deploy** — domain (`arnavc.in`) on Cloudflare, Worker custom domains, Email Routing verified, Turnstile keys, Web Analytics, Workers Builds from GitHub.
+- [x] **1.10 Deploy** — domain (`arnavc.in`) on Cloudflare, Worker custom domain, Email Routing verified (mail to `arnavc.work@gmail.com`), Turnstile keys, Workers Builds from GitHub, `/admin` behind a PIN (Access dropped, Arnav's call). Web Analytics moved to the last phase (Arnav, 2026-10-19: do it at the very end); `www.arnavc.in` skipped by choice.
 
 ## Phase 2 · Workshop
 
@@ -41,3 +41,4 @@ Brain dive in three.js, the room and its props, the holotable (Earth intro, icon
 
 ## Phase 4 · Story + play — break down after Phase 3 gate (includes the discipline wall)
 ## Phase 5 · Media and sound — after launch: more reels, proximity audio, royalty-free music, UI sounds
+- [ ] **5.x Web Analytics** _(moved here from 1.10; Arnav, 2026-10-19: "push it as the last phase plan, not current")_ — Cloudflare Web Analytics for `arnavc.in` (automatic setup, or a beacon script loaded after first paint so LCP and the landing JS budget hold). Done when: visits show in the dashboard; Lighthouse budgets unchanged.

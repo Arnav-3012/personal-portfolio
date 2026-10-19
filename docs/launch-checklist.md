@@ -18,7 +18,7 @@ Evidence: the Deployments tab shows commit `79b3ab4` ("feat(admin): PIN sign-inâ
 3. Build command `pnpm build`. Deploy command `pnpm wrangler deploy`. Root directory `/`. Add the variable `NODE_VERSION` = `24`.
 4. Check: push a small commit and watch the build run; the site updates by itself.
 
-## 3. Web Analytics
+## 3. Web Analytics: moved to the last phase (plan task 5.x), not part of the current phase
 Dashboard, Analytics & Logs, Web Analytics, Add a site, `arnavc.in`, then use automatic setup if it is offered. If it only gives a beacon snippet, send Claude the token: it goes in as a script loaded after the first paint, so it does not cost LCP.
 
 ## 4. `www.arnavc.in`: skipped by choice (Arnav, 2026-10-19: only `arnavc.in` matters)
