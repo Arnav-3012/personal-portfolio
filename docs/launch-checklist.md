@@ -11,7 +11,8 @@ Done: domain `arnavc.in` on Cloudflare, Worker on the custom domain over HTTPS, 
 6. Give the team domain and the AUD tag to Claude, or put them in `wrangler.jsonc` `vars` as `ACCESS_TEAM_DOMAIN` (no `https://`) and `ACCESS_AUD`, then deploy.
 7. Check: https://arnavc.in/admin asks for a one-time PIN, then shows the inbox; a private window with no login must not reach it.
 
-## 2. Deploys from GitHub (Workers Builds)
+## 2. Deploys from GitHub (Workers Builds): DONE 2026-10-19
+Evidence: the Deployments tab shows commit `79b3ab4` ("feat(admin): PIN sign-in…") built and deployed from `main` by Workers Builds, status Ready (Arnav's screenshot).
 1. Push the repository: `git push origin main`.
 2. Dashboard, Workers & Pages, `arnav-portfolio`, Settings, Builds, Connect, GitHub, repository `Arnav-3012/personal-portfolio`, branch `main`.
 3. Build command `pnpm build`. Deploy command `pnpm wrangler deploy`. Root directory `/`. Add the variable `NODE_VERSION` = `24`.
